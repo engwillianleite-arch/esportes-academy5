@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — SuperAdmin-planos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db; --primary-dark: #1e429f; --primary-light: #ebf5ff;
+      --secondary: #0ea5e9;
+      --success: #059669; --success-light: #d1fae5;
+      --warning: #d97706; --warning-light: #fef3c7;
+      --danger: #dc2626; --danger-light: #fee2e2;
+      --purple: #7c3aed; --purple-light: #ede9fe;
+      --bg: #f1f5f9; --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
+      --card: #ffffff; --text: #1e293b; --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
+      --radius: 12px; --radius-sm: 8px;
+      --sidebar-w: 260px; --topbar-h: 56px;
+
+      /* plan colors */
+      --plan-basic:   #64748b; --plan-basic-bg:   #f8fafc;
+      --plan-pro:     #1a56db; --plan-pro-bg:     #ebf5ff;
+      --plan-premium: #7c3aed; --plan-premium-bg: #ede9fe;
+      --plan-enterprise: #0d9488; --plan-enterprise-bg: #ccfbf1;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; }
+
+    /* ── OVERLAY ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; backdrop-filter: blur(2px); }
+    .overlay.show { display: block; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-w); height: 100dvh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); overflow-y: auto; }
+    .sidebar.open { transform: translateX(0); }
+    @media (min-width: 1024px) { .sidebar { transform: translateX(0); } }
+    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
+    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+    .nav-section-label { color: rgba(255,255,255,.3); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin: 14px 0 5px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; margin-bottom: 2px; text-decoration: none; }
+    .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: var(--primary); color: #fff; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; }
+    .user-avatar-row:hover { background: var(--sidebar-hover); }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+
+    /* ── LAYOUT ── */
+    .main { display: flex; flex-direction: column; min-height: 100dvh; }
+    @media (min-width: 1024px) { .main { margin-left: var(--sidebar-w); } }
+
+    /* ── TOPBAR ── */
+    .topbar { background: var(--card); border-bottom: 1px solid var(--border); height: var(--topbar-h); padding: 0 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
+    @media (min-width: 640px) { .topbar { padding: 0 20px; } }
+    @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
+    .hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 18px; flex-shrink: 0; }
+    @media (min-width: 1024px) { .hamburger { display: none; } }
+    .topbar-title-group { flex: 1; min-width: 0; }
+    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; }
+    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
+    @media (min-width: 640px) { .topbar-title-group .breadcrumb { display: block; } }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1.5px solid var(--border); cursor: pointer; font-size: 15px; position: relative; transition: all .15s; flex-shrink: 0; }
+    .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    .notif-dot { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; position: absolute; top: 5px; right: 5px; border: 1.5px solid #fff; }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: none; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-xs { padding: 4px 9px; font-size: 11px; border-radius: 6px; }
+
+    /* ── CONTENT ── */
+    .content { padding: 16px; flex: 1; }
+    @media (min-width: 640px)  { .content { padding: 20px; } }
+    @media (min-width: 1024px) { .content { padding: 28px; } }
+
+    /* ── CARD ── */
+    .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    @media (min-width: 640px)  { .card { padding: 20px; } }
+    @media (min-width: 1024px) { .card { padding: 22px; } }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .card-title    { font-size: 15px; font-weight: 700; }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── KPI GRID ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    @media (min-width: 640px)  { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .kpi-card {
+      background: var(--card); border-radius: var(--radius); padding: 16px 18px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius: var(--radius) var(--radius) 0 0; }
+    .kpi-card.blue::before   { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+    .kpi-card.green::before  { background: linear-gradient(90deg, var(--success), #34d399); }
+    .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), #a855f7); }
+    .kpi-card.orange::before { background: linear-gradient(90deg, var(--warning), #f59e0b); }
+    .kpi-card.teal::before   { background: linear-gradient(90deg, #0d9488, #14b8a6); }
+
+    .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .kpi-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .kpi-icon.blue   { background: var(--primary-light); }
+    .kpi-icon.green  { background: var(--success-light); }
+    .kpi-icon.purple { background: var(--purple-light); }
+    .kpi-icon.orange { background: var(--warning-light); }
+    .kpi-icon.teal   { background: #ccfbf1; }
+    .kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+    .kpi-trend.up   { background: var(--success-light); color: var(--success); }
+    .kpi-trend.down { background: var(--danger-light); color: var(--danger); }
+    .kpi-trend.neutral { background: var(--bg); color: var(--text-muted); }
+    .kpi-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 3px; }
+    .kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .kpi-sub   { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── SECTION TOGGLE (mensal/anual) ── */
+    .billing-toggle { display: flex; align-items: center; gap: 10px; }
+    .billing-toggle-switch { display: flex; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px; }
+    .billing-toggle-opt { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; color: var(--text-muted); }
+    .billing-toggle-opt.active { background: var(--primary); color: #fff; }
+    .discount-badge { background: var(--success-light); color: var(--success); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+
+    /* ── PLAN CARDS ── */
+    .plans-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 24px; }
+    @media (min-width: 640px)  { .plans-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1200px) { .plans-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .plan-card {
+      background: var(--card); border-radius: var(--radius); padding: 22px;
+      border: 2px solid var(--border); position: relative; overflow: hidden;
+      transition: all .2s; cursor: default;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .plan-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .plan-card.featured { border-color: var(--purple); }
+    .plan-card.featured::after {
+      content: 'MAIS POPULAR';
+      position: absolute; top: 14px; right: -22px;
+      background: var(--purple); color: #fff;
+      font-size: 9px; font-weight: 800; letter-spacing: 1px;
+      padding: 4px 30px; transform: rotate(35deg);
+    }
+
+    .plan-stripe { height: 4px; border-radius: 4px; margin-bottom: 18px; }
+    .plan-stripe.basic     { background: var(--plan-basic); }
+    .plan-stripe.pro       { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+    .plan-stripe.premium   { background: linear-gradient(90deg, var(--purple), #a855f7); }
+    .plan-stripe.enterprise{ background: linear-gradient(90deg, #0d9488, #14b8a6); }
+
+    .plan-name  { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+    .plan-name.basic     { color: var(--plan-basic); }
+    .plan-name.pro       { color: var(--plan-pro); }
+    .plan-name.premium   { color: var(--plan-premium); }
+    .plan-name.enterprise{ color: var(--plan-enterprise); }
+
+    .plan-tagline { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; min-height: 36px; }
+
+    .plan-price { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 4px; }
+    .plan-price .currency { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.8; }
+    .plan-price .amount   { font-size: 34px; font-weight: 900; color: var(--text); line-height: 1; }
+    .plan-price .period   { font-size: 12px; color: var(--text-muted); line-height: 2; }
+    .plan-price-custom    { font-size: 22px; font-weight: 800; color: var(--plan-enterprise); margin-bottom: 4px; }
+
+    .plan-annual-note { font-size: 11px; color: var(--text-muted); margin-bottom: 18px; min-height: 16px; }
+    .plan-annual-note .save { color: var(--success); font-weight: 600; }
+
+    .plan-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    .plan-stats { display: flex; gap: 12px; margin-bottom: 16px; }
+    .plan-stat { flex: 1; text-align: center; background: var(--bg); border-radius: 8px; padding: 8px 4px; }
+    .plan-stat .ps-value { font-size: 16px; font-weight: 800; color: var(--text); }
+    .plan-stat .ps-label { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; flex: 1; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text); }
+    .plan-features li .fi { flex-shrink: 0; font-size: 13px; margin-top: 1px; }
+    .plan-features li.disabled { color: var(--text-muted); }
+
+    .plan-btn { width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; font-family: 'Inter', sans-serif; }
+    .plan-btn.basic     { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .plan-btn.basic:hover { background: var(--border); }
+    .plan-btn.pro       { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
+    .plan-btn.pro:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .plan-btn.premium   { background: var(--purple); color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,.3); }
+    .plan-btn.premium:hover { background: #6d28d9; transform: translateY(-1px); }
+    .plan-btn.enterprise{ background: #0d9488; color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,.3); }
+    .plan-btn.enterprise:hover { background: #0f766e; transform: translateY(-1px); }
+
+    /* ── DISTRIBUTION BAR ── */
+    .dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .dist-label { font-size: 12px; font-weight: 600; width: 80px; flex-shrink: 0; }
+    .dist-bar-wrap { flex: 1; height: 8px; background: var(--bg); border-radius: 20px; overflow: hidden; }
+    .dist-bar { height: 100%; border-radius: 20px; transition: width .6s ease; }
+    .dist-count { font-size: 12px; font-weight: 700; width: 28px; text-align: right; flex-shrink: 0; }
+    .dist-revenue { font-size: 11px; color: var(--text-muted); width: 70px; text-align: right; flex-shrink: 0; }
+
+    /* ── TWO-COL ── */
+    .two-col { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (min-width: 900px) { .two-col { grid-template-columns: 1fr 1fr; } }
+    .three-col { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (min-width: 900px) { .three-col { grid-template-columns: 2fr 1fr; } }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+    .filter-tab { padding: 9px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+    .filter-tab:hover { color: var(--text); }
+    .filter-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .tab-count { background: var(--bg); color: var(--text-muted); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; }
+    .filter-tab.active .tab-count { background: var(--primary-light); color: var(--primary); }
+
+    /* ── FILTERS ROW ── */
+    .filters-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+    .filter-search { display: flex; align-items: center; gap: 7px; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 180px; max-width: 280px; }
+    .filter-search input { border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; width: 100%; }
+    .filter-search input::placeholder { color: var(--text-muted); }
+    select { appearance: none; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 28px 8px 10px; font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text); cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; }
+
+    /* ── TABLE ── */
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: var(--bg); padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    thead th.sortable { cursor: pointer; user-select: none; }
+    thead th.sortable:hover { color: var(--text); }
+    tbody tr { transition: background .1s; cursor: pointer; }
+    tbody tr:hover td { background: #f8fafc; }
+    tbody td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .school-cell { display: flex; align-items: center; gap: 10px; }
+    .school-av { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .school-name { font-weight: 600; font-size: 13px; }
+    .school-city { font-size: 11px; color: var(--text-muted); }
+
+    /* plan chip inline */
+    .plan-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .plan-chip.basic     { background: #f8fafc; color: var(--plan-basic); border: 1px solid var(--border); }
+    .plan-chip.pro       { background: var(--primary-light); color: var(--primary); }
+    .plan-chip.premium   { background: var(--purple-light); color: var(--purple); }
+    .plan-chip.enterprise{ background: #ccfbf1; color: var(--plan-enterprise); }
+
+    .badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-active   { background: var(--success-light); color: var(--success); }
+    .badge-trial    { background: var(--warning-light); color: var(--warning); }
+    .badge-overdue  { background: var(--danger-light); color: var(--danger); }
+    .badge-inactive { background: #f1f5f9; color: var(--text-muted); }
+    .badge-pending  { background: var(--purple-light); color: var(--purple); }
+
+    .progress-bar-wrap { background: var(--border); border-radius: 20px; overflow: hidden; }
+    .progress-bar { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+
+    .days-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; }
+    .days-badge.ok    { color: var(--success); }
+    .days-badge.warn  { color: var(--warning); }
+    .days-badge.over  { color: var(--danger); }
+
+    .row-actions { display: flex; gap: 4px; align-items: center; }
+    .action-btn { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; background: var(--bg); color: var(--text-muted); transition: all .15s; }
+    .action-btn:hover        { background: var(--primary-light); color: var(--primary); }
+    .action-btn.danger:hover { background: var(--danger-light); color: var(--danger); }
+
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 2px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+    .pagination-pages { display: flex; gap: 5px; }
+
+    /* ── RENEWALS TIMELINE ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item { display: flex; align-items: stretch; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot-col { display: flex; flex-direction: column; align-items: center; gap: 0; flex-shrink: 0; padding-top: 3px; }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .timeline-line { width: 2px; flex: 1; background: var(--border); margin-top: 4px; }
+    .timeline-content { flex: 1; min-width: 0; }
+    .timeline-school { font-size: 13px; font-weight: 600; }
+    .timeline-meta   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .timeline-right  { text-align: right; flex-shrink: 0; }
+    .timeline-date   { font-size: 12px; font-weight: 700; color: var(--text); }
+    .timeline-value  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ── SIDE PANEL ── */
+    .panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; }
+    .panel-overlay.show { display: block; }
+    .side-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 540px; background: var(--card); z-index: 210; display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: -8px 0 40px rgba(0,0,0,.15); overflow: hidden; }
+    .side-panel.open { transform: translateX(0); }
+    .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .panel-header-info { flex: 1; min-width: 0; }
+    .panel-header-info .panel-title { font-size: 16px; font-weight: 700; }
+    .panel-header-info .panel-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .panel-close { width: 32px; height: 32px; border-radius: 8px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all .15s; flex-shrink: 0; }
+    .panel-close:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .panel-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
+
+    /* plan selector inside panel */
+    .plan-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .plan-sel-opt { border: 2px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .15s; }
+    .plan-sel-opt:hover { border-color: var(--primary); }
+    .plan-sel-opt.selected.basic     { border-color: var(--plan-basic); background: #f8fafc; }
+    .plan-sel-opt.selected.pro       { border-color: var(--primary); background: var(--primary-light); }
+    .plan-sel-opt.selected.premium   { border-color: var(--purple); background: var(--purple-light); }
+    .plan-sel-opt.selected.enterprise{ border-color: #0d9488; background: #ccfbf1; }
+    .plan-sel-name  { font-size: 12px; font-weight: 800; letter-spacing: .5px; }
+    .plan-sel-price { font-size: 16px; font-weight: 800; margin-top: 2px; }
+    .plan-sel-sub   { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    /* info section */
+    .info-section { margin-bottom: 20px; }
+    .info-section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .info-item .info-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; }
+    .info-item .info-value { font-size: 13px; color: var(--text); font-weight: 600; }
+    .info-item.full { grid-column: 1 / -1; }
+
+    /* invoice list */
+    .invoice-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 8px; margin-bottom: 6px; }
+    .inv-icon { font-size: 15px; width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .inv-info { flex: 1; }
+    .inv-info .inv-desc { font-size: 12px; font-weight: 500; }
+    .inv-info .inv-date { font-size: 11px; color: var(--text-muted); }
+    .inv-value { font-size: 13px; font-weight: 700; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--card); border-radius: var(--radius); padding: 28px; max-width: 440px; width: 100%; box-shadow: var(--shadow-lg); animation: modalIn .2s ease; }
+    @keyframes modalIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+    .modal-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px; }
+    .modal-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .modal-text  { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* form inside modal */
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .form-input, .form-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text); background: var(--card); outline: none; transition: border-color .15s; }
+    .form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.1); }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; background-color: var(--card); }
+
+    /* UTILS */
+    .text-muted { color: var(--text-muted); }
+    .text-sm    { font-size: 12px; }
+    .fw-700     { font-weight: 700; }
+    .mt-12      { margin-top: 12px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
+    .empty-state .es-icon { font-size: 36px; margin-bottom: 8px; }
+    .empty-state .es-text { font-size: 13px; font-weight: 500; }
+
+    /* highlight row */
+    tbody tr.row-overdue td { background: #fff5f5; }
+    tbody tr.row-overdue:hover td { background: #fee2e2; }
+    tbody tr.row-trial td { background: #fffbeb; }
+    tbody tr.row-trial:hover td { background: #fef3c7; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">PORTAL ADMIN</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item" href="admin-dashboard.html"><span class="icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="schools.html"><span class="icon">🏫</span> Escolas <span class="nav-badge">24</span></a>
+    <a class="nav-item" href="#"><span class="icon">👤</span> Usuários</a>
+    <div class="nav-section-label">Financeiro</div>
+    <a class="nav-item" href="#"><span class="icon">💳</span> Cobranças</a>
+    <a class="nav-item active" href="planos.html"><span class="icon">📦</span> Planos & Licenças</a>
+    <a class="nav-item" href="#"><span class="icon">📊</span> Relatórios</a>
+    <a class="nav-item" href="#"><span class="icon">🧾</span> Notas Fiscais</a>
+    <div class="nav-section-label">Sistema</div>
+    <a class="nav-item" href="#"><span class="icon">⚙️</span> Configurações</a>
+    <a class="nav-item" href="notificacoes.html"><span class="icon">🔔</span> Notificações <span class="nav-badge">5</span></a>
+    <a class="nav-item" href="#"><span class="icon">🛡️</span> Permissões</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-avatar-row">
+      <div class="avatar">WA</div>
+      <div class="user-info">
+        <div class="user-name">Willianm Admin</div>
+        <div class="user-role">Super Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title-group">
+      <div class="page-title">Planos & Licenças</div>
+      <div class="breadcrumb">Admin / Financeiro / Planos & Licenças</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+      <button class="btn btn-secondary btn-sm" onclick="openNewPlanModal()">✏️ Editar Planos</button>
+      <button class="btn btn-primary" onclick="openAssignPanel()">＋ Atribuir Licença</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ── KPIs ── -->
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-top">
+          <div class="kpi-icon blue">💰</div>
+          <div class="kpi-trend up">▲ 18%</div>
+        </div>
+        <div class="kpi-value">R$48,7k</div>
+        <div class="kpi-label">MRR (Receita Mensal)</div>
+        <div class="kpi-sub">ARR estimado: R$ 584k</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-top">
+          <div class="kpi-icon green">📦</div>
+          <div class="kpi-trend up">▲ 2</div>
+        </div>
+        <div class="kpi-value">24</div>
+        <div class="kpi-label">Licenças Ativas</div>
+        <div class="kpi-sub">21 pagas · 2 trial · 1 pendente</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-top">
+          <div class="kpi-icon purple">📈</div>
+          <div class="kpi-trend up">▲ 5%</div>
+        </div>
+        <div class="kpi-value">R$2.030</div>
+        <div class="kpi-label">Ticket Médio</div>
+        <div class="kpi-sub">vs. R$ 1.933 mês anterior</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-top">
+          <div class="kpi-icon orange">⚠️</div>
+          <div class="kpi-trend down">▼ 1</div>
+        </div>
+        <div class="kpi-value">1,8%</div>
+        <div class="kpi-label">Churn Rate</div>
+        <div class="kpi-sub">1 escola cancelou em março</div>
+      </div>
+    </div>
+
+    <!-- ── PLAN CARDS + DISTRIBUTION ── -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;">Planos disponíveis</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Configure os planos oferecidos às escolas</div>
+      </div>
+      <div class="billing-toggle">
+        <div class="billing-toggle-switch">
+          <div class="billing-toggle-opt active" onclick="setBilling('monthly',this)">Mensal</div>
+          <div class="billing-toggle-opt" onclick="setBilling('annual',this)">Anual</div>
+        </div>
+        <span class="discount-badge">-20% anual</span>
+      </div>
+    </div>
+
+    <div class="plans-grid" id="plansGrid">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- ── DISTRIBUTION + UPCOMING RENEWALS ── -->
+    <div class="two-col">
+
+      <!-- Distribuição por plano -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Distribuição por Plano</div>
+            <div class="card-subtitle">Escolas ativas por categoria</div>
+          </div>
+          <div style="width:120px;height:120px;flex-shrink:0;">
+            <canvas id="distChart"></canvas>
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <div class="dist-row">
+            <div class="dist-label" style="color:var(--plan-basic)">Basic</div>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:25%;background:var(--plan-basic)"></div></div>
+            <div class="dist-count">6</div>
+            <div class="dist-revenue">R$2,9k/mês</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label" style="color:var(--plan-pro)">Pro</div>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:42%;background:var(--plan-pro)"></div></div>
+            <div class="dist-count">10</div>
+            <div class="dist-revenue">R$8,9k/mês</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label" style="color:var(--plan-premium)">Premium</div>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:25%;background:var(--plan-premium)"></div></div>
+            <div class="dist-count">6</div>
+            <div class="dist-revenue">R$8,9k/mês</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label" style="color:var(--plan-enterprise)">Enterprise</div>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:8%;background:var(--plan-enterprise)"></div></div>
+            <div class="dist-count">2</div>
+            <div class="dist-revenue">R$9,8k/mês</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:14px;">
+          <div style="flex:1;text-align:center">
+            <div style="font-size:18px;font-weight:800">68%</div>
+            <div style="font-size:11px;color:var(--text-muted)">Pro ou acima</div>
+          </div>
+          <div style="flex:1;text-align:center">
+            <div style="font-size:18px;font-weight:800">8,3%</div>
+            <div style="font-size:11px;color:var(--text-muted)">Taxa upgrade/mês</div>
+          </div>
+          <div style="flex:1;text-align:center">
+            <div style="font-size:18px;font-weight:800">R$587k</div>
+            <div style="font-size:11px;color:var(--text-muted)">ARR atual</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximas renovações -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Próximas Renovações</div>
+            <div class="card-subtitle">Abril 2026 · 8 vencimentos</div>
+          </div>
+          <button class="btn btn-secondary btn-sm">Ver todas</button>
+        </div>
+        <div class="timeline" id="renewalTimeline">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MRR CHART ── -->
+    <div class="three-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Evolução do MRR</div>
+            <div class="card-subtitle">Receita mensal recorrente · últimos 12 meses</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:12px;flex-wrap:wrap">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:var(--primary);display:inline-block;border-radius:2px"></span>MRR</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:#34d399;display:inline-block;border-radius:2px"></span>Novos</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:var(--danger);display:inline-block;border-radius:2px"></span>Churn</span>
+          </div>
+        </div>
+        <div style="height:200px"><canvas id="mrrChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Alertas do mês</div>
+          <span class="badge badge-overdue">3 críticos</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--danger-light);border-radius:8px;padding:12px;border-left:3px solid var(--danger)">
+            <div style="font-size:12px;font-weight:700;color:var(--danger)">🚨 Pagamento em atraso</div>
+            <div style="font-size:12px;margin-top:3px">Basketball Academy Sul · 3 dias</div>
+          </div>
+          <div style="background:var(--warning-light);border-radius:8px;padding:12px;border-left:3px solid var(--warning)">
+            <div style="font-size:12px;font-weight:700;color:var(--warning)">⏳ Trial expirando</div>
+            <div style="font-size:12px;margin-top:3px">Judô Shotokan RJ · 5 dias restantes</div>
+          </div>
+          <div style="background:var(--warning-light);border-radius:8px;padding:12px;border-left:3px solid var(--warning)">
+            <div style="font-size:12px;font-weight:700;color:var(--warning)">⏳ Trial expirando</div>
+            <div style="font-size:12px;margin-top:3px">CrossFit Manaus · 12 dias restantes</div>
+          </div>
+          <div style="background:var(--primary-light);border-radius:8px;padding:12px;border-left:3px solid var(--primary)">
+            <div style="font-size:12px;font-weight:700;color:var(--primary)">💡 Oportunidade de upgrade</div>
+            <div style="font-size:12px;margin-top:3px">3 escolas Basic próximas do limite</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUBSCRIPTIONS TABLE ── -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Assinaturas</div>
+          <div class="card-subtitle" id="tableSubtitle">24 escolas · R$ 48.720/mês</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm">⬇ Exportar</button>
+          <button class="btn btn-primary btn-sm" onclick="openAssignPanel()">＋ Atribuir</button>
+        </div>
+      </div>
+
+      <!-- FILTER TABS -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterByStatus('all',this)">Todas <span class="tab-count" id="tc-all">24</span></button>
+        <button class="filter-tab" onclick="filterByStatus('Ativa',this)">Ativas <span class="tab-count" id="tc-ativa">21</span></button>
+        <button class="filter-tab" onclick="filterByStatus('Trial',this)">Trial <span class="tab-count" id="tc-trial">2</span></button>
+        <button class="filter-tab" onclick="filterByStatus('Em atraso',this)">Em atraso <span class="tab-count" id="tc-atraso">1</span></button>
+        <button class="filter-tab" onclick="filterByStatus('Cancelada',this)">Canceladas <span class="tab-count" id="tc-cancel">0</span></button>
+      </div>
+
+      <!-- FILTERS ROW -->
+      <div class="filters-row">
+        <div class="filter-search">
+          <span>🔍</span>
+          <input type="text" placeholder="Buscar escola..." oninput="searchTable(this.value)" />
+        </div>
+        <select id="filterPlan" onchange="applyFilters()">
+          <option value="">Todos os planos</option>
+          <option>Basic</option><option>Pro</option><option>Premium</option><option>Enterprise</option>
+        </select>
+        <select id="filterBilling" onchange="applyFilters()">
+          <option value="">Mensal / Anual</option>
+          <option value="Mensal">Mensal</option>
+          <option value="Anual">Anual</option>
+        </select>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable('escola')">Escola ↕</th>
+              <th>Plano</th>
+              <th>Cobrança</th>
+              <th>Status</th>
+              <th class="sortable" onclick="sortTable('valor')">Valor/mês ↕</th>
+              <th class="sortable" onclick="sortTable('renovacao')">Renovação ↕</th>
+              <th>Atletas</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="subsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="text-sm text-muted" id="paginationInfo">Mostrando 1–10 de 24</span>
+        <div class="pagination-pages">
+          <button class="btn btn-secondary btn-xs">‹</button>
+          <button class="btn btn-primary btn-xs">1</button>
+          <button class="btn btn-secondary btn-xs">2</button>
+          <button class="btn btn-secondary btn-xs">3</button>
+          <button class="btn btn-secondary btn-xs">›</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════ PANEL OVERLAY ════ -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+
+<!-- ════ SIDE PANEL: VER / EDITAR ASSINATURA ════ -->
+<div class="side-panel" id="subPanel">
+  <div class="panel-header">
+    <div class="panel-header-info">
+      <div class="panel-title" id="sp-title">Academia Futebol SP</div>
+      <div class="panel-sub" id="sp-sub">Plano Premium · Ativa</div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body">
+
+    <!-- current plan highlight -->
+    <div id="sp-plan-banner" style="border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+      <div id="sp-plan-emoji" style="font-size:24px"></div>
+      <div>
+        <div id="sp-plan-name" style="font-size:14px;font-weight:800;letter-spacing:.5px"></div>
+        <div id="sp-plan-desc" style="font-size:12px;opacity:.8;margin-top:2px"></div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div id="sp-plan-price" style="font-size:20px;font-weight:900"></div>
+        <div style="font-size:11px;opacity:.7">/mês</div>
+      </div>
+    </div>
+
+    <!-- info -->
+    <div class="info-section">
+      <div class="info-section-title">Dados da Assinatura</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Status</div>
+          <div class="info-value" id="sp-status">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Cobrança</div>
+          <div class="info-value" id="sp-billing">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Início</div>
+          <div class="info-value" id="sp-start">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Próx. Renovação</div>
+          <div class="info-value" id="sp-renew">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Atletas ativos</div>
+          <div class="info-value" id="sp-athletes">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Limite do plano</div>
+          <div class="info-value" id="sp-limit">—</div>
+        </div>
+        <div class="info-item full">
+          <div class="info-label">Ocupação da licença</div>
+          <div style="margin-top:6px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px">
+              <span id="sp-ocp-label">—</span><span id="sp-ocp-pct">—</span>
+            </div>
+            <div class="progress-bar-wrap" style="height:7px">
+              <div class="progress-bar" id="sp-ocp-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- upgrade/downgrade -->
+    <div class="info-section">
+      <div class="info-section-title">Alterar Plano</div>
+      <div class="plan-selector" id="sp-plan-selector">
+        <!-- rendered by JS -->
+      </div>
+      <div style="display:flex;gap:8px">
+        <select class="form-select" id="sp-billing-sel" style="flex:1">
+          <option value="Mensal">Mensal</option>
+          <option value="Anual">Anual (-20%)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- invoice history -->
+    <div class="info-section">
+      <div class="info-section-title">Histórico de Pagamentos</div>
+      <div id="sp-invoices"></div>
+    </div>
+
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-danger btn-sm" onclick="openCancelModal()">Cancelar</button>
+    <button class="btn btn-secondary" onclick="closePanel()">Fechar</button>
+    <button class="btn btn-primary" onclick="saveChanges()">💾 Salvar alterações</button>
+  </div>
+</div>
+
+<!-- ════ SIDE PANEL: ATRIBUIR LICENÇA ════ -->
+<div class="side-panel" id="assignPanel">
+  <div class="panel-header">
+    <div class="panel-header-info">
+      <div class="panel-title">Atribuir Licença</div>
+      <div class="panel-sub">Vincule um plano a uma escola</div>
+    </div>
+    <button class="panel-close" onclick="closeAssignPanel()">✕</button>
+  </div>
+  <div class="panel-body">
+    <div class="form-group">
+      <label class="form-label">Escola <span style="color:var(--danger)">*</span></label>
+      <select class="form-select" id="assign-escola">
+        <option value="">Selecione uma escola...</option>
+        <option>Nova CrossFit Manaus</option>
+        <option>Academia Paulista de Tênis</option>
+        <option>Surf School Floripa</option>
+        <option>Clube Atletismo Recife</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Plano <span style="color:var(--danger)">*</span></label>
+      <div class="plan-selector" style="margin-bottom:0">
+        <div class="plan-sel-opt basic" onclick="selectAssignPlan('basic',this)">
+          <div class="plan-sel-name" style="color:var(--plan-basic)">BASIC</div>
+          <div class="plan-sel-price">R$490</div>
+          <div class="plan-sel-sub">Até 100 atletas</div>
+        </div>
+        <div class="plan-sel-opt pro selected" onclick="selectAssignPlan('pro',this)">
+          <div class="plan-sel-name" style="color:var(--plan-pro)">PRO</div>
+          <div class="plan-sel-price">R$890</div>
+          <div class="plan-sel-sub">Até 300 atletas</div>
+        </div>
+        <div class="plan-sel-opt premium" onclick="selectAssignPlan('premium',this)">
+          <div class="plan-sel-name" style="color:var(--plan-premium)">PREMIUM</div>
+          <div class="plan-sel-price">R$1.490</div>
+          <div class="plan-sel-sub">Até 800 atletas</div>
+        </div>
+        <div class="plan-sel-opt enterprise" onclick="selectAssignPlan('enterprise',this)">
+          <div class="plan-sel-name" style="color:var(--plan-enterprise)">ENTERPRISE</div>
+          <div class="plan-sel-price">Sob consulta</div>
+          <div class="plan-sel-sub">Ilimitado</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Modalidade de cobrança</label>
+      <select class="form-select">
+        <option>Mensal</option>
+        <option>Anual (desconto 20%)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data de início</label>
+      <input type="date" class="form-input" value="2026-04-01" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Período trial (dias) <span style="font-weight:400;color:var(--text-muted);font-size:11px">0 = sem trial</span></label>
+      <input type="number" class="form-input" value="14" min="0" max="90" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Desconto especial (%)</label>
+      <input type="number" class="form-input" value="0" min="0" max="100" placeholder="0" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <textarea class="form-input" rows="3" placeholder="Notas internas sobre esta licença..." style="resize:vertical"></textarea>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="btn btn-secondary" onclick="closeAssignPanel()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveAssign()">✅ Confirmar Licença</button>
+  </div>
+</div>
+
+<!-- MODAL: CANCELAR ASSINATURA -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <div class="modal-icon" style="background:var(--danger-light)">🚫</div>
+    <div class="modal-title">Cancelar Assinatura?</div>
+    <div class="modal-text">A escola perderá acesso à plataforma ao final do período vigente. Esta ação poderá ser desfeita antes do vencimento.</div>
+    <div class="form-group" style="text-align:left">
+      <label class="form-label">Motivo do cancelamento</label>
+      <select class="form-select">
+        <option>Solicitação da escola</option>
+        <option>Inadimplência</option>
+        <option>Migração de plano</option>
+        <option>Encerramento de atividades</option>
+        <option>Outro</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Voltar</button>
+      <button class="btn btn-danger" onclick="confirmCancel()">Confirmar Cancelamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR PLANOS -->
+<div class="modal-overlay" id="editPlanModal">
+  <div class="modal" style="max-width:480px">
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Editar Planos</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px">Ajuste os valores e limites de cada plano</div>
+    <div id="editPlanList"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeEditPlanModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditPlans()">💾 Salvar Planos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ JS ════ -->
+<script>
+/* ──────────────────────────────────────────
+   DATA
+────────────────────────────────────────── */
+const PLANS = [
+  {
+    id: 'basic', name: 'BASIC', tagline: 'Para escolas em início de operação com até 100 atletas.',
+    monthlyPrice: 490, emoji: '🌱',
+    limits: { atletas: 100, grupos: 10, professores: 5, escolas: 1 },
+    features: [
+      { ok: true,  text: 'Até 100 atletas' },
+      { ok: true,  text: '10 grupos de treinamento' },
+      { ok: true,  text: '5 professores cadastrados' },
+      { ok: true,  text: 'Gestão de frequência' },
+      { ok: true,  text: 'Cobranças básicas' },
+      { ok: false, text: 'Relatórios avançados' },
+      { ok: false, text: 'API & Integrações' },
+      { ok: false, text: 'Suporte prioritário' },
+    ]
+  },
+  {
+    id: 'pro', name: 'PRO', tagline: 'O preferido. Ideal para escolas em crescimento.',
+    monthlyPrice: 890, emoji: '🚀',
+    limits: { atletas: 300, grupos: 40, professores: 20, escolas: 1 },
+    features: [
+      { ok: true,  text: 'Até 300 atletas' },
+      { ok: true,  text: '40 grupos de treinamento' },
+      { ok: true,  text: '20 professores cadastrados' },
+      { ok: true,  text: 'Relatórios avançados' },
+      { ok: true,  text: 'Cobranças automáticas (Asaas)' },
+      { ok: true,  text: 'App para atletas' },
+      { ok: false, text: 'API & Integrações' },
+      { ok: false, text: 'Gerente de sucesso dedicado' },
+    ]
+  },
+  {
+    id: 'premium', name: 'PREMIUM', tagline: 'Para academias consolidadas com alta demanda.',
+    monthlyPrice: 1490, emoji: '🏆',
+    limits: { atletas: 800, grupos: 120, professores: 60, escolas: 3 },
+    features: [
+      { ok: true, text: 'Até 800 atletas' },
+      { ok: true, text: '120 grupos de treinamento' },
+      { ok: true, text: '60 professores cadastrados' },
+      { ok: true, text: 'Até 3 filiais / unidades' },
+      { ok: true, text: 'API & Integrações' },
+      { ok: true, text: 'Suporte prioritário (SLA 4h)' },
+      { ok: true, text: 'App personalizado' },
+      { ok: false, text: 'Gerente de sucesso dedicado' },
+    ]
+  },
+  {
+    id: 'enterprise', name: 'ENTERPRISE', tagline: 'Solução sob medida para grandes redes esportivas.',
+    monthlyPrice: null, emoji: '🏢',
+    limits: { atletas: '∞', grupos: '∞', professores: '∞', escolas: '∞' },
+    features: [
+      { ok: true, text: 'Atletas ilimitados' },
+      { ok: true, text: 'Grupos ilimitados' },
+      { ok: true, text: 'Professores ilimitados' },
+      { ok: true, text: 'Filiais ilimitadas' },
+      { ok: true, text: 'API dedicada & white-label' },
+      { ok: true, text: 'SLA 1h · Suporte 24/7' },
+      { ok: true, text: 'Gerente de sucesso dedicado' },
+      { ok: true, text: 'Onboarding presencial' },
+    ]
+  },
+];
+
+const SUBSCRIPTIONS = [
+  { id:1,  escola:'Academia Futebol SP',      emoji:'⚽', bg:'#dbeafe', cidade:'São Paulo, SP',        plano:'Pro',        billing:'Anual',   status:'Ativa',      valor:712,  renovacao:'2027-01-15', atletas:148, inicio:'2024-01-15' },
+  { id:2,  escola:'Natação Rio Verde',         emoji:'🏊', bg:'#d1fae5', cidade:'Campinas, SP',         plano:'Pro',        billing:'Mensal',  status:'Ativa',      valor:890,  renovacao:'2026-04-05', atletas:96,  inicio:'2023-06-05' },
+  { id:3,  escola:'Judô Shotokan RJ',          emoji:'🥋', bg:'#ede9fe', cidade:'Rio de Janeiro, RJ',   plano:'Basic',      billing:'Mensal',  status:'Trial',      valor:490,  renovacao:'2026-03-28', atletas:32,  inicio:'2026-03-14' },
+  { id:4,  escola:'Tennis Club BH',            emoji:'🎾', bg:'#fef3c7', cidade:'Belo Horizonte, MG',   plano:'Premium',    billing:'Mensal',  status:'Ativa',      valor:1490, renovacao:'2026-04-10', atletas:204, inicio:'2023-02-10' },
+  { id:5,  escola:'Basketball Academy Sul',    emoji:'🏀', bg:'#fee2e2', cidade:'Porto Alegre, RS',     plano:'Pro',        billing:'Mensal',  status:'Em atraso',  valor:890,  renovacao:'2026-03-20', atletas:67,  inicio:'2024-09-20' },
+  { id:6,  escola:'Atletismo Curitiba',        emoji:'🏃', bg:'#fce7f3', cidade:'Curitiba, PR',         plano:'Basic',      billing:'Anual',   status:'Ativa',      valor:392,  renovacao:'2026-12-01', atletas:45,  inicio:'2025-12-01' },
+  { id:7,  escola:'CrossFit Manaus',           emoji:'💪', bg:'#fef3c7', cidade:'Manaus, AM',           plano:'Basic',      billing:'Mensal',  status:'Trial',      valor:490,  renovacao:'2026-04-04', atletas:18,  inicio:'2026-03-21' },
+  { id:8,  escola:'Vôlei Praia Fortaleza',     emoji:'🏐', bg:'#d1fae5', cidade:'Fortaleza, CE',        plano:'Pro',        billing:'Mensal',  status:'Ativa',      valor:890,  renovacao:'2026-04-18', atletas:120, inicio:'2024-04-18' },
+  { id:9,  escola:'Ginástica Arte Salvador',   emoji:'🤸', bg:'#ede9fe', cidade:'Salvador, BA',         plano:'Premium',    billing:'Anual',   status:'Ativa',      valor:1192, renovacao:'2026-11-22', atletas:310, inicio:'2024-11-22' },
+  { id:10, escola:'Surf Academy Floripa',      emoji:'🏄', bg:'#dbeafe', cidade:'Florianópolis, SC',    plano:'Basic',      billing:'Mensal',  status:'Ativa',      valor:490,  renovacao:'2026-04-08', atletas:55,  inicio:'2025-04-08' },
+  { id:11, escola:'Redes Esportivas BR',       emoji:'🏟️', bg:'#ccfbf1', cidade:'São Paulo, SP',        plano:'Enterprise', billing:'Anual',   status:'Ativa',      valor:4900, renovacao:'2027-03-01', atletas:1850,inicio:'2025-03-01' },
+  { id:12, escola:'Liga Esportiva Nacional',   emoji:'🥇', bg:'#ccfbf1', cidade:'Brasília, DF',         plano:'Enterprise', billing:'Anual',   status:'Ativa',      valor:4900, renovacao:'2026-09-15', atletas:2200,inicio:'2024-09-15' },
+  { id:13, escola:'Capoeira Raízes',           emoji:'🥁', bg:'#fce7f3', cidade:'Recife, PE',           plano:'Basic',      billing:'Mensal',  status:'Ativa',      valor:490,  renovacao:'2026-04-12', atletas:40,  inicio:'2025-04-12' },
+  { id:14, escola:'Hockey SP',                 emoji:'🏑', bg:'#dbeafe', cidade:'São Paulo, SP',        plano:'Pro',        billing:'Mensal',  status:'Ativa',      valor:890,  renovacao:'2026-04-25', atletas:88,  inicio:'2024-10-25' },
+  { id:15, escola:'Boxe Champions Gym',        emoji:'🥊', bg:'#fee2e2', cidade:'São Paulo, SP',        plano:'Pro',        billing:'Anual',   status:'Ativa',      valor:712,  renovacao:'2026-08-14', atletas:76,  inicio:'2024-08-14' },
+  { id:16, escola:'Natação Olímpica SP',       emoji:'🏊', bg:'#d1fae5', cidade:'São Paulo, SP',        plano:'Premium',    billing:'Mensal',  status:'Ativa',      valor:1490, renovacao:'2026-04-03', atletas:430, inicio:'2023-04-03' },
+  { id:17, escola:'Futebol Society RJ',        emoji:'⚽', bg:'#dbeafe', cidade:'Rio de Janeiro, RJ',   plano:'Basic',      billing:'Mensal',  status:'Ativa',      valor:490,  renovacao:'2026-05-01', atletas:60,  inicio:'2025-05-01' },
+  { id:18, escola:'Tênis Kids Campinas',       emoji:'🎾', bg:'#fef3c7', cidade:'Campinas, SP',         plano:'Pro',        billing:'Anual',   status:'Ativa',      valor:712,  renovacao:'2026-10-20', atletas:95,  inicio:'2024-10-20' },
+  { id:19, escola:'Escalada Vertical',         emoji:'🧗', bg:'#ede9fe', cidade:'Belo Horizonte, MG',   plano:'Basic',      billing:'Mensal',  status:'Ativa',      valor:490,  renovacao:'2026-04-17', atletas:38,  inicio:'2025-04-17' },
+  { id:20, escola:'Polo Aquático Brasília',    emoji:'🏊', bg:'#d1fae5', cidade:'Brasília, DF',         plano:'Premium',    billing:'Mensal',  status:'Ativa',      valor:1490, renovacao:'2026-04-22', atletas:188, inicio:'2024-04-22' },
+  { id:21, escola:'Skate Park Curitiba',       emoji:'🛹', bg:'#fce7f3', cidade:'Curitiba, PR',         plano:'Pro',        billing:'Mensal',  status:'Ativa',      valor:890,  renovacao:'2026-04-30', atletas:110, inicio:'2024-11-30' },
+  { id:22, escola:'Handebol do Norte',         emoji:'🤾', bg:'#ccfbf1', cidade:'Belém, PA',            plano:'Pro',        billing:'Mensal',  status:'Ativa',      valor:890,  renovacao:'2026-05-08', atletas:92,  inicio:'2025-05-08' },
+  { id:23, escola:'MMA Total Fight',           emoji:'🥋', bg:'#fee2e2', cidade:'São Paulo, SP',        plano:'Pro',        billing:'Anual',   status:'Ativa',      valor:712,  renovacao:'2026-07-11', atletas:134, inicio:'2024-07-11' },
+  { id:24, escola:'Premium Sports SP',         emoji:'🏅', bg:'#fef3c7', cidade:'São Paulo, SP',        plano:'Premium',    billing:'Anual',   status:'Ativa',      valor:1192, renovacao:'2026-06-18', atletas:290, inicio:'2024-06-18' },
+];
+
+let billingMode = 'monthly';
+let activeStatus = 'all';
+let searchQuery  = '';
+let currentSubId = null;
+
+/* ──────────────────────────────────────────
+   PLAN CARDS
+────────────────────────────────────────── */
+function renderPlans() {
+  const grid = document.getElementById('plansGrid');
+  const annual = billingMode === 'annual';
+  grid.innerHTML = PLANS.map(p => {
+    const price = p.monthlyPrice ? (annual ? Math.round(p.monthlyPrice * 0.8) : p.monthlyPrice) : null;
+    const saved = p.monthlyPrice ? p.monthlyPrice * 0.2 : 0;
+    const count = SUBSCRIPTIONS.filter(s => s.plano === (p.id.charAt(0).toUpperCase()+p.id.slice(1))).length;
+    const featured = p.id === 'pro' ? 'featured' : '';
+    return `
+    <div class="plan-card ${featured}" id="pc-${p.id}">
+      <div class="plan-stripe ${p.id}"></div>
+      <div class="plan-name ${p.id}">${p.name}</div>
+      <div class="plan-tagline">${p.tagline}</div>
+      ${price
+        ? `<div class="plan-price"><span class="currency">R$</span><span class="amount">${price.toLocaleString('pt-BR')}</span><span class="period">/mês</span></div>`
+        : `<div class="plan-price-custom">Sob consulta</div>`
+      }
+      <div class="plan-annual-note">${annual && price ? `<span class="save">Você economiza R$ ${saved}/mês · R$ ${(saved*12).toLocaleString('pt-BR')}/ano</span>` : annual ? '&nbsp;' : '&nbsp;'}</div>
+      <div class="plan-stats">
+        <div class="plan-stat"><div class="ps-value">${count}</div><div class="ps-label">Escolas</div></div>
+        <div class="plan-stat"><div class="ps-value">${p.limits.atletas}</div><div class="ps-label">Atletas</div></div>
+        <div class="plan-stat"><div class="ps-value">${p.limits.grupos}</div><div class="ps-label">Grupos</div></div>
+      </div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        ${p.features.map(f=>`<li class="${f.ok?'':'disabled'}"><span class="fi">${f.ok?'✅':'⬜'}</span>${f.text}</li>`).join('')}
+      </ul>
+      <button class="plan-btn ${p.id}" onclick="filterByPlanCard('${p.id.charAt(0).toUpperCase()+p.id.slice(1)}')">${price ? 'Ver assinaturas' : 'Entrar em contato'}</button>
+    </div>`;
+  }).join('');
+}
+
+function setBilling(mode, el) {
+  billingMode = mode;
+  document.querySelectorAll('.billing-toggle-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  renderPlans();
+}
+
+/* ──────────────────────────────────────────
+   DIST CHART
+────────────────────────────────────────── */
+function renderDistChart() {
+  new Chart(document.getElementById('distChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Basic','Pro','Premium','Enterprise'],
+      datasets: [{ data: [6,10,6,2], backgroundColor: ['#64748b','#1a56db','#7c3aed','#0d9488'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true, cutout: '70%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} escolas` } } }
+    }
+  });
+}
+
+/* ──────────────────────────────────────────
+   MRR CHART
+────────────────────────────────────────── */
+function renderMRRChart() {
+  const ctx = document.getElementById('mrrChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0,'rgba(26,86,219,.18)');
+  grad.addColorStop(1,'rgba(26,86,219,0)');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar'],
+      datasets: [
+        { label:'MRR', data:[28500,30200,29800,33100,31500,35800,37200,36100,40500,39200,38200,48700], borderColor:'#1a56db', backgroundColor: grad, borderWidth:2.5, pointRadius:3, pointHoverRadius:5, fill:true, tension:.4 },
+        { label:'Novos', data:[3200,4100,3800,5200,4600,6100,5800,5400,7200,6100,5900,8400], borderColor:'#34d399', borderWidth:1.5, pointRadius:2, fill:false, tension:.4 },
+        { label:'Churn', data:[800,600,1200,400,700,300,900,1100,600,800,1200,400], borderColor:'#dc2626', borderWidth:1.5, borderDash:[4,4], pointRadius:2, fill:false, tension:.4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false}, tooltip:{mode:'index',intersect:false, callbacks:{label:c=>`${c.dataset.label}: R$ ${c.raw.toLocaleString('pt-BR')}`}} },
+      scales: { x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}} }
+    }
+  });
+}
+
+/* ──────────────────────────────────────────
+   RENEWALS TIMELINE
+────────────────────────────────────────── */
+function renderRenewals() {
+  const upcoming = [...SUBSCRIPTIONS]
+    .filter(s => s.status !== 'Cancelada')
+    .sort((a,b) => new Date(a.renovacao) - new Date(b.renovacao))
+    .slice(0,8);
+  const colorMap = { Ativa:'#059669', Trial:'#d97706', 'Em atraso':'#dc2626' };
+  document.getElementById('renewalTimeline').innerHTML = upcoming.map((s,i) => {
+    const d = new Date(s.renovacao);
+    const day = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    const daysLeft = Math.round((d - new Date()) / 86400000);
+    const urgency = daysLeft < 7 ? 'color:var(--danger);font-weight:700' : daysLeft < 14 ? 'color:var(--warning);font-weight:700' : 'color:var(--text-muted)';
+    return `
+    <div class="timeline-item">
+      <div class="timeline-dot-col">
+        <div class="timeline-dot" style="background:${colorMap[s.status]||'#64748b'}"></div>
+        ${i < upcoming.length-1 ? '<div class="timeline-line"></div>' : ''}
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-school">${s.escola}</div>
+        <div class="timeline-meta"><span class="plan-chip ${s.plano.toLowerCase()}">${s.plano}</span> · ${s.billing}</div>
+      </div>
+      <div class="timeline-right">
+        <div class="timeline-date">${day}</div>
+        <div class="timeline-value" style="${urgency}">${daysLeft > 0 ? `em ${daysLeft}d` : `${Math.abs(daysLeft)}d atraso`}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ──────────────────────────────────────────
+   TABLE
+────────────────────────────────────────── */
+function planClass(p) { return p.toLowerCase(); }
+function statusBadge(s) {
+  const map = { Ativa:'badge-active', Trial:'badge-trial', 'Em atraso':'badge-overdue', Cancelada:'badge-inactive', Pendente:'badge-pending' };
+  const dot = { Ativa:'●', Trial:'◉', 'Em atraso':'⚠', Cancelada:'○' };
+  return `<span class="badge ${map[s]||''}">${(dot[s]||'')} ${s}</span>`;
+}
+function daysTo(dateStr) {
+  const d = Math.round((new Date(dateStr) - new Date()) / 86400000);
+  if (d < 0) return `<span class="days-badge over">⚠ ${Math.abs(d)}d atraso</span>`;
+  if (d < 14) return `<span class="days-badge warn">⏳ ${d}d</span>`;
+  return `<span class="days-badge ok">${new Date(dateStr).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})}</span>`;
+}
+function rowClass(s) {
+  if (s === 'Em atraso') return 'row-overdue';
+  if (s === 'Trial') return 'row-trial';
+  return '';
+}
+
+function renderTable(data) {
+  const body = document.getElementById('subsTableBody');
+  if (!data.length) {
+    body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="es-icon">📭</div><div class="es-text">Nenhuma assinatura encontrada</div></div></td></tr>`;
+    return;
+  }
+  body.innerHTML = data.map(s => `
+    <tr class="${rowClass(s.status)}" onclick="openSubPanel(${s.id})">
+      <td>
+        <div class="school-cell">
+          <div class="school-av" style="background:${s.bg}">${s.emoji}</div>
+          <div>
+            <div class="school-name">${s.escola}</div>
+            <div class="school-city">${s.cidade}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="plan-chip ${planClass(s.plano)}">${s.emoji2||''}${s.plano}</span></td>
+      <td><span style="font-size:12px;font-weight:500">${s.billing}</span></td>
+      <td>${statusBadge(s.status)}</td>
+      <td><strong>R$ ${s.valor.toLocaleString('pt-BR')}</strong></td>
+      <td>${daysTo(s.renovacao)}</td>
+      <td style="font-weight:600">${s.atletas.toLocaleString('pt-BR')}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="row-actions">
+          <button class="action-btn" title="Ver" onclick="openSubPanel(${s.id})">👁</button>
+          <button class="action-btn" title="Upgrade" onclick="openSubPanel(${s.id})">⬆️</button>
+          <button class="action-btn danger" title="Cancelar" onclick="openCancelModal()">🚫</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  document.getElementById('paginationInfo').textContent = `Mostrando 1–${Math.min(data.length,10)} de ${data.length}`;
+}
+
+function applyFilters() {
+  const planFilter    = document.getElementById('filterPlan').value;
+  const billingFilter = document.getElementById('filterBilling').value;
+  let data = SUBSCRIPTIONS.filter(s => {
+    const matchStatus  = activeStatus === 'all' || s.status === activeStatus;
+    const matchSearch  = !searchQuery || s.escola.toLowerCase().includes(searchQuery) || s.cidade.toLowerCase().includes(searchQuery);
+    const matchPlan    = !planFilter    || s.plano === planFilter;
+    const matchBilling = !billingFilter || s.billing === billingFilter;
+    return matchStatus && matchSearch && matchPlan && matchBilling;
+  });
+  renderTable(data);
+}
+
+function filterByStatus(status, el) {
+  activeStatus = status;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function searchTable(q) { searchQuery = q.toLowerCase(); applyFilters(); }
+
+function filterByPlanCard(plan) {
+  document.getElementById('filterPlan').value = plan;
+  activeStatus = 'all';
+  document.querySelectorAll('.filter-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  applyFilters();
+  document.querySelector('.card:last-of-type').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+let sortDir = 1;
+function sortTable(field) {
+  sortDir *= -1;
+  const fieldMap = { escola:'escola', valor:'valor', renovacao:'renovacao' };
+  const key = fieldMap[field];
+  const planFilter    = document.getElementById('filterPlan').value;
+  const billingFilter = document.getElementById('filterBilling').value;
+  let data = SUBSCRIPTIONS.filter(s => {
+    const matchStatus  = activeStatus === 'all' || s.status === activeStatus;
+    const matchSearch  = !searchQuery || s.escola.toLowerCase().includes(searchQuery);
+    const matchPlan    = !planFilter    || s.plano === planFilter;
+    const matchBilling = !billingFilter || s.billing === billingFilter;
+    return matchStatus && matchSearch && matchPlan && matchBilling;
+  }).sort((a,b) => {
+    if (key === 'renovacao') return sortDir * (new Date(a.renovacao) - new Date(b.renovacao));
+    if (typeof a[key] === 'number') return sortDir * (a[key] - b[key]);
+    return sortDir * a[key].localeCompare(b[key]);
+  });
+  renderTable(data);
+}
+
+/* ──────────────────────────────────────────
+   SUB PANEL
+────────────────────────────────────────── */
+const PLAN_COLORS = { basic:'#f8fafc', pro:'#ebf5ff', premium:'#ede9fe', enterprise:'#ccfbf1' };
+const PLAN_TEXT   = { basic:'#64748b', pro:'#1a56db', premium:'#7c3aed', enterprise:'#0d9488' };
+
+function openSubPanel(id) {
+  const s = SUBSCRIPTIONS.find(x => x.id === id);
+  if (!s) return;
+  currentSubId = id;
+
+  document.getElementById('sp-title').textContent = s.escola;
+  document.getElementById('sp-sub').textContent   = `Plano ${s.plano} · ${s.status}`;
+
+  const plan = PLANS.find(p => p.name === s.plano.toUpperCase() || p.id === s.plano.toLowerCase());
+  const pc   = s.plano.toLowerCase();
+  const banner = document.getElementById('sp-plan-banner');
+  banner.style.background = PLAN_COLORS[pc] || '#f8fafc';
+  banner.style.border     = `1.5px solid ${PLAN_TEXT[pc]}33`;
+  document.getElementById('sp-plan-emoji').textContent = plan?.emoji || '📦';
+  document.getElementById('sp-plan-name').textContent  = s.plano.toUpperCase();
+  document.getElementById('sp-plan-name').style.color  = PLAN_TEXT[pc];
+  document.getElementById('sp-plan-desc').textContent  = plan?.tagline || '';
+  document.getElementById('sp-plan-price').textContent = s.valor ? `R$ ${s.valor.toLocaleString('pt-BR')}` : 'Sob consulta';
+  document.getElementById('sp-plan-price').style.color = PLAN_TEXT[pc];
+
+  document.getElementById('sp-status').innerHTML  = statusBadge(s.status);
+  document.getElementById('sp-billing').textContent = s.billing;
+  document.getElementById('sp-start').textContent  = new Date(s.inicio).toLocaleDateString('pt-BR');
+  document.getElementById('sp-renew').textContent  = new Date(s.renovacao).toLocaleDateString('pt-BR');
+  document.getElementById('sp-athletes').textContent = s.atletas.toLocaleString('pt-BR');
+  const limit = plan?.limits?.atletas || '—';
+  document.getElementById('sp-limit').textContent = typeof limit === 'number' ? limit.toLocaleString('pt-BR') : limit;
+
+  const pct = typeof limit === 'number' ? Math.round(s.atletas/limit*100) : 0;
+  document.getElementById('sp-ocp-label').textContent = `${s.atletas} / ${limit} atletas`;
+  document.getElementById('sp-ocp-pct').textContent   = `${pct}%`;
+  document.getElementById('sp-ocp-bar').style.width   = `${Math.min(pct,100)}%`;
+  const barColor = pct >= 90 ? 'var(--danger)' : pct >= 70 ? 'var(--warning)' : 'var(--primary)';
+  document.getElementById('sp-ocp-bar').style.background = barColor;
+
+  // plan selector
+  document.getElementById('sp-plan-selector').innerHTML = PLANS.filter(p=>p.monthlyPrice).map(p => `
+    <div class="plan-sel-opt ${p.id} ${s.plano.toLowerCase()===p.id?'selected':''}" onclick="selectPlan('${p.id}',this)">
+      <div class="plan-sel-name" style="color:${PLAN_TEXT[p.id]}">${p.name}</div>
+      <div class="plan-sel-price" style="color:${PLAN_TEXT[p.id]}">R$ ${p.monthlyPrice.toLocaleString('pt-BR')}</div>
+      <div class="plan-sel-sub">${p.limits.atletas} atletas</div>
+    </div>`).join('') + `
+    <div class="plan-sel-opt enterprise ${s.plano.toLowerCase()==='enterprise'?'selected':''}" onclick="selectPlan('enterprise',this)">
+      <div class="plan-sel-name" style="color:${PLAN_TEXT.enterprise}">ENTERPRISE</div>
+      <div class="plan-sel-price" style="color:${PLAN_TEXT.enterprise}">Custom</div>
+      <div class="plan-sel-sub">Ilimitado</div>
+    </div>`;
+  document.getElementById('sp-billing-sel').value = s.billing;
+
+  // invoices mock
+  const months = ['Mar 2026','Fev 2026','Jan 2026','Dez 2025','Nov 2025'];
+  document.getElementById('sp-invoices').innerHTML = months.map((m,i) => `
+    <div class="invoice-row">
+      <div class="inv-icon" style="background:${i===0?'var(--success-light)':'var(--bg)'}">${i===0?'✅':'🧾'}</div>
+      <div class="inv-info">
+        <div class="inv-desc">${s.plano} · ${s.billing} · ${m}</div>
+        <div class="inv-date">${i===0?'Pago em ':'Pago em '}${['23/03','21/02','20/01','19/12','18/11'][i]}/2026</div>
+      </div>
+      <div class="inv-value">R$ ${s.valor.toLocaleString('pt-BR')}</div>
+    </div>`).join('');
+
+  openPanel('subPanel');
+}
+
+function selectPlan(planId, el) {
+  document.querySelectorAll('#sp-plan-selector .plan-sel-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveChanges() {
+  closePanel();
+  // in real app: persist changes
+}
+
+/* ──────────────────────────────────────────
+   ASSIGN PANEL
+────────────────────────────────────────── */
+function selectAssignPlan(id, el) {
+  document.querySelectorAll('#assignPanel .plan-sel-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function openAssignPanel() {
+  document.getElementById('panelOverlay').classList.add('show');
+  document.getElementById('assignPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAssignPanel() {
+  document.getElementById('assignPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function saveAssign() {
+  closeAssignPanel();
+}
+
+/* ──────────────────────────────────────────
+   EDIT PLAN MODAL
+────────────────────────────────────────── */
+function openNewPlanModal() {
+  document.getElementById('editPlanList').innerHTML = PLANS.filter(p=>p.monthlyPrice).map(p=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px">
+      <div style="width:70px;font-size:12px;font-weight:800;color:${PLAN_TEXT[p.id]}">${p.name}</div>
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--text-muted)">Preço mensal (R$)</label>
+        <input type="number" class="form-input" style="margin-top:3px;padding:7px 10px" value="${p.monthlyPrice}" />
+      </div>
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--text-muted)">Limite de atletas</label>
+        <input type="number" class="form-input" style="margin-top:3px;padding:7px 10px" value="${p.limits.atletas}" />
+      </div>
+    </div>`).join('') + `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+      <div style="width:70px;font-size:12px;font-weight:800;color:${PLAN_TEXT.enterprise}">ENTERPRISE</div>
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--text-muted)">Contato (e-mail)</label>
+        <input type="text" class="form-input" style="margin-top:3px;padding:7px 10px" value="enterprise@esportesacademy.com.br" />
+      </div>
+    </div>`;
+  document.getElementById('editPlanModal').classList.add('show');
+}
+function closeEditPlanModal() { document.getElementById('editPlanModal').classList.remove('show'); }
+function saveEditPlans() { closeEditPlanModal(); }
+
+/* ──────────────────────────────────────────
+   CANCEL MODAL
+────────────────────────────────────────── */
+function openCancelModal() { document.getElementById('cancelModal').classList.add('show'); }
+function confirmCancel() { closeModal(); closePanel(); }
+function closeModal() {
+  document.getElementById('cancelModal').classList.remove('show');
+  document.getElementById('editPlanModal').classList.remove('show');
+}
+
+/* ──────────────────────────────────────────
+   PANEL HELPERS
+────────────────────────────────────────── */
+function openPanel(id) {
+  document.getElementById('panelOverlay').classList.add('show');
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePanel() {
+  ['subPanel','assignPanel'].forEach(id => document.getElementById(id).classList.remove('open'));
+  document.getElementById('panelOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+/* ──────────────────────────────────────────
+   SIDEBAR
+────────────────────────────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+/* ──────────────────────────────────────────
+   INIT
+────────────────────────────────────────── */
+renderPlans();
+renderDistChart();
+renderMRRChart();
+renderRenewals();
+renderTable(SUBSCRIPTIONS);
+</script>
+</body>
+</html>

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — SuperAdmin-notificacoes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db; --primary-dark: #1e429f; --primary-light: #ebf5ff;
+      --secondary: #0ea5e9;
+      --success: #059669; --success-light: #d1fae5;
+      --warning: #d97706; --warning-light: #fef3c7;
+      --danger: #dc2626;  --danger-light: #fee2e2;
+      --purple: #7c3aed;  --purple-light: #ede9fe;
+      --teal: #0d9488;    --teal-light: #ccfbf1;
+      --bg: #f1f5f9; --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
+      --card: #ffffff; --text: #1e293b; --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
+      --radius: 12px; --radius-sm: 8px;
+      --sidebar-w: 260px; --topbar-h: 56px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; }
+
+    /* ── OVERLAY ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; backdrop-filter: blur(2px); }
+    .overlay.show { display: block; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-w); height: 100dvh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); overflow-y: auto; }
+    .sidebar.open { transform: translateX(0); }
+    @media (min-width: 1024px) { .sidebar { transform: translateX(0); } }
+    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
+    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+    .nav-section-label { color: rgba(255,255,255,.3); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin: 14px 0 5px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; margin-bottom: 2px; text-decoration: none; }
+    .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: var(--primary); color: #fff; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; }
+    .user-avatar-row:hover { background: var(--sidebar-hover); }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+
+    /* ── LAYOUT ── */
+    .main { display: flex; flex-direction: column; min-height: 100dvh; }
+    @media (min-width: 1024px) { .main { margin-left: var(--sidebar-w); } }
+
+    /* ── TOPBAR ── */
+    .topbar { background: var(--card); border-bottom: 1px solid var(--border); height: var(--topbar-h); padding: 0 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
+    @media (min-width: 640px) { .topbar { padding: 0 20px; } }
+    @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
+    .hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 18px; flex-shrink: 0; }
+    @media (min-width: 1024px) { .hamburger { display: none; } }
+    .topbar-title-group { flex: 1; min-width: 0; }
+    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
+    @media (min-width: 640px) { .topbar-title-group .breadcrumb { display: block; } }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: none; }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-xs { padding: 4px 9px; font-size: 11px; border-radius: 6px; }
+
+    /* ── CONTENT ── */
+    .content { padding: 16px; flex: 1; }
+    @media (min-width: 640px)  { .content { padding: 20px; } }
+    @media (min-width: 1024px) { .content { padding: 28px; } }
+
+    /* ── LAYOUT GRID ── */
+    .notif-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 1100px) { .notif-layout { grid-template-columns: 1fr 320px; align-items: start; } }
+
+    /* ── CARD ── */
+    .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    @media (min-width: 640px) { .card { padding: 20px; } }
+    .card-title    { font-size: 14px; font-weight: 700; }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── KPI STRIP ── */
+    .kpi-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+    @media (min-width: 640px) { .kpi-strip { grid-template-columns: repeat(4, 1fr); } }
+    .kpi-pill { background: var(--card); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; transition: transform .15s; }
+    .kpi-pill:hover { transform: translateY(-1px); }
+    .kpi-pill-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .kpi-pill-val   { font-size: 18px; font-weight: 800; line-height: 1; }
+    .kpi-pill-label { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ── FILTER BAR ── */
+    .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .filter-tabs { display: flex; gap: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 3px; overflow-x: auto; flex-shrink: 0; }
+    .filter-tab { padding: 6px 13px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; white-space: nowrap; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+    .filter-tab:hover { color: var(--text); }
+    .filter-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+    .tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .tab-num { font-size: 10px; background: var(--danger); color: #fff; padding: 1px 5px; border-radius: 20px; font-weight: 700; }
+    .tab-num.zero { background: var(--bg); color: var(--text-muted); }
+
+    .filter-search { flex: 1; min-width: 160px; max-width: 260px; display: flex; align-items: center; gap: 7px; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 11px; }
+    .filter-search input { border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; width: 100%; }
+    .filter-search input::placeholder { color: var(--text-muted); }
+
+    /* ── BULK ACTIONS BAR ── */
+    .bulk-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--primary-light); border: 1px solid #bfdbfe; border-radius: 9px; margin-bottom: 12px; animation: slideDown .2s ease; }
+    @keyframes slideDown { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
+    .bulk-bar.hidden { display: none; }
+    .bulk-count { font-size: 13px; font-weight: 600; color: var(--primary); flex: 1; }
+    .bulk-actions { display: flex; gap: 6px; }
+
+    /* ── NOTIFICATION GROUPS ── */
+    .notif-group { margin-bottom: 6px; }
+    .notif-group-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 12px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .group-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ── NOTIFICATION ITEM ── */
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 14px; border-radius: 10px; cursor: pointer;
+      transition: background .12s; position: relative;
+      border: 1px solid transparent; margin-bottom: 3px;
+    }
+    .notif-item:hover { background: var(--bg); }
+    .notif-item.unread { background: #f0f7ff; border-color: #bfdbfe; }
+    .notif-item.unread:hover { background: #e0f0ff; }
+    .notif-item.selected { background: #ebf5ff; border-color: var(--primary); }
+
+    /* checkbox */
+    .notif-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all .12s; display: flex; align-items: center; justify-content: center; background: var(--card); }
+    .notif-check.checked { background: var(--primary); border-color: var(--primary); color: #fff; font-size: 10px; }
+
+    /* icon */
+    .notif-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; position: relative; }
+    .notif-icon .unread-dot { width: 8px; height: 8px; border-radius: 50%; position: absolute; top: -2px; right: -2px; border: 2px solid var(--card); }
+    .notif-item.unread .unread-dot { display: block; }
+    .notif-dot-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+    /* body */
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .notif-item.unread .notif-title { font-weight: 700; }
+    .notif-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; white-space: normal; }
+    .notif-footer { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .notif-time { font-size: 11px; color: var(--text-muted); }
+    .notif-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+
+    /* right side */
+    .notif-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+    .notif-actions { display: none; gap: 4px; }
+    .notif-item:hover .notif-actions { display: flex; }
+    .na-btn { width: 26px; height: 26px; border-radius: 6px; border: none; background: var(--card); color: var(--text-muted); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; box-shadow: var(--shadow); }
+    .na-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .na-btn.del:hover { background: var(--danger-light); color: var(--danger); }
+    .priority-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+
+    /* type tag colors */
+    .tag-critico  { background: var(--danger-light);  color: var(--danger); }
+    .tag-aviso    { background: var(--warning-light); color: var(--warning); }
+    .tag-sucesso  { background: var(--success-light); color: var(--success); }
+    .tag-info     { background: var(--primary-light); color: var(--primary); }
+    .tag-escola   { background: var(--purple-light);  color: var(--purple); }
+    .tag-sistema  { background: #f1f5f9;              color: var(--text-muted); }
+    .tag-relatorio{ background: var(--teal-light);    color: var(--teal); }
+
+    /* icon bg */
+    .ic-critico  { background: var(--danger-light); }
+    .ic-aviso    { background: var(--warning-light); }
+    .ic-sucesso  { background: var(--success-light); }
+    .ic-info     { background: var(--primary-light); }
+    .ic-escola   { background: var(--purple-light); }
+    .ic-sistema  { background: #f1f5f9; }
+    .ic-relatorio{ background: var(--teal-light); }
+
+    /* priority dot */
+    .pd-critico  { background: var(--danger); }
+    .pd-aviso    { background: var(--warning); }
+    .pd-sucesso  { background: var(--success); }
+    .pd-info     { background: var(--primary); }
+    .pd-escola   { background: var(--purple); }
+    .pd-sistema  { background: var(--text-muted); }
+    .pd-relatorio{ background: var(--teal); }
+
+    /* empty */
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+    .empty-state .es-icon { font-size: 44px; margin-bottom: 12px; }
+    .empty-state .es-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state .es-text  { font-size: 13px; }
+
+    /* ── RIGHT PANEL (stats + settings) ── */
+    .right-col { display: flex; flex-direction: column; gap: 14px; }
+
+    /* summary donut */
+    .summary-card { padding: 16px; }
+    .summary-donut-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+    .donut-canvas { width: 80px !important; height: 80px !important; flex-shrink: 0; }
+    .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .legend-row { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { flex: 1; color: var(--text-muted); }
+    .legend-val   { font-weight: 700; }
+
+    /* settings */
+    .settings-section { margin-bottom: 16px; }
+    .settings-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 12px; font-weight: 500; color: var(--text); }
+    .setting-sub   { font-size: 11px; color: var(--text-muted); }
+    .toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 20px; cursor: pointer; transition: .2s; }
+    .toggle-slider::before { content:''; position:absolute; height:14px; width:14px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--primary); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* channel pills */
+    .channel-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .channel-pill { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); color: var(--text-muted); background: var(--bg); transition: all .12s; }
+    .channel-pill.on { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+    /* quick stats */
+    .quick-stat { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .quick-stat:last-child { border-bottom: none; }
+    .qs-label { font-size: 12px; color: var(--text-muted); }
+    .qs-val   { font-size: 13px; font-weight: 700; }
+
+    /* SIDE PANEL (notification detail) */
+    .panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; }
+    .panel-overlay.show { display: block; }
+    .side-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 480px; background: var(--card); z-index: 210; display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: -8px 0 40px rgba(0,0,0,.15); overflow: hidden; }
+    .side-panel.open { transform: translateX(0); }
+    .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .panel-title { font-size: 15px; font-weight: 700; flex: 1; }
+    .panel-close { width: 30px; height: 30px; border-radius: 7px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all .15s; }
+    .panel-close:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+    /* MODAL confirm */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--card); border-radius: var(--radius); padding: 26px; max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); animation: mIn .18s ease; }
+    @keyframes mIn { from { opacity:0; transform: scale(.96); } to { opacity:1; transform: scale(1); } }
+    .modal-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--danger-light); display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px; }
+    .modal-title { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+    .modal-text  { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.5; margin-bottom: 18px; }
+    .modal-btns  { display: flex; gap: 8px; }
+    .modal-btns .btn { flex: 1; justify-content: center; }
+
+    /* utils */
+    .text-muted { color: var(--text-muted); }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .unread-dot { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">PORTAL ADMIN</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item" href="admin-dashboard.html"><span class="icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="schools.html"><span class="icon">🏫</span> Escolas <span class="nav-badge">24</span></a>
+    <a class="nav-item" href="#"><span class="icon">👤</span> Usuários</a>
+    <div class="nav-section-label">Financeiro</div>
+    <a class="nav-item" href="#"><span class="icon">💳</span> Cobranças</a>
+    <a class="nav-item" href="planos.html"><span class="icon">📦</span> Planos & Licenças</a>
+    <a class="nav-item" href="#"><span class="icon">📊</span> Relatórios</a>
+    <a class="nav-item" href="#"><span class="icon">🧾</span> Notas Fiscais</a>
+    <div class="nav-section-label">Sistema</div>
+    <a class="nav-item" href="#"><span class="icon">⚙️</span> Configurações</a>
+    <a class="nav-item active" href="notificacoes.html"><span class="icon">🔔</span> Notificações <span class="nav-badge" id="sb-badge">5</span></a>
+    <a class="nav-item" href="#"><span class="icon">🛡️</span> Permissões</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-avatar-row">
+      <div class="avatar">WA</div>
+      <div class="user-info">
+        <div class="user-name">Willianm Admin</div>
+        <div class="user-role">Super Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title-group">
+      <div class="page-title">
+        Notificações
+        <span id="topbar-badge" style="background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;line-height:1">5</span>
+      </div>
+      <div class="breadcrumb">Admin / Sistema / Notificações</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="markAllRead()" title="Marcar todas como lidas">✓ Marcar todas lidas</button>
+      <button class="btn btn-secondary btn-sm" onclick="openSettings()">⚙️ Configurar</button>
+      <button class="btn btn-danger btn-sm" onclick="openClearModal()">🗑 Limpar</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-pill">
+        <div class="kpi-pill-icon" style="background:var(--primary-light)">🔔</div>
+        <div>
+          <div class="kpi-pill-val" id="kpi-total">32</div>
+          <div class="kpi-pill-label">Total</div>
+        </div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-icon" style="background:#dbeafe">💬</div>
+        <div>
+          <div class="kpi-pill-val" id="kpi-unread" style="color:var(--primary)">5</div>
+          <div class="kpi-pill-label">Não lidas</div>
+        </div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-icon" style="background:var(--danger-light)">🚨</div>
+        <div>
+          <div class="kpi-pill-val" id="kpi-critico" style="color:var(--danger)">2</div>
+          <div class="kpi-pill-label">Críticas</div>
+        </div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-icon" style="background:var(--warning-light)">⚠️</div>
+        <div>
+          <div class="kpi-pill-val" id="kpi-aviso" style="color:var(--warning)">3</div>
+          <div class="kpi-pill-label">Avisos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="notif-layout">
+
+      <!-- LEFT: notification list -->
+      <div>
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+          <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" data-filter="all"      onclick="setFilter('all',this)">Todas <span class="tab-num" id="tn-all">32</span></button>
+            <button class="filter-tab"        data-filter="unread"   onclick="setFilter('unread',this)"><span class="tab-dot" style="background:var(--primary)"></span>Não lidas <span class="tab-num" id="tn-unread">5</span></button>
+            <button class="filter-tab"        data-filter="critico"  onclick="setFilter('critico',this)"><span class="tab-dot" style="background:var(--danger)"></span>Críticas <span class="tab-num" id="tn-critico">2</span></button>
+            <button class="filter-tab"        data-filter="aviso"    onclick="setFilter('aviso',this)"><span class="tab-dot" style="background:var(--warning)"></span>Avisos <span class="tab-num" id="tn-aviso">3</span></button>
+            <button class="filter-tab"        data-filter="escola"   onclick="setFilter('escola',this)">🏫 Escolas</button>
+            <button class="filter-tab"        data-filter="financeiro" onclick="setFilter('financeiro',this)">💳 Financeiro</button>
+            <button class="filter-tab"        data-filter="sistema"  onclick="setFilter('sistema',this)">⚙️ Sistema</button>
+          </div>
+          <div class="filter-search">
+            <span style="color:var(--text-muted);font-size:14px">🔍</span>
+            <input type="text" placeholder="Buscar notificações..." oninput="searchNotifs(this.value)" />
+          </div>
+        </div>
+
+        <!-- BULK BAR -->
+        <div class="bulk-bar hidden" id="bulkBar">
+          <span class="bulk-count" id="bulkCount">0 selecionadas</span>
+          <div class="bulk-actions">
+            <button class="btn btn-secondary btn-xs" onclick="bulkMarkRead()">✓ Marcar lidas</button>
+            <button class="btn btn-danger btn-xs"    onclick="bulkDelete()">🗑 Excluir</button>
+            <button class="btn btn-ghost btn-xs"     onclick="clearSelection()">✕ Cancelar</button>
+          </div>
+        </div>
+
+        <!-- NOTIFICATION LIST -->
+        <div id="notifList"></div>
+      </div>
+
+      <!-- RIGHT: stats + settings -->
+      <div class="right-col">
+
+        <!-- Resumo por tipo -->
+        <div class="card summary-card">
+          <div class="card-title" style="margin-bottom:14px">Resumo</div>
+          <div class="summary-donut-wrap">
+            <canvas class="donut-canvas" id="summaryChart"></canvas>
+            <div class="donut-legend">
+              <div class="legend-row"><div class="legend-dot" style="background:var(--danger)"></div><div class="legend-label">Críticas</div><div class="legend-val">2</div></div>
+              <div class="legend-row"><div class="legend-dot" style="background:var(--warning)"></div><div class="legend-label">Avisos</div><div class="legend-val">3</div></div>
+              <div class="legend-row"><div class="legend-dot" style="background:var(--success)"></div><div class="legend-label">Sucesso</div><div class="legend-val">8</div></div>
+              <div class="legend-row"><div class="legend-dot" style="background:var(--primary)"></div><div class="legend-label">Info</div><div class="legend-val">7</div></div>
+              <div class="legend-row"><div class="legend-dot" style="background:var(--purple)"></div><div class="legend-label">Escolas</div><div class="legend-val">6</div></div>
+              <div class="legend-row"><div class="legend-dot" style="background:var(--teal)"></div><div class="legend-label">Sistema</div><div class="legend-val">6</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="quick-stat"><div class="qs-label">Esta semana</div><div class="qs-val">18</div></div>
+            <div class="quick-stat"><div class="qs-label">Ontem</div><div class="qs-val">7</div></div>
+            <div class="quick-stat"><div class="qs-label">Mais antigas</div><div class="qs-val">7</div></div>
+            <div class="quick-stat"><div class="qs-label">Taxa de leitura</div><div class="qs-val" style="color:var(--success)">84%</div></div>
+          </div>
+        </div>
+
+        <!-- Canais ativos -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:6px">Canais ativos</div>
+          <div class="card-subtitle" style="margin-bottom:12px">Onde você recebe notificações</div>
+          <div class="channel-row">
+            <div class="channel-pill on">🖥️ Portal</div>
+            <div class="channel-pill on" onclick="toggleChannel(this)">📧 E-mail</div>
+            <div class="channel-pill" onclick="toggleChannel(this)">📱 SMS</div>
+            <div class="channel-pill on" onclick="toggleChannel(this)">💬 Slack</div>
+            <div class="channel-pill" onclick="toggleChannel(this)">📲 Push</div>
+          </div>
+        </div>
+
+        <!-- Preferências rápidas -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">Preferências</div>
+          <div class="settings-section">
+            <div class="settings-title">Alertas críticos</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Pagamento em atraso</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Trial expirando</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Erro no sistema</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-title">Atualizações</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Nova escola cadastrada</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Pagamento recebido</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Relatório semanal</div></div>
+              <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Atualizações do sistema</div></div>
+              <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:4px" onclick="openSettings()">⚙️ Configurações avançadas</button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════ PANEL: NOTIFICATION DETAIL ════ -->
+<div class="panel-overlay" id="panelOverlay" onclick="closeDetail()"></div>
+<div class="side-panel" id="detailPanel">
+  <div class="panel-header">
+    <div id="dp-icon" style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+    <div class="panel-title" id="dp-title">Notificação</div>
+    <button class="panel-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="panel-body">
+    <div id="dp-tag" style="margin-bottom:14px"></div>
+    <div id="dp-body" style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:20px"></div>
+    <div style="background:var(--bg);border-radius:9px;padding:14px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Data/hora</div><div style="font-size:12px;font-weight:600" id="dp-time">—</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prioridade</div><div style="font-size:12px;font-weight:600" id="dp-priority">—</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Categoria</div><div style="font-size:12px;font-weight:600" id="dp-cat">—</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Status</div><div style="font-size:12px;font-weight:600" id="dp-status">—</div></div>
+      </div>
+    </div>
+    <div id="dp-actions-wrap"></div>
+  </div>
+</div>
+
+<!-- MODAL: LIMPAR NOTIFICAÇÕES -->
+<div class="modal-overlay" id="clearModal">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">Limpar notificações?</div>
+    <div class="modal-text">Escolha quais notificações deseja remover permanentemente.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="radio" name="clearOpt" value="read" checked /> Apenas as já lidas</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="radio" name="clearOpt" value="old" /> Mais antigas que 30 dias</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="radio" name="clearOpt" value="all" /> Todas as notificações</label>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmClear()">Limpar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIGURAÇÕES AVANÇADAS -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="max-width:460px">
+    <div style="font-size:16px;font-weight:800;margin-bottom:4px">⚙️ Configurações de Notificação</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px">Defina como e quando deseja ser notificado</div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Frequência do resumo</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="freq" value="real" checked /> Tempo real</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="freq" value="hourly" /> Hourly digest</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="freq" value="daily" /> Daily digest</label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Horário de silêncio (DND)</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="time" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:Inter,sans-serif;font-size:13px;outline:none" value="22:00" />
+        <span style="color:var(--text-muted);font-size:13px">até</span>
+        <input type="time" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:Inter,sans-serif;font-size:13px;outline:none" value="08:00" />
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Reter histórico por</div>
+      <select style="width:100%;padding:9px 28px 9px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;appearance:none;outline:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;background-color:#fff">
+        <option>30 dias</option><option selected>60 dias</option><option>90 dias</option><option>1 ano</option>
+      </select>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ JS ════ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ──────────────────────────────────────────
+   NOTIFICATION DATA
+────────────────────────────────────────── */
+const NOTIFS = [
+  // ── HOJE ──
+  { id:1,  type:'critico',   cat:'financeiro', icon:'🚨', title:'Pagamento em atraso: Basketball Academy Sul',      desc:'A escola Basketball Academy Sul (Porto Alegre, RS) está com o pagamento do plano Pro em atraso há 3 dias. Valor: R$ 890,00. Notificação automática enviada por e-mail.',                              time:'Hoje, 14:32', ts:1, unread:true,  actions:['ver','cobrar'] },
+  { id:2,  type:'critico',   cat:'financeiro', icon:'🔴', title:'Falha no débito automático: Judô Shotokan RJ',     desc:'A tentativa de débito automático no cartão cadastrado foi recusada (código 51 — saldo insuficiente). Plano Basic, valor R$ 490. Tentativa de reprocessamento agendada para amanhã às 09h.',         time:'Hoje, 11:48', ts:1, unread:true,  actions:['ver','retentar'] },
+  { id:3,  type:'aviso',     cat:'escola',     icon:'⏳', title:'Trial expirando: Judô Shotokan RJ',               desc:'O período de trial da escola Judô Shotokan RJ (Rio de Janeiro, RJ) encerra em 5 dias (28/03/2026). A escola tem 32 atletas ativos. Considere enviar uma proposta de conversão.',                  time:'Hoje, 09:00', ts:1, unread:true,  actions:['ver','proposta'] },
+  { id:4,  type:'aviso',     cat:'escola',     icon:'⏳', title:'Trial expirando: CrossFit Manaus',                 desc:'O período de trial da escola CrossFit Manaus (Manaus, AM) encerra em 12 dias (04/04/2026). 18 atletas cadastrados. Taxa de uso: 72% das funcionalidades acessadas.',                               time:'Hoje, 09:00', ts:1, unread:false, actions:['ver','proposta'] },
+  { id:5,  type:'sucesso',   cat:'financeiro', icon:'✅', title:'Pagamento confirmado: Academia Futebol SP',        desc:'Pagamento de R$ 712,00 (Plano Pro Anual) recebido via Pix automático. Próxima renovação: 15/01/2027. Obrigado por manter sua assinatura em dia!',                                                  time:'Hoje, 08:15', ts:1, unread:false, actions:['ver','nota'] },
+  { id:6,  type:'sucesso',   cat:'escola',     icon:'🏫', title:'Nova escola cadastrada: Surf Academy Floripa',     desc:'A escola Surf Academy Floripa (Florianópolis, SC) concluiu o cadastro e iniciou o período de trial de 14 dias. Contato: João Surfista · (48) 99999-8888.',                                         time:'Hoje, 07:44', ts:1, unread:true,  actions:['ver','aprovar'] },
+
+  // ── ONTEM ──
+  { id:7,  type:'info',      cat:'escola',     icon:'⬆️', title:'Upgrade de plano: Tennis Club BH',                desc:'A escola Tennis Club BH migrou do plano Pro para o plano Premium. Novo valor mensal: R$ 1.490. A diferença proporcional de R$ 200 foi cobrada via Pix.',                                           time:'Ontem, 18:22', ts:2, unread:false, actions:['ver'] },
+  { id:8,  type:'aviso',     cat:'escola',     icon:'📊', title:'Licença próxima do limite: Natação Rio Verde',     desc:'A escola Natação Rio Verde (Campinas, SP) atingiu 96% da capacidade do seu plano Pro (96/100 atletas). Considere recomendar upgrade para o plano Premium.',                                      time:'Ontem, 16:05', ts:2, unread:false, actions:['ver','proposta'] },
+  { id:9,  type:'sucesso',   cat:'financeiro', icon:'✅', title:'Pagamento confirmado: Tennis Club BH',             desc:'Pagamento de R$ 1.490,00 (Plano Premium Mensal) recebido. Método: Boleto bancário. Compensação em 1 dia útil.',                                                                                    time:'Ontem, 14:00', ts:2, unread:false, actions:['ver','nota'] },
+  { id:10, type:'info',      cat:'escola',     icon:'🏫', title:'Escola atualizou dados cadastrais',               desc:'A escola Vôlei Praia Fortaleza atualizou seu endereço e dados de contato. O responsável financeiro foi alterado de Maria Costa para Pedro Vasconcelos.',                                          time:'Ontem, 11:30', ts:2, unread:false, actions:['ver'] },
+  { id:11, type:'sistema',   cat:'sistema',    icon:'🔧', title:'Backup automático concluído com sucesso',          desc:'O backup diário dos dados da plataforma foi realizado às 03:00 com sucesso. Tamanho: 2,4 GB. Armazenado no ambiente AWS S3 (região us-east-1). Retenção: 90 dias.',                               time:'Ontem, 03:01', ts:2, unread:false, actions:[] },
+  { id:12, type:'sucesso',   cat:'financeiro', icon:'✅', title:'Pagamento confirmado: Natação Rio Verde',          desc:'Pagamento de R$ 890,00 (Plano Pro Mensal) recebido via débito automático. Fatura #2026-03-022 gerada.',                                                                                             time:'Ontem, 09:12', ts:2, unread:false, actions:['ver','nota'] },
+  { id:13, type:'relatorio', cat:'sistema',    icon:'📊', title:'Relatório semanal gerado',                        desc:'O relatório semanal de 17–23/03/2026 está disponível. Destaques: +18 novos atletas, MRR subiu R$ 2.100, 1 novo trial iniciado, 1 pagamento atrasado.',                                           time:'Ontem, 08:00', ts:2, unread:false, actions:['ver','baixar'] },
+
+  // ── ESTA SEMANA ──
+  { id:14, type:'info',      cat:'escola',     icon:'📝', title:'Contrato assinado digitalmente: MMA Total Fight',  desc:'O contrato de prestação de serviços do plano Pro Anual (R$ 712/mês) foi assinado eletronicamente pela responsável Fernanda Santos. Vigência: 11/03/2026 a 10/03/2027.',                          time:'22/03, 15:40', ts:3, unread:false, actions:['ver'] },
+  { id:15, type:'aviso',     cat:'sistema',    icon:'⚡', title:'Pico de uso detectado às 19h',                    desc:'A plataforma registrou 340 usuários simultâneos às 19h17 do dia 22/03. O limite de alerta é 300. Nenhuma degradação de performance foi observada. Infraestrutura auto-escalada.',               time:'22/03, 19:20', ts:3, unread:false, actions:[] },
+  { id:16, type:'sucesso',   cat:'escola',     icon:'🎉', title:'Meta de março atingida: 24 escolas ativas',       desc:'A meta de março de 22 escolas ativas foi superada. Encerramos o mês com 24 escolas, sendo 21 pagas, 2 em trial e 1 pendente. MRR: R$ 48.720.',                                                    time:'22/03, 12:00', ts:3, unread:false, actions:['ver'] },
+  { id:17, type:'sistema',   cat:'sistema',    icon:'🔄', title:'Atualização de sistema aplicada: v3.7.1',         desc:'A atualização v3.7.1 foi aplicada com sucesso em ambiente de produção às 02:00 (janela de manutenção). Novidades: melhorias no módulo de cobranças e correção de bug no filtro de grupos.',      time:'21/03, 02:15', ts:3, unread:false, actions:[] },
+  { id:18, type:'info',      cat:'financeiro', icon:'📄', title:'Notas fiscais emitidas: lote de março',           desc:'Foram emitidas 21 notas fiscais referentes às competências de março/2026. Valor total: R$ 48.720,00. Arquivos XML e PDF disponíveis para download na seção Notas Fiscais.',                        time:'20/03, 10:30', ts:3, unread:false, actions:['baixar'] },
+  { id:19, type:'escola',    cat:'escola',     icon:'🏫', title:'Escola solicitou upgrade: Ginástica Arte Salvador', desc:'A escola Ginástica Arte Salvador (Salvador, BA) manifestou interesse em migrar do plano Premium para Enterprise. Contato aguardando retorno do time comercial.',                                 time:'20/03, 09:15', ts:3, unread:false, actions:['ver','proposta'] },
+  { id:20, type:'sucesso',   cat:'financeiro', icon:'✅', title:'Pagamento confirmado: 18 escolas (lote)',          desc:'O processamento do lote de cobranças do ciclo 20/03 foi concluído com sucesso para 18 escolas. Total recebido: R$ 31.480. 1 falha registrada (Basketball Academy Sul).',                          time:'20/03, 08:45', ts:3, unread:false, actions:['ver'] },
+
+  // ── MAIS ANTIGAS ──
+  { id:21, type:'sistema',   cat:'sistema',    icon:'🛡️', title:'Certificado SSL renovado automaticamente',        desc:'O certificado SSL do domínio app.esportesacademy.com.br foi renovado com sucesso (Let\'s Encrypt). Validade: 90 dias. Próxima renovação automática: 22/06/2026.',                                  time:'18/03, 03:00', ts:4, unread:false, actions:[] },
+  { id:22, type:'info',      cat:'escola',     icon:'📊', title:'Relatório de uso enviado para escolas',           desc:'Os relatórios de uso de março foram enviados para os administradores de todas as 24 escolas cadastradas. Taxa de abertura de e-mail: 71%.',                                                       time:'15/03, 10:00', ts:4, unread:false, actions:[] },
+  { id:23, type:'sucesso',   cat:'escola',     icon:'🌟', title:'Escola premium destaque: Liga Esportiva Nacional', desc:'A Liga Esportiva Nacional atingiu 2.200 atletas ativos, a maior base de atletas na plataforma. O plano Enterprise suporta crescimento ilimitado.',                                               time:'14/03, 14:22', ts:4, unread:false, actions:['ver'] },
+  { id:24, type:'info',      cat:'sistema',    icon:'💡', title:'Nova funcionalidade: relatórios avançados',       desc:'O módulo de relatórios avançados foi lançado para os planos Pro, Premium e Enterprise. Inclui exportação para Excel/PDF, gráficos interativos e comparativos históricos.',                         time:'12/03, 09:00', ts:4, unread:false, actions:['ver'] },
+  { id:25, type:'relatorio', cat:'sistema',    icon:'📈', title:'Relatório mensal de fevereiro disponível',        desc:'O relatório consolidado de fevereiro/2026 está pronto. Destaques: MRR R$ 38.200, 22 escolas ativas, crescimento de 8% em atletas vs. janeiro. Churn: 0%.',                                        time:'10/03, 08:00', ts:4, unread:false, actions:['ver','baixar'] },
+  { id:26, type:'escola',    cat:'escola',     icon:'🏫', title:'Escola inativada por solicitação: Academia XYZ',  desc:'A escola Academia XYZ Fitness solicitou cancelamento da assinatura. Motivo: encerramento das atividades. Dados retidos por 90 dias conforme contrato.',                                            time:'08/03, 16:00', ts:4, unread:false, actions:['ver'] },
+  { id:27, type:'sucesso',   cat:'financeiro', icon:'💰', title:'Meta anual atingida: R$ 500k MRR acumulado',      desc:'A plataforma atingiu R$ 500.000 em receita mensal acumulada ao longo de 2026. Marco histórico superado em março, 2 meses antes do previsto.',                                                    time:'05/03, 12:30', ts:4, unread:false, actions:[] },
+  { id:28, type:'sistema',   cat:'sistema',    icon:'🔧', title:'Manutenção programada concluída',                 desc:'A janela de manutenção programada de 02h às 04h foi concluída sem incidentes. Banco de dados otimizado, índices reindexados, cache limpo.',                                                        time:'01/03, 04:02', ts:4, unread:false, actions:[] },
+  { id:29, type:'info',      cat:'financeiro', icon:'💳', title:'Integração Asaas atualizada para v3',             desc:'A integração com o gateway de pagamentos Asaas foi atualizada para a versão 3 da API. Melhoria na taxa de aprovação de débitos automáticos: de 94% para 97,2%.',                                  time:'28/02, 11:00', ts:4, unread:false, actions:[] },
+  { id:30, type:'relatorio', cat:'sistema',    icon:'📊', title:'Benchmark anual: posição no mercado',             desc:'O relatório de benchmark anual foi concluído. A plataforma Esportes Academy apresenta crescimento de 340% em 2 anos, com NPS de 72 e taxa de retenção de 96,1%.',                                 time:'25/02, 09:00', ts:4, unread:false, actions:['ver','baixar'] },
+  { id:31, type:'sucesso',   cat:'escola',     icon:'✅', title:'Onboarding concluído: Redes Esportivas BR',       desc:'O processo de onboarding Enterprise da Redes Esportivas BR foi concluído. 1.850 atletas migrados, 3 admins configurados, integrações ativas. SLA 1h ativado.',                                     time:'01/03, 16:45', ts:4, unread:false, actions:['ver'] },
+  { id:32, type:'sistema',   cat:'sistema',    icon:'🔒', title:'Auditoria de segurança aprovada',                 desc:'A auditoria de segurança trimestral foi concluída sem vulnerabilidades críticas. 2 itens de média prioridade identificados e corrigidos. Relatório disponível.',                                   time:'20/02, 14:00', ts:4, unread:false, actions:['ver'] },
+];
+
+const GROUP_LABELS = { 1:'Hoje', 2:'Ontem', 3:'Esta semana', 4:'Mais antigas' };
+const TAG_LABELS   = { critico:'Crítico', aviso:'Aviso', sucesso:'Sucesso', info:'Info', escola:'Escola', sistema:'Sistema', relatorio:'Relatório', financeiro:'Financeiro' };
+const ACTION_LABELS= { ver:'👁 Ver detalhes', cobrar:'💳 Enviar cobrança', retentar:'🔄 Retentar débito', proposta:'📋 Enviar proposta', aprovar:'✅ Aprovar escola', nota:'🧾 Ver nota fiscal', baixar:'⬇ Baixar PDF' };
+
+let currentFilter = 'all';
+let searchQuery   = '';
+let selected      = new Set();
+let notifs        = JSON.parse(JSON.stringify(NOTIFS)); // working copy
+
+/* ──────────────────────────────────────────
+   RENDER
+────────────────────────────────────────── */
+function getFiltered() {
+  return notifs.filter(n => {
+    const matchFilter =
+      currentFilter === 'all'        ? true :
+      currentFilter === 'unread'     ? n.unread :
+      currentFilter === 'financeiro' ? n.cat === 'financeiro' :
+      n.type === currentFilter || n.cat === currentFilter;
+    const matchSearch = !searchQuery ||
+      n.title.toLowerCase().includes(searchQuery) ||
+      n.desc.toLowerCase().includes(searchQuery);
+    return matchFilter && matchSearch;
+  });
+}
+
+function render() {
+  const list = document.getElementById('notifList');
+  const filtered = getFiltered();
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🔕</div><div class="es-title">Nenhuma notificação encontrada</div><div class="es-text">Tente ajustar os filtros ou aguarde novas notificações.</div></div>`;
+    return;
+  }
+
+  // Group by ts
+  const groups = {};
+  filtered.forEach(n => { (groups[n.ts] = groups[n.ts]||[]).push(n); });
+
+  list.innerHTML = Object.keys(groups).sort().map(g => `
+    <div class="notif-group">
+      <div class="notif-group-label">
+        ${GROUP_LABELS[g]}
+        <div class="group-line"></div>
+        <span style="font-size:10px;font-weight:500;color:var(--text-muted)">${groups[g].length}</span>
+      </div>
+      ${groups[g].map(n => renderItem(n)).join('')}
+    </div>
+  `).join('');
+
+  updateCounters();
+}
+
+function renderItem(n) {
+  const isSelected = selected.has(n.id);
+  return `
+  <div class="notif-item ${n.unread?'unread':''} ${isSelected?'selected':''}" id="ni-${n.id}" onclick="handleItemClick(event,${n.id})">
+    <div class="notif-check ${isSelected?'checked':''}" onclick="toggleSelect(event,${n.id})">${isSelected?'✓':''}</div>
+    <div class="notif-icon ic-${n.type}">
+      ${n.icon}
+      <span class="unread-dot pd-${n.type} ${n.unread?'notif-dot-pulse':''}"></span>
+    </div>
+    <div class="notif-body">
+      <div class="notif-title">${n.title}</div>
+      <div class="notif-desc">${n.desc.length>120?n.desc.slice(0,120)+'…':n.desc}</div>
+      <div class="notif-footer">
+        <span class="notif-time">🕐 ${n.time}</span>
+        <span class="notif-tag tag-${n.type}">${TAG_LABELS[n.type]||n.type}</span>
+        ${n.unread?'<span style="font-size:10px;font-weight:700;color:var(--primary)">● NÃO LIDA</span>':''}
+      </div>
+    </div>
+    <div class="notif-right">
+      <div class="notif-actions">
+        ${n.unread?`<button class="na-btn" title="Marcar como lida" onclick="markRead(event,${n.id})">✓</button>`:''}
+        <button class="na-btn" title="Ver detalhes" onclick="openDetail(event,${n.id})">👁</button>
+        <button class="na-btn del" title="Excluir" onclick="deleteNotif(event,${n.id})">🗑</button>
+      </div>
+      <div class="priority-dot pd-${n.type}"></div>
+    </div>
+  </div>`;
+}
+
+function updateCounters() {
+  const unreadCount  = notifs.filter(n=>n.unread).length;
+  const criticoCount = notifs.filter(n=>n.type==='critico').length;
+  const avisoCount   = notifs.filter(n=>n.type==='aviso').length;
+  const total        = notifs.length;
+
+  document.getElementById('kpi-total').textContent    = total;
+  document.getElementById('kpi-unread').textContent   = unreadCount;
+  document.getElementById('kpi-critico').textContent  = criticoCount;
+  document.getElementById('kpi-aviso').textContent    = avisoCount;
+  document.getElementById('tn-all').textContent       = total;
+  document.getElementById('tn-unread').textContent    = unreadCount;
+  document.getElementById('tn-critico').textContent   = criticoCount;
+  document.getElementById('tn-aviso').textContent     = avisoCount;
+  document.getElementById('topbar-badge').textContent = unreadCount;
+  document.getElementById('sb-badge').textContent     = unreadCount;
+
+  if (unreadCount === 0) {
+    document.getElementById('topbar-badge').style.display = 'none';
+    document.getElementById('sb-badge').style.display     = 'none';
+  } else {
+    document.getElementById('topbar-badge').style.display = '';
+    document.getElementById('sb-badge').style.display     = '';
+  }
+}
+
+/* ──────────────────────────────────────────
+   INTERACTIONS
+────────────────────────────────────────── */
+function handleItemClick(e, id) {
+  if (e.target.classList.contains('notif-check') || e.target.closest('.notif-check') || e.target.closest('.notif-actions')) return;
+  markRead(e, id);
+  openDetail(e, id);
+}
+
+function toggleSelect(e, id) {
+  e.stopPropagation();
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  updateBulkBar();
+  render();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  if (selected.size > 0) {
+    bar.classList.remove('hidden');
+    document.getElementById('bulkCount').textContent = `${selected.size} selecionada${selected.size>1?'s':''}`;
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function clearSelection() { selected.clear(); updateBulkBar(); render(); }
+
+function bulkMarkRead() {
+  selected.forEach(id => { const n = notifs.find(x=>x.id===id); if(n) n.unread=false; });
+  clearSelection();
+  render();
+}
+
+function bulkDelete() {
+  notifs = notifs.filter(n => !selected.has(n.id));
+  clearSelection();
+  render();
+}
+
+function markRead(e, id) {
+  e && e.stopPropagation();
+  const n = notifs.find(x=>x.id===id);
+  if (n) n.unread = false;
+  render();
+}
+
+function deleteNotif(e, id) {
+  e.stopPropagation();
+  notifs = notifs.filter(x=>x.id!==id);
+  render();
+}
+
+function markAllRead() {
+  notifs.forEach(n=>n.unread=false);
+  render();
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function searchNotifs(q) { searchQuery = q.toLowerCase(); render(); }
+
+/* ──────────────────────────────────────────
+   DETAIL PANEL
+────────────────────────────────────────── */
+function openDetail(e, id) {
+  e && e.stopPropagation();
+  const n = notifs.find(x=>x.id===id);
+  if (!n) return;
+  markRead(null, id);
+
+  const iconEl = document.getElementById('dp-icon');
+  iconEl.textContent  = n.icon;
+  iconEl.className    = `ic-${n.type}`;
+  iconEl.style.cssText= `width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0`;
+
+  document.getElementById('dp-title').textContent = n.title;
+  document.getElementById('dp-tag').innerHTML = `<span class="notif-tag tag-${n.type}" style="padding:4px 10px;font-size:12px">${TAG_LABELS[n.type]||n.type}</span>`;
+  document.getElementById('dp-body').textContent  = n.desc;
+  document.getElementById('dp-time').textContent  = n.time;
+
+  const priorityMap = { critico:'🔴 Crítica', aviso:'🟡 Aviso', sucesso:'🟢 Sucesso', info:'🔵 Info', escola:'🟣 Escola', sistema:'⚪ Sistema', relatorio:'🩵 Relatório' };
+  document.getElementById('dp-priority').textContent = priorityMap[n.type]||n.type;
+  document.getElementById('dp-cat').textContent = TAG_LABELS[n.cat]||n.cat;
+  document.getElementById('dp-status').innerHTML = n.unread
+    ? `<span style="color:var(--primary);font-weight:700">● Não lida</span>`
+    : `<span style="color:var(--success)">✓ Lida</span>`;
+
+  const actionsWrap = document.getElementById('dp-actions-wrap');
+  if (n.actions && n.actions.length) {
+    actionsWrap.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Ações disponíveis</div>`
+      + n.actions.map(a=>`<button class="btn btn-secondary" style="margin-bottom:8px;width:100%;justify-content:flex-start" onclick="closeDetail()">${ACTION_LABELS[a]||a}</button>`).join('');
+  } else {
+    actionsWrap.innerHTML = '';
+  }
+
+  document.getElementById('panelOverlay').classList.add('show');
+  document.getElementById('detailPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  render();
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+/* ──────────────────────────────────────────
+   MODALS
+────────────────────────────────────────── */
+function openClearModal()  { document.getElementById('clearModal').classList.add('show'); }
+function openSettings()    { document.getElementById('settingsModal').classList.add('show'); }
+function closeModal()      { document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show')); }
+
+function confirmClear() {
+  const opt = document.querySelector('input[name="clearOpt"]:checked')?.value;
+  if (opt === 'read')  notifs = notifs.filter(n=>n.unread);
+  if (opt === 'all')   notifs = [];
+  if (opt === 'old')   notifs = notifs.filter(n=>n.ts < 4);
+  closeModal();
+  render();
+}
+
+/* ──────────────────────────────────────────
+   CHANNEL TOGGLE
+────────────────────────────────────────── */
+function toggleChannel(el) { el.classList.toggle('on'); }
+
+/* ──────────────────────────────────────────
+   CHART
+────────────────────────────────────────── */
+function renderSummaryChart() {
+  new Chart(document.getElementById('summaryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Críticas','Avisos','Sucesso','Info','Escolas','Sistema'],
+      datasets: [{
+        data: [2, 3, 8, 7, 6, 6],
+        backgroundColor: ['#dc2626','#d97706','#059669','#1a56db','#7c3aed','#64748b'],
+        borderWidth: 0, hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: false, cutout: '68%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c=>`${c.label}: ${c.raw}` } } }
+    }
+  });
+}
+
+/* ──────────────────────────────────────────
+   SIDEBAR
+────────────────────────────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+/* ──────────────────────────────────────────
+   INIT
+────────────────────────────────────────── */
+render();
+renderSummaryChart();
+</script>
+</body>
+</html>

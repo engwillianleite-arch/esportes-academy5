@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — SuperAdmin-dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════
+       BASE RESET & TOKENS
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e429f;
+      --primary-light: #ebf5ff;
+      --secondary: #0ea5e9;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --bg: #f1f5f9;
+      --sidebar-w: 260px;
+      --sidebar-bg: #0f172a;
+      --sidebar-hover: #1e293b;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --topbar-h: 56px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════
+       OVERLAY (mobile sidebar backdrop)
+    ═══════════════════════════════════════ */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 90;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.show { display: block; }
+
+    /* ═══════════════════════════════════════
+       SIDEBAR — mobile first: off-screen
+    ═══════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      height: 100dvh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+
+    .sidebar.open { transform: translateX(0); }
+
+    /* lg+: always visible */
+    @media (min-width: 1024px) {
+      .sidebar { transform: translateX(0); }
+    }
+
+    .sidebar-logo {
+      padding: 20px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
+
+    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+
+    .nav-section-label {
+      color: rgba(255,255,255,.3);
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 0 8px;
+      margin: 14px 0 5px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,.6);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 2px;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: var(--primary); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--primary);
+      color: #fff; font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 20px;
+    }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+
+    .sidebar-footer {
+      padding: 14px 10px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+
+    .user-avatar-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; border-radius: 8px; cursor: pointer;
+      transition: background .15s;
+    }
+    .user-avatar-row:hover { background: var(--sidebar-hover); }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #1a56db);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+
+    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+
+    /* ═══════════════════════════════════════
+       MAIN WRAPPER
+    ═══════════════════════════════════════ */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      /* no margin on mobile */
+    }
+
+    @media (min-width: 1024px) {
+      .main { margin-left: var(--sidebar-w); }
+    }
+
+    /* ═══════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════ */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      height: var(--topbar-h);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow);
+    }
+
+    @media (min-width: 640px) { .topbar { padding: 0 20px; } }
+    @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
+
+    .hamburger {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: none;
+      background: var(--bg); cursor: pointer;
+      font-size: 18px; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 1024px) { .hamburger { display: none; } }
+
+    .topbar-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .topbar-title-group .page-title {
+      font-size: 16px; font-weight: 700; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .topbar-title-group .breadcrumb {
+      font-size: 11px; color: var(--text-muted);
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .topbar-title-group .page-title { font-size: 17px; }
+      .topbar-title-group .breadcrumb { display: block; }
+    }
+
+    .topbar-actions {
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      display: none;
+      align-items: center; gap: 8px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+    }
+
+    @media (min-width: 768px) {
+      .search-box { display: flex; width: 220px; }
+    }
+
+    @media (min-width: 1024px) { .search-box { width: 240px; } }
+
+    .search-box input {
+      border: none; background: transparent;
+      font-size: 13px; color: var(--text); outline: none; width: 100%;
+    }
+    .search-box input::placeholder { color: var(--text-muted); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .15s;
+      text-decoration: none; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 640px) { .btn { font-size: 14px; padding: 9px 18px; } }
+
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
+
+    .btn-new-school-text { display: none; }
+    @media (min-width: 480px) { .btn-new-school-text { display: inline; } }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg); border: 1.5px solid var(--border);
+      cursor: pointer; font-size: 15px; position: relative;
+      transition: all .15s; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    .notif-dot {
+      width: 7px; height: 7px; background: var(--danger);
+      border-radius: 50%; position: absolute; top: 5px; right: 5px;
+      border: 1.5px solid #fff;
+    }
+
+    /* hide clipboard icon on mobile */
+    .hide-mobile { display: none; }
+    @media (min-width: 640px) { .hide-mobile { display: flex; } }
+
+    /* ═══════════════════════════════════════
+       PAGE CONTENT
+    ═══════════════════════════════════════ */
+    .content {
+      padding: 16px;
+      flex: 1;
+    }
+
+    @media (min-width: 640px)  { .content { padding: 20px; } }
+    @media (min-width: 1024px) { .content { padding: 28px; } }
+
+    /* ═══════════════════════════════════════
+       WELCOME BANNER
+    ═══════════════════════════════════════ */
+    .welcome-banner {
+      background: linear-gradient(135deg, #1a56db 0%, #0ea5e9 100%);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 20px rgba(26,86,219,.3);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .welcome-banner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 26px;
+        margin-bottom: 24px;
+      }
+    }
+
+    .welcome-text .greeting { color: rgba(255,255,255,.8); font-size: 13px; margin-bottom: 4px; }
+    .welcome-text .headline { color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .welcome-text .sub      { color: rgba(255,255,255,.7); font-size: 13px; }
+
+    @media (min-width: 640px) {
+      .welcome-text .headline { font-size: 21px; }
+    }
+
+    .welcome-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn-banner-ghost {
+      background: rgba(255,255,255,.2); color: #fff;
+      border: 1.5px solid rgba(255,255,255,.3);
+    }
+    .btn-banner-white { background: #fff; color: var(--primary); }
+
+    /* ═══════════════════════════════════════
+       KPI GRID — 2 cols mobile → 4 cols desktop
+    ═══════════════════════════════════════ */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 768px)  { .kpi-grid { gap: 16px; margin-bottom: 22px; } }
+    @media (min-width: 1024px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; } }
+
+    .kpi-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    @media (min-width: 640px)  { .kpi-card { padding: 20px; } }
+    @media (min-width: 1024px) { .kpi-card { padding: 22px; } }
+
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .kpi-card.blue::before   { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+    .kpi-card.green::before  { background: linear-gradient(90deg, #059669, #10b981); }
+    .kpi-card.orange::before { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .kpi-card.purple::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+
+    .kpi-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .kpi-icon {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+
+    @media (min-width: 640px) { .kpi-icon { width: 44px; height: 44px; font-size: 20px; } }
+
+    .kpi-icon.blue   { background: var(--primary-light); }
+    .kpi-icon.green  { background: var(--success-light); }
+    .kpi-icon.orange { background: var(--warning-light); }
+    .kpi-icon.purple { background: var(--purple-light); }
+
+    .kpi-trend {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 7px; border-radius: 20px;
+    }
+    .kpi-trend.up   { background: var(--success-light); color: var(--success); }
+    .kpi-trend.down { background: var(--danger-light);  color: var(--danger); }
+
+    .kpi-value {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      line-height: 1; margin-bottom: 3px;
+    }
+
+    @media (min-width: 640px)  { .kpi-value { font-size: 26px; } }
+    @media (min-width: 1024px) { .kpi-value { font-size: 30px; } }
+
+    .kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    @media (min-width: 640px) { .kpi-label { font-size: 13px; } }
+
+    .kpi-sub {
+      font-size: 11px; color: var(--text-muted);
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    @media (min-width: 480px) { .kpi-sub { display: block; } }
+
+    /* ═══════════════════════════════════════
+       CARD BASE
+    ═══════════════════════════════════════ */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    @media (min-width: 640px)  { .card { padding: 20px; } }
+    @media (min-width: 1024px) { .card { padding: 22px; } }
+
+    .card-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-title    { font-size: 14px; font-weight: 700; color: var(--text); }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    @media (min-width: 640px) { .card-title { font-size: 15px; } }
+
+    /* ═══════════════════════════════════════
+       CHARTS GRID — 1 col mobile → 2 cols md
+    ═══════════════════════════════════════ */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .charts-grid { grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 22px; }
+    }
+
+    /* 3-col charts: 1 → 2 → 3 */
+    .charts-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 640px)  { .charts-grid-3 { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .charts-grid-3 { grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 24px; } }
+
+    .chart-wrapper    { position: relative; height: 220px; }
+    .chart-wrapper-sm { position: relative; height: 170px; }
+    .chart-wrapper-md { position: relative; height: 200px; }
+
+    @media (min-width: 640px) {
+      .chart-wrapper    { height: 240px; }
+      .chart-wrapper-sm { height: 190px; }
+      .chart-wrapper-md { height: 220px; }
+    }
+
+    /* ── Tabs ── */
+    .tab-group {
+      display: flex; gap: 3px;
+      background: var(--bg); padding: 3px; border-radius: 8px;
+    }
+
+    .tab {
+      padding: 5px 10px; border-radius: 6px;
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; color: var(--text-muted);
+      transition: all .15s; border: none; background: transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 640px) { .tab { padding: 6px 14px; font-size: 13px; } }
+
+    .tab.active {
+      background: var(--card); color: var(--text);
+      box-shadow: var(--shadow); font-weight: 600;
+    }
+
+    /* ── Select ── */
+    select {
+      appearance: none;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 28px 7px 10px;
+      font-size: 12px; font-family: 'Inter', sans-serif;
+      color: var(--text); cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+      outline: none;
+    }
+
+    @media (min-width: 640px) { select { font-size: 13px; } }
+
+    /* ── Mini stat row ── */
+    .mini-stat-row { display: flex; gap: 8px; margin-bottom: 7px; align-items: center; }
+    .mini-stat-label { font-size: 12px; color: var(--text-muted); flex: 1; }
+    .mini-stat-value { font-size: 12px; font-weight: 700; color: var(--text); }
+    .mini-stat-bar   { flex: 2; }
+
+    .progress-bar-wrap {
+      background: var(--border); border-radius: 20px;
+      height: 5px; width: 100%; overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%; border-radius: 20px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    /* ═══════════════════════════════════════
+       TABLE — horizontal scroll on mobile
+    ═══════════════════════════════════════ */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-sm); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead th {
+      background: var(--bg); padding: 9px 12px;
+      text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr { transition: background .1s; }
+    tbody tr:hover td { background: #f8fafc; }
+
+    tbody td {
+      padding: 11px 12px; border-bottom: 1px solid var(--border);
+      color: var(--text); vertical-align: middle; white-space: nowrap;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    .school-name-cell { display: flex; align-items: center; gap: 9px; }
+
+    .school-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+
+    .school-meta .name { font-weight: 600; font-size: 13px; }
+    .school-meta .city { font-size: 11px; color: var(--text-muted); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+
+    .badge-active   { background: var(--success-light); color: var(--success); }
+    .badge-inactive { background: #f1f5f9; color: var(--text-muted); }
+    .badge-trial    { background: var(--warning-light); color: var(--warning); }
+    .badge-pending  { background: var(--purple-light);  color: var(--purple); }
+
+    .row-actions { display: flex; gap: 5px; align-items: center; }
+
+    .action-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; cursor: pointer; border: none;
+      background: var(--bg); color: var(--text-muted);
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .action-btn:hover        { background: var(--primary-light); color: var(--primary); }
+    .action-btn.danger:hover { background: var(--danger-light);  color: var(--danger); }
+
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 500;
+      background: var(--primary-light); color: var(--primary);
+    }
+
+    /* Table filters row - stack on mobile */
+    .table-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* ═══════════════════════════════════════
+       BOTTOM GRID — 1 col mobile → 2 cols lg
+    ═══════════════════════════════════════ */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 1024px) {
+      .bottom-grid { grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+    }
+
+    /* ── Activity Feed ── */
+    .activity-list { display: flex; flex-direction: column; gap: 13px; }
+
+    .activity-item { display: flex; gap: 11px; align-items: flex-start; }
+
+    .activity-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+
+    .activity-body .activity-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+    .activity-body .activity-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Alerts ── */
+    .alerts-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .alert-item {
+      display: flex; gap: 10px; padding: 10px; border-radius: 8px;
+      border: 1px solid var(--border); align-items: flex-start;
+      cursor: pointer; transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .alert-item:hover { border-color: var(--primary); background: var(--primary-light); }
+
+    .alert-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .alert-dot.info    { background: var(--primary); }
+    .alert-dot.success { background: var(--success); }
+    .alert-dot.warning { background: var(--warning); }
+    .alert-dot.danger  { background: var(--danger); }
+
+    .alert-text { font-size: 12px; font-weight: 500; color: var(--text); }
+    .alert-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Quick Actions ── */
+    .quick-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+    .quick-action-btn {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 7px; padding: 14px 8px;
+      border-radius: 10px; background: var(--bg);
+      border: 1.5px solid var(--border); cursor: pointer;
+      transition: all .15s; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-action-btn:hover {
+      border-color: var(--primary); background: var(--primary-light);
+      transform: translateY(-1px); box-shadow: var(--shadow-md);
+    }
+
+    .qa-icon {
+      font-size: 20px; width: 40px; height: 40px;
+      background: var(--card); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .qa-label { font-size: 11px; font-weight: 600; color: var(--text); }
+
+    /* ── Right panel stack ── */
+    .right-panel { display: flex; flex-direction: column; gap: 16px; }
+    @media (min-width: 1024px) { .right-panel { gap: 18px; } }
+
+    /* ── Utilities ── */
+    .text-muted  { color: var(--text-muted) !important; }
+    .text-sm     { font-size: 12px; }
+    .fw-600      { font-weight: 600; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 12px 2px; border-top: 1px solid var(--border);
+      flex-wrap: wrap; gap: 8px;
+    }
+    .pagination-pages { display: flex; gap: 5px; }
+  </style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">PORTAL ADMIN</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item active" href="admin-dashboard.html" onclick="closeSidebar()">
+      <span class="icon">🏠</span> Dashboard
+    </a>
+    <a class="nav-item" href="schools.html" onclick="closeSidebar()">
+      <span class="icon">🏫</span> Escolas
+      <span class="nav-badge">24</span>
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">👤</span> Usuários
+    </a>
+
+    <div class="nav-section-label">Financeiro</div>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">💳</span> Cobranças
+    </a>
+    <a class="nav-item" href="planos.html" onclick="closeSidebar()">
+      <span class="icon">📦</span> Planos & Licenças
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">📊</span> Relatórios
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">🧾</span> Notas Fiscais
+    </a>
+
+    <div class="nav-section-label">Sistema</div>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">⚙️</span> Configurações
+    </a>
+    <a class="nav-item" href="notificacoes.html" onclick="closeSidebar()">
+      <span class="icon">🔔</span> Notificações
+      <span class="nav-badge">5</span>
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">🛡️</span> Permissões
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar-row">
+      <div class="avatar">WA</div>
+      <div class="user-info">
+        <div class="user-name">Willianm Admin</div>
+        <div class="user-role">Super Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+
+    <div class="topbar-title-group">
+      <div class="page-title">Dashboard</div>
+      <div class="breadcrumb">Visão Geral da Plataforma</div>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar escola, aluno…" />
+      </div>
+      <div class="icon-btn">
+        🔔
+        <span class="notif-dot"></span>
+      </div>
+      <div class="icon-btn hide-mobile">📋</div>
+      <button class="btn btn-primary">
+        ➕ <span class="btn-new-school-text">Nova Escola</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <div class="greeting">Bom dia, Willianm 👋</div>
+        <div class="headline">Bem-vindo ao Portal Admin</div>
+        <div class="sub">Plataforma atualizada · 24 escolas ativas · Março 2026</div>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn btn-banner-ghost">📊 Relatório</button>
+        <button class="btn btn-banner-white">🏫 Escolas</button>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-top">
+          <div class="kpi-icon blue">🏫</div>
+          <div class="kpi-trend up">▲ 12%</div>
+        </div>
+        <div class="kpi-value">24</div>
+        <div class="kpi-label">Escolas Cadastradas</div>
+        <div class="kpi-sub">21 ativas · 3 em avaliação</div>
+      </div>
+
+      <div class="kpi-card green">
+        <div class="kpi-top">
+          <div class="kpi-icon green">👨‍🎓</div>
+          <div class="kpi-trend up">▲ 8%</div>
+        </div>
+        <div class="kpi-value">1.248</div>
+        <div class="kpi-label">Alunos Ativos</div>
+        <div class="kpi-sub">+94 novos em março</div>
+      </div>
+
+      <div class="kpi-card orange">
+        <div class="kpi-top">
+          <div class="kpi-icon orange">💰</div>
+          <div class="kpi-trend up">▲ 18%</div>
+        </div>
+        <div class="kpi-value">R$48,7k</div>
+        <div class="kpi-label">Receita Mensal</div>
+        <div class="kpi-sub">R$38,2k mês anterior</div>
+      </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-top">
+          <div class="kpi-icon purple">📈</div>
+          <div class="kpi-trend down">▼ 2%</div>
+        </div>
+        <div class="kpi-value">94,3%</div>
+        <div class="kpi-label">Taxa de Retenção</div>
+        <div class="kpi-sub">Média anual: 96,1%</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <div class="charts-grid">
+
+      <!-- Receita Mensal -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Receita Mensal</div>
+            <div class="card-subtitle">Faturamento · Últimos 12 meses</div>
+          </div>
+          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
+            <div class="tab-group">
+              <button class="tab active">Mensal</button>
+              <button class="tab">Trim.</button>
+              <button class="tab">Anual</button>
+            </div>
+            <select><option>2026</option><option>2025</option></select>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Status das Escolas -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Status das Escolas</div>
+            <div class="card-subtitle">Distribuição por status</div>
+          </div>
+        </div>
+        <div class="chart-wrapper-sm">
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="mini-stat-row">
+            <span style="width:9px;height:9px;border-radius:50%;background:#1a56db;flex-shrink:0;display:inline-block;"></span>
+            <span class="mini-stat-label">Ativas</span>
+            <span class="mini-stat-value">21</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:87.5%"></div></div></div>
+          </div>
+          <div class="mini-stat-row">
+            <span style="width:9px;height:9px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>
+            <span class="mini-stat-label">Trial</span>
+            <span class="mini-stat-value">2</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:8%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div></div>
+          </div>
+          <div class="mini-stat-row">
+            <span style="width:9px;height:9px;border-radius:50%;background:#7c3aed;flex-shrink:0;display:inline-block;"></span>
+            <span class="mini-stat-label">Pendente</span>
+            <span class="mini-stat-value">1</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:4%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 2 -->
+    <div class="charts-grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Novos Alunos</div>
+            <div class="card-subtitle">Matrículas por mês</div>
+          </div>
+          <span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:var(--success-light);color:var(--success);">+8% ▲</span>
+        </div>
+        <div class="chart-wrapper-md"><canvas id="studentsChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Top Esportes</div>
+            <div class="card-subtitle">Modalidades mais populares</div>
+          </div>
+        </div>
+        <div class="chart-wrapper-md"><canvas id="sportsChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Escolas por Região</div>
+            <div class="card-subtitle">Distribuição geográfica</div>
+          </div>
+        </div>
+        <div class="chart-wrapper-md"><canvas id="regionChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SCHOOLS TABLE -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Escolas Cadastradas</div>
+          <div class="card-subtitle">Gerenciamento completo de escolas</div>
+        </div>
+        <div class="table-filters">
+          <select><option>Todos status</option><option>Ativas</option><option>Trial</option><option>Inativas</option></select>
+          <select><option>Todas regiões</option><option>Sudeste</option><option>Sul</option><option>Norte</option></select>
+          <button class="btn btn-secondary btn-sm">⬇ Export</button>
+          <button class="btn btn-primary btn-sm">➕ Nova</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Escola</th>
+              <th>Plano</th>
+              <th>Status</th>
+              <th>Alunos</th>
+              <th>Capacidade</th>
+              <th>Receita/mês</th>
+              <th>Próx. Cobrança</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="school-name-cell">
+                  <div class="school-logo" style="background:#dbeafe;">⚽</div>
+                  <div class="school-meta">
+                    <div class="name">Academia Futebol SP</div>
+                    <div class="city">São Paulo, SP</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="chip">Premium</span></td>
+              <td><span class="badge badge-active">● Ativa</span></td>
+              <td><strong>148</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div class="progress-bar-wrap" style="width:90px;"><div class="progress-bar" style="width:74%"></div></div>
+                  <span class="text-sm text-muted">74%</span>
+                </div>
+              </td>
+              <td><strong>R$ 2.960</strong></td>
+              <td class="text-muted text-sm">01/04/2026</td>
+              <td>
+                <div class="row-actions">
+                  <button class="action-btn" title="Ver">👁</button>
+                  <button class="action-btn" title="Editar">✏️</button>
+                  <button class="action-btn danger" title="Remover">🗑</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="school-name-cell">
+                  <div class="school-logo" style="background:#d1fae5;">🏊</div>
+                  <div class="school-meta">
+                    <div class="name">Natação Rio Verde</div>
+                    <div class="city">Campinas, SP</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="chip">Pro</span></td>
+              <td><span class="badge badge-active">● Ativa</span></td>
+              <td><strong>96</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div class="progress-bar-wrap" style="width:90px;"><div class="progress-bar" style="width:96%"></div></div>
+                  <span class="text-sm text-muted">96%</span>
+                </div>
+              </td>
+              <td><strong>R$ 1.920</strong></td>
+              <td class="text-muted text-sm">05/04/2026</td>
+              <td>
+                <div class="row-actions">
+                  <button class="action-btn">👁</button>
+                  <button class="action-btn">✏️</button>
+                  <button class="action-btn danger">🗑</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="school-name-cell">
+                  <div class="school-logo" style="background:#ede9fe;">🥋</div>
+                  <div class="school-meta">
+                    <div class="name">Judô Shotokan RJ</div>
+                    <div class="city">Rio de Janeiro, RJ</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="chip">Basic</span></td>
+              <td><span class="badge badge-trial">◉ Trial</span></td>
+              <td><strong>32</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div class="progress-bar-wrap" style="width:90px;"><div class="progress-bar" style="width:32%"></div></div>
+                  <span class="text-sm text-muted">32%</span>
+                </div>
+              </td>
+              <td><strong>R$ 640</strong></td>
+              <td class="text-muted text-sm">28/03/2026</td>
+              <td>
+                <div class="row-actions">
+                  <button class="action-btn">👁</button>
+                  <button class="action-btn">✏️</button>
+                  <button class="action-btn danger">🗑</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="school-name-cell">
+                  <div class="school-logo" style="background:#fef3c7;">🎾</div>
+                  <div class="school-meta">
+                    <div class="name">Tennis Club BH</div>
+                    <div class="city">Belo Horizonte, MG</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="chip">Premium</span></td>
+              <td><span class="badge badge-active">● Ativa</span></td>
+              <td><strong>204</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div class="progress-bar-wrap" style="width:90px;"><div class="progress-bar" style="width:82%"></div></div>
+                  <span class="text-sm text-muted">82%</span>
+                </div>
+              </td>
+              <td><strong>R$ 4.080</strong></td>
+              <td class="text-muted text-sm">10/04/2026</td>
+              <td>
+                <div class="row-actions">
+                  <button class="action-btn">👁</button>
+                  <button class="action-btn">✏️</button>
+                  <button class="action-btn danger">🗑</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="school-name-cell">
+                  <div class="school-logo" style="background:#fee2e2;">🏀</div>
+                  <div class="school-meta">
+                    <div class="name">Basketball Academy Sul</div>
+                    <div class="city">Porto Alegre, RS</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="chip">Pro</span></td>
+              <td><span class="badge badge-pending">◎ Pendente</span></td>
+              <td><strong>67</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div class="progress-bar-wrap" style="width:90px;"><div class="progress-bar" style="width:55%"></div></div>
+                  <span class="text-sm text-muted">55%</span>
+                </div>
+              </td>
+              <td><strong>R$ 1.340</strong></td>
+              <td class="text-muted text-sm">15/04/2026</td>
+              <td>
+                <div class="row-actions">
+                  <button class="action-btn">👁</button>
+                  <button class="action-btn">✏️</button>
+                  <button class="action-btn danger">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="text-sm text-muted">Mostrando 5 de 24 escolas</span>
+        <div class="pagination-pages">
+          <button class="btn btn-secondary btn-sm">← Ant.</button>
+          <button class="btn btn-primary btn-sm">1</button>
+          <button class="btn btn-secondary btn-sm">2</button>
+          <button class="btn btn-secondary btn-sm">3</button>
+          <button class="btn btn-secondary btn-sm">Próx →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-grid">
+
+      <!-- Atividade Recente -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Atividade Recente</div>
+            <div class="card-subtitle">Últimas ações na plataforma</div>
+          </div>
+          <button class="btn btn-secondary btn-sm">Ver todas</button>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon" style="background:var(--success-light);">✅</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Academia Futebol SP</strong> realizou pagamento de <strong>R$ 2.960</strong></div>
+              <div class="activity-time">Hoje, 14h32 · Pix automático</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon" style="background:var(--primary-light);">🏫</div>
+            <div class="activity-body">
+              <div class="activity-text">Nova escola <strong>CrossFit Manaus</strong> cadastrada, aguardando aprovação</div>
+              <div class="activity-time">Hoje, 11h15 · Trial iniciado</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon" style="background:var(--warning-light);">⚠️</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Judô Shotokan RJ</strong> — trial expira em 5 dias</div>
+              <div class="activity-time">Ontem, 09h00 · Enviar proposta</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon" style="background:var(--purple-light);">👨‍🎓</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>94 novos alunos</strong> matriculados em março</div>
+              <div class="activity-time">23/03/2026 · Melhor mês desde ago/2025</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon" style="background:var(--danger-light);">🚨</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Basketball Academy Sul</strong> com pagamento em atraso</div>
+              <div class="activity-time">22/03/2026 · 3 dias · Notificação enviada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="right-panel">
+
+        <!-- Ações Rápidas -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Ações Rápidas</div>
+          </div>
+          <div class="quick-actions-grid">
+            <button class="quick-action-btn">
+              <div class="qa-icon">🏫</div>
+              <div class="qa-label">Nova Escola</div>
+            </button>
+            <button class="quick-action-btn">
+              <div class="qa-icon">👤</div>
+              <div class="qa-label">Novo Usuário</div>
+            </button>
+            <button class="quick-action-btn">
+              <div class="qa-icon">💳</div>
+              <div class="qa-label">Cobrança</div>
+            </button>
+            <button class="quick-action-btn">
+              <div class="qa-icon">📊</div>
+              <div class="qa-label">Relatório</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Alertas</div>
+              <div class="card-subtitle">5 itens requerem atenção</div>
+            </div>
+            <span class="badge badge-active">5 novos</span>
+          </div>
+          <div class="alerts-list">
+            <div class="alert-item">
+              <div class="alert-dot warning"></div>
+              <div>
+                <div class="alert-text">Trial expirando: Judô Shotokan RJ</div>
+                <div class="alert-time">Em 5 dias</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot danger"></div>
+              <div>
+                <div class="alert-text">Pagamento em atraso: Basketball Academy</div>
+                <div class="alert-time">3 dias de atraso</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot info"></div>
+              <div>
+                <div class="alert-text">Nova escola aguarda aprovação</div>
+                <div class="alert-time">CrossFit Manaus · Há 2h</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot success"></div>
+              <div>
+                <div class="alert-text">Meta de receita atingida: R$ 48,7k</div>
+                <div class="alert-time">Meta era R$ 45k · +8%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════ CHARTS JS ════════════════ -->
+<script>
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = '#64748b';
+
+  // Revenue Line
+  const rCtx = document.getElementById('revenueChart').getContext('2d');
+  const rGrad = rCtx.createLinearGradient(0,0,0,240);
+  rGrad.addColorStop(0,'rgba(26,86,219,.22)');
+  rGrad.addColorStop(1,'rgba(26,86,219,0)');
+
+  new Chart(rCtx,{
+    type:'line',
+    data:{
+      labels:['Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar'],
+      datasets:[{
+        label:'Receita (R$)',
+        data:[28500,30200,29800,33100,31500,35800,37200,36100,40500,39200,38200,48700],
+        borderColor:'#1a56db', backgroundColor:rGrad,
+        borderWidth:2.5, pointBackgroundColor:'#1a56db',
+        pointRadius:4, pointHoverRadius:6, fill:true, tension:.4
+      },{
+        label:'Meta (R$)',
+        data:[30000,30000,31000,32000,32000,34000,35000,35000,38000,38000,40000,45000],
+        borderColor:'#e2e8f0', borderWidth:1.5, borderDash:[5,5],
+        pointRadius:0, fill:false, tension:.4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top', labels:{usePointStyle:true,pointStyleWidth:10,boxHeight:6,padding:14}},
+        tooltip:{mode:'index', intersect:false,
+          callbacks:{label:c=>`${c.dataset.label}: R$ ${c.raw.toLocaleString('pt-BR')}`}
+        }
+      },
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:'#f1f5f9'},
+          ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}
+      }
+    }
+  });
+
+  // Doughnut
+  new Chart(document.getElementById('statusChart'),{
+    type:'doughnut',
+    data:{
+      labels:['Ativas','Trial','Pendente'],
+      datasets:[{data:[21,2,1], backgroundColor:['#1a56db','#d97706','#7c3aed'], borderWidth:0, hoverOffset:4}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} escolas`}}
+      }
+    }
+  });
+
+  // Students Bar
+  new Chart(document.getElementById('studentsChart'),{
+    type:'bar',
+    data:{
+      labels:['Out','Nov','Dez','Jan','Fev','Mar'],
+      datasets:[{
+        label:'Novos Alunos',
+        data:[62,58,45,71,68,94],
+        backgroundColor:(ctx)=>{
+          const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);
+          g.addColorStop(0,'#1a56db'); g.addColorStop(1,'#0ea5e9'); return g;
+        },
+        borderRadius:6, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}}}
+    }
+  });
+
+  // Sports Horizontal Bar
+  new Chart(document.getElementById('sportsChart'),{
+    type:'bar',
+    data:{
+      labels:['Futebol','Natação','Tennis','Basquete','Judô','CrossFit'],
+      datasets:[{
+        label:'Alunos',
+        data:[420,310,248,180,145,98],
+        backgroundColor:['#1a56db','#0ea5e9','#059669','#d97706','#7c3aed','#dc2626'],
+        borderRadius:4, borderSkipped:false
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#f1f5f9'}}, y:{grid:{display:false}}}
+    }
+  });
+
+  // Region Pie
+  new Chart(document.getElementById('regionChart'),{
+    type:'pie',
+    data:{
+      labels:['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'],
+      datasets:[{
+        data:[12,5,4,2,1],
+        backgroundColor:['#1a56db','#0ea5e9','#059669','#d97706','#7c3aed'],
+        borderWidth:2, borderColor:'#fff', hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',
+          labels:{usePointStyle:true,pointStyleWidth:8,boxHeight:6,padding:9,font:{size:11}}}
+      }
+    }
+  });
+
+  // Tab interactivity
+  document.querySelectorAll('.tab-group').forEach(g=>{
+    g.querySelectorAll('.tab').forEach(t=>{
+      t.addEventListener('click',()=>{
+        g.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+      });
+    });
+  });
+
+  // Sidebar toggle
+  function toggleSidebar(){
+    const s=document.getElementById('sidebar');
+    const o=document.getElementById('overlay');
+    s.classList.toggle('open');
+    o.classList.toggle('show');
+    document.body.style.overflow = s.classList.contains('open') ? 'hidden' : '';
+  }
+
+  function closeSidebar(){
+    const s=document.getElementById('sidebar');
+    const o=document.getElementById('overlay');
+    if(window.innerWidth < 1024){
+      s.classList.remove('open');
+      o.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Auto-close sidebar on resize to desktop
+  window.addEventListener('resize',()=>{
+    if(window.innerWidth >= 1024){
+      document.getElementById('overlay').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — SuperAdmin-configuracoes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e429f;
+      --primary-light: #ebf5ff;
+      --secondary: #0ea5e9;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --bg: #f1f5f9;
+      --sidebar-w: 260px;
+      --sidebar-bg: #0f172a;
+      --sidebar-hover: #1e293b;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
+      --radius: 12px;
+      --topbar-h: 56px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; backdrop-filter: blur(2px); }
+    .overlay.show { display: block; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); height: 100dvh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); overflow-y: auto; }
+    .sidebar.open { transform: translateX(0); }
+    @media (min-width: 1024px) { .sidebar { transform: translateX(0); } }
+    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
+    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+    .nav-section-label { color: rgba(255,255,255,.3); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin: 14px 0 5px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; margin-bottom: 2px; text-decoration: none; }
+    .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: var(--primary); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+    .user-avatar-row:hover { background: var(--sidebar-hover); }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+
+    /* MAIN */
+    .main { display: flex; flex-direction: column; min-height: 100dvh; }
+    @media (min-width: 1024px) { .main { margin-left: var(--sidebar-w); } }
+
+    /* TOPBAR */
+    .topbar { background: var(--card); border-bottom: 1px solid var(--border); height: var(--topbar-h); padding: 0 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
+    @media (min-width: 640px)  { .topbar { padding: 0 20px; } }
+    @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
+    .hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 18px; flex-shrink: 0; }
+    @media (min-width: 1024px) { .hamburger { display: none; } }
+    .topbar-title-group { flex: 1; min-width: 0; }
+    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; }
+    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
+    @media (min-width: 640px) { .topbar-title-group .page-title { font-size: 17px; } .topbar-title-group .breadcrumb { display: block; } }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1.5px solid var(--border); cursor: pointer; font-size: 15px; position: relative; transition: all .15s; flex-shrink: 0; }
+    .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    .notif-dot { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; position: absolute; top: 5px; right: 5px; border: 1.5px solid #fff; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; }
+    @media (min-width: 640px) { .btn { font-size: 14px; padding: 9px 18px; } }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    /* CONTENT */
+    .content { padding: 16px; flex: 1; }
+    @media (min-width: 640px)  { .content { padding: 20px; } }
+    @media (min-width: 1024px) { .content { padding: 28px; } }
+
+    /* SETTINGS LAYOUT */
+    .settings-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 1024px) { .settings-layout { grid-template-columns: 220px 1fr; align-items: start; } }
+
+    /* SETTINGS NAV */
+    .settings-nav { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: sticky; top: 80px; }
+    .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .15s; border-left: 3px solid transparent; }
+    .settings-nav-item:hover { background: var(--bg); color: var(--text); }
+    .settings-nav-item.active { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+    .settings-nav-item .sn-icon { font-size: 15px; width: 20px; text-align: center; }
+    .settings-nav-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* SECTION CARD */
+    .section-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
+    .section-card:last-child { margin-bottom: 0; }
+    .section-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .section-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .section-icon.blue   { background: var(--primary-light); }
+    .section-icon.green  { background: var(--success-light); }
+    .section-icon.purple { background: var(--purple-light); }
+    .section-icon.orange { background: var(--warning-light); }
+    .section-icon.red    { background: var(--danger-light); }
+    .section-title { font-size: 14px; font-weight: 700; }
+    .section-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .section-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+    .section-footer { padding: 14px 24px; border-top: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* FORM ELEMENTS */
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
+    .form-hint  { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .form-input { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; transition: border-color .15s; width: 100%; }
+    .form-input:focus { border-color: var(--primary); background: var(--card); }
+    .form-input:disabled { opacity: .5; cursor: not-allowed; }
+    .form-select { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; cursor: pointer; transition: border-color .15s; width: 100%; }
+    .form-select:focus { border-color: var(--primary); background: var(--card); }
+    .form-textarea { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; transition: border-color .15s; width: 100%; resize: vertical; min-height: 80px; }
+    .form-textarea:focus { border-color: var(--primary); background: var(--card); }
+
+    /* TOGGLE */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-info { flex: 1; }
+    .toggle-title { font-size: 13px; font-weight: 600; }
+    .toggle-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 99px; cursor: pointer; transition: background .2s; }
+    .toggle input:checked + .toggle-track { background: var(--primary); }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); pointer-events: none; }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+    /* BADGE STATUS */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-ok  { background: var(--success-light); color: var(--success); }
+    .badge-warn{ background: var(--warning-light); color: var(--warning); }
+    .badge-err { background: var(--danger-light);  color: var(--danger);  }
+
+    /* INTEGRATION CARD */
+    .integ-list { display: flex; flex-direction: column; gap: 0; }
+    .integ-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .integ-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .integ-item:first-child { padding-top: 0; }
+    .integ-logo { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .integ-info { flex: 1; }
+    .integ-name { font-size: 13px; font-weight: 700; }
+    .integ-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .integ-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    /* DANGER ZONE */
+    .danger-zone { border: 1.5px solid var(--danger-light); border-radius: var(--radius); padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .danger-info .danger-title { font-size: 13px; font-weight: 700; color: var(--danger); }
+    .danger-info .danger-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* AVATAR UPLOAD */
+    .avatar-upload { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .avatar-preview { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; font-weight: 800; flex-shrink: 0; }
+    .avatar-upload-actions { display: flex; flex-direction: column; gap: 6px; }
+    .avatar-upload-hint { font-size: 11px; color: var(--text-muted); }
+
+    /* TABS (mobile settings nav) */
+    .settings-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 4px; }
+    @media (min-width: 1024px) { .settings-tabs { display: none; } }
+    .settings-tab { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--card); border: 1.5px solid var(--border); color: var(--text-muted); white-space: nowrap; transition: all .15s; }
+    .settings-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* TOAST */
+    .toast { display: none; position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; box-shadow: var(--shadow-lg); gap: 8px; align-items: center; }
+    .toast.show { display: flex; }
+    .toast.success { background: var(--success); }
+    .toast.danger  { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">PORTAL SUPERADMIN</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item" href="SuperAdmin-dashboard.html" onclick="closeSidebar()">
+      <span class="icon">🏠</span> Dashboard
+    </a>
+    <a class="nav-item" href="SuperAdmin-schools.html" onclick="closeSidebar()">
+      <span class="icon">🏫</span> Escolas
+      <span class="nav-badge">24</span>
+    </a>
+    <a class="nav-item" href="SuperAdmin-usuarios.html" onclick="closeSidebar()">
+      <span class="icon">👤</span> Usuários
+    </a>
+
+    <div class="nav-section-label">Financeiro</div>
+    <a class="nav-item" href="SuperAdmin-cobrancas.html" onclick="closeSidebar()">
+      <span class="icon">💳</span> Cobranças
+    </a>
+    <a class="nav-item" href="SuperAdmin-planos.html" onclick="closeSidebar()">
+      <span class="icon">📦</span> Planos & Licenças
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">📊</span> Relatórios
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">🧾</span> Notas Fiscais
+    </a>
+
+    <div class="nav-section-label">Sistema</div>
+    <a class="nav-item active" href="SuperAdmin-configuracoes.html" onclick="closeSidebar()">
+      <span class="icon">⚙️</span> Configurações
+    </a>
+    <a class="nav-item" href="SuperAdmin-notificacoes.html" onclick="closeSidebar()">
+      <span class="icon">🔔</span> Notificações
+      <span class="nav-badge">5</span>
+    </a>
+    <a class="nav-item" href="#" onclick="closeSidebar()">
+      <span class="icon">🛡️</span> Permissões
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar-row">
+      <div class="avatar">WA</div>
+      <div class="user-info">
+        <div class="user-name">Willianm Admin</div>
+        <div class="user-role">Super Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+    <div class="topbar-title-group">
+      <div class="page-title">Configurações</div>
+      <div class="breadcrumb">SuperAdmin › Sistema › Configurações</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn">🔔<span class="notif-dot"></span></div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- TABS (mobile) -->
+    <div class="settings-tabs">
+      <button class="settings-tab active" onclick="showSection('plataforma', this)">🏢 Plataforma</button>
+      <button class="settings-tab" onclick="showSection('conta', this)">👤 Conta</button>
+      <button class="settings-tab" onclick="showSection('notificacoes', this)">🔔 Notificações</button>
+      <button class="settings-tab" onclick="showSection('integracoes', this)">🔗 Integrações</button>
+      <button class="settings-tab" onclick="showSection('seguranca', this)">🛡️ Segurança</button>
+    </div>
+
+    <div class="settings-layout">
+
+      <!-- SETTINGS NAV (desktop) -->
+      <nav class="settings-nav">
+        <div class="settings-nav-item active" onclick="showSection('plataforma', this)">
+          <span class="sn-icon">🏢</span> Plataforma
+        </div>
+        <div class="settings-nav-item" onclick="showSection('conta', this)">
+          <span class="sn-icon">👤</span> Minha Conta
+        </div>
+        <div class="settings-nav-divider"></div>
+        <div class="settings-nav-item" onclick="showSection('notificacoes', this)">
+          <span class="sn-icon">🔔</span> Notificações
+        </div>
+        <div class="settings-nav-item" onclick="showSection('integracoes', this)">
+          <span class="sn-icon">🔗</span> Integrações
+        </div>
+        <div class="settings-nav-divider"></div>
+        <div class="settings-nav-item" onclick="showSection('seguranca', this)">
+          <span class="sn-icon">🛡️</span> Segurança
+        </div>
+        <div class="settings-nav-item" onclick="showSection('avancado', this)">
+          <span class="sn-icon">⚠️</span> Avançado
+        </div>
+      </nav>
+
+      <!-- SECTIONS -->
+      <div id="sectionsWrap">
+
+        <!-- ── PLATAFORMA ── -->
+        <div class="settings-section" id="sec-plataforma">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon blue">🏢</div>
+              <div>
+                <div class="section-title">Informações da Plataforma</div>
+                <div class="section-subtitle">Nome, identidade visual e dados gerais</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="avatar-upload">
+                <div class="avatar-preview">EA</div>
+                <div class="avatar-upload-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="showToast('Selecione uma imagem')">📁 Alterar logo</button>
+                  <span class="avatar-upload-hint">PNG ou SVG. Máx. 512 KB.</span>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Nome da plataforma</label>
+                  <input class="form-input" type="text" value="Esportes Academy" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Domínio principal</label>
+                  <input class="form-input" type="text" value="app.esportesacademy.com.br" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Descrição curta</label>
+                <textarea class="form-textarea">SaaS B2B para gestão completa de escolas esportivas.</textarea>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">E-mail de suporte</label>
+                  <input class="form-input" type="email" value="suporte@esportesacademy.com.br" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Fuso horário</label>
+                  <select class="form-select">
+                    <option selected>America/Sao_Paulo (UTC-3)</option>
+                    <option>America/Manaus (UTC-4)</option>
+                    <option>America/Fortaleza (UTC-3)</option>
+                    <option>America/Belem (UTC-3)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Idioma padrão</label>
+                  <select class="form-select">
+                    <option selected>Português (Brasil)</option>
+                    <option>English (US)</option>
+                    <option>Español</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Moeda</label>
+                  <select class="form-select">
+                    <option selected>BRL — Real Brasileiro</option>
+                    <option>USD — Dólar Americano</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Alterações descartadas')">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('Plataforma atualizada','success')">💾 Salvar alterações</button>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon orange">📋</div>
+              <div>
+                <div class="section-title">Termos e Políticas</div>
+                <div class="section-subtitle">URLs para termos de uso e política de privacidade</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="form-group">
+                <label class="form-label">Termos de Uso</label>
+                <input class="form-input" type="url" value="https://esportesacademy.com.br/termos" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Política de Privacidade</label>
+                <input class="form-input" type="url" value="https://esportesacademy.com.br/privacidade" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Versão dos termos em vigor</label>
+                <input class="form-input" type="text" value="v2.1 — 01/01/2026" />
+                <span class="form-hint">Ao alterar a versão, todos os usuários serão solicitados a aceitar novamente.</span>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Políticas salvas','success')">💾 Salvar</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── CONTA ── -->
+        <div class="settings-section" id="sec-conta" style="display:none">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon blue">👤</div>
+              <div>
+                <div class="section-title">Dados do Perfil</div>
+                <div class="section-subtitle">Informações da sua conta de Super Admin</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="avatar-upload">
+                <div class="avatar-preview" style="font-size:22px">WA</div>
+                <div class="avatar-upload-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="showToast('Selecione uma foto')">📁 Alterar foto</button>
+                  <span class="avatar-upload-hint">JPG ou PNG. Máx. 2 MB.</span>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Nome</label>
+                  <input class="form-input" type="text" value="Willianm" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Sobrenome</label>
+                  <input class="form-input" type="text" value="Admin" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">E-mail</label>
+                <input class="form-input" type="email" value="admin@esportesacademy.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Telefone</label>
+                <input class="form-input" type="tel" value="+55 (11) 99999-0000" />
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-secondary btn-sm">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('Perfil atualizado','success')">💾 Salvar</button>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon purple">🔑</div>
+              <div>
+                <div class="section-title">Alterar Senha</div>
+                <div class="section-subtitle">Defina uma nova senha de acesso</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="form-group">
+                <label class="form-label">Senha atual</label>
+                <input class="form-input" type="password" placeholder="••••••••" />
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Nova senha</label>
+                  <input class="form-input" type="password" placeholder="••••••••" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirmar nova senha</label>
+                  <input class="form-input" type="password" placeholder="••••••••" />
+                </div>
+              </div>
+              <span class="form-hint">Mínimo 8 caracteres com letras, números e símbolo.</span>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Senha alterada com sucesso','success')">🔑 Atualizar senha</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── NOTIFICAÇÕES ── -->
+        <div class="settings-section" id="sec-notificacoes" style="display:none">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon orange">🔔</div>
+              <div>
+                <div class="section-title">Preferências de Notificação</div>
+                <div class="section-subtitle">Escolha quando e como ser notificado</div>
+              </div>
+            </div>
+            <div class="section-body">
+
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Plataforma</div>
+              <div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Nova escola cadastrada</div>
+                    <div class="toggle-desc">Receber alerta quando uma nova escola concluir o onboarding</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Plano próximo do vencimento</div>
+                    <div class="toggle-desc">Avisar quando uma escola estiver a 7 dias do vencimento do plano</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Escola inadimplente</div>
+                    <div class="toggle-desc">Notificar quando uma escola atrasar o pagamento do plano</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Erros críticos do sistema</div>
+                    <div class="toggle-desc">Alertas de falhas em Edge Functions, webhooks ou CI/CD</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Canais de envio</div>
+              <div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">E-mail</div>
+                    <div class="toggle-desc">Enviar notificações para admin@esportesacademy.com</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Push no navegador</div>
+                    <div class="toggle-desc">Notificações push enquanto o painel estiver aberto</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-title">WhatsApp</div>
+                    <div class="toggle-desc">Notificações críticas via WhatsApp Business</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Preferências salvas','success')">💾 Salvar</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── INTEGRAÇÕES ── -->
+        <div class="settings-section" id="sec-integracoes" style="display:none">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon green">🔗</div>
+              <div>
+                <div class="section-title">Integrações Ativas</div>
+                <div class="section-subtitle">Serviços conectados à plataforma</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="integ-list">
+                <div class="integ-item">
+                  <div class="integ-logo">💳</div>
+                  <div class="integ-info">
+                    <div class="integ-name">Asaas — Pagamentos</div>
+                    <div class="integ-desc">Cobranças via PIX, boleto e cartão de crédito</div>
+                  </div>
+                  <div class="integ-actions">
+                    <span class="badge badge-ok">● Conectado</span>
+                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo configuração Asaas')">Configurar</button>
+                  </div>
+                </div>
+                <div class="integ-item">
+                  <div class="integ-logo">💬</div>
+                  <div class="integ-info">
+                    <div class="integ-name">WhatsApp Business API</div>
+                    <div class="integ-desc">Envio de mensagens automáticas para pais e alunos</div>
+                  </div>
+                  <div class="integ-actions">
+                    <span class="badge badge-ok">● Conectado</span>
+                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo configuração WhatsApp')">Configurar</button>
+                  </div>
+                </div>
+                <div class="integ-item">
+                  <div class="integ-logo">📅</div>
+                  <div class="integ-info">
+                    <div class="integ-name">Google Calendar API</div>
+                    <div class="integ-desc">Sincronização automática de aulas e eventos</div>
+                  </div>
+                  <div class="integ-actions">
+                    <span class="badge badge-warn">● Atenção</span>
+                    <button class="btn btn-secondary btn-sm" onclick="showToast('Reconecte o Google Calendar')">Reconectar</button>
+                  </div>
+                </div>
+                <div class="integ-item">
+                  <div class="integ-logo">📊</div>
+                  <div class="integ-info">
+                    <div class="integ-name">Sentry — Monitoramento</div>
+                    <div class="integ-desc">Rastreamento de erros em produção e staging</div>
+                  </div>
+                  <div class="integ-actions">
+                    <span class="badge badge-ok">● Conectado</span>
+                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo Sentry')">Ver erros</button>
+                  </div>
+                </div>
+                <div class="integ-item">
+                  <div class="integ-logo">🔔</div>
+                  <div class="integ-info">
+                    <div class="integ-name">Expo Push / FCM / APNs</div>
+                    <div class="integ-desc">Notificações push para o app mobile</div>
+                  </div>
+                  <div class="integ-actions">
+                    <span class="badge badge-err">● Desconectado</span>
+                    <button class="btn btn-primary btn-sm" onclick="showToast('Iniciando configuração push')">Conectar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon purple">🔑</div>
+              <div>
+                <div class="section-title">Chaves de API</div>
+                <div class="section-subtitle">Credenciais e tokens das integrações</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="form-group">
+                <label class="form-label">Asaas — API Key</label>
+                <input class="form-input" type="password" value="aact_YTU5YTE0M2Q4YT..." />
+                <span class="form-hint">Nunca compartilhe esta chave. Rotacione a cada 90 dias.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">WhatsApp — Token de Acesso</label>
+                <input class="form-input" type="password" value="EAAxxxxxxxxxxxxxx..." />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Supabase — Service Role Key</label>
+                <input class="form-input" type="password" value="eyJhbGciOiJIUzI1..." disabled />
+                <span class="form-hint">Gerenciada pelo Doppler. Altere via painel do Supabase.</span>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Chaves salvas com segurança','success')">🔑 Salvar chaves</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── SEGURANÇA ── -->
+        <div class="settings-section" id="sec-seguranca" style="display:none">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon purple">🛡️</div>
+              <div>
+                <div class="section-title">Autenticação & Acesso</div>
+                <div class="section-subtitle">Políticas de segurança da plataforma</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Autenticação em dois fatores (2FA)</div>
+                  <div class="toggle-desc">Obrigar 2FA para todos os usuários super_admin</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Login com Google</div>
+                  <div class="toggle-desc">Permitir OAuth Google para todos os perfis</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Login com Apple</div>
+                  <div class="toggle-desc">Permitir Sign in with Apple no app mobile</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Bloquear acesso por IP suspeito</div>
+                  <div class="toggle-desc">Usar detecção de IP para bloquear tentativas de acesso anômalas</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Tempo de sessão (minutos)</label>
+                  <input class="form-input" type="number" value="60" min="15" max="1440" />
+                  <span class="form-hint">Sessão expira após inatividade.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tentativas de login antes de bloqueio</label>
+                  <input class="form-input" type="number" value="5" min="3" max="10" />
+                </div>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Configurações de segurança salvas','success')">💾 Salvar</button>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon blue">📋</div>
+              <div>
+                <div class="section-title">Logs de Auditoria</div>
+                <div class="section-subtitle">Histórico de ações realizadas na plataforma</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
+                  <span>🔑 Login — Willianm Admin</span>
+                  <span style="color:var(--text-muted);font-size:11px">Hoje, 09:00</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
+                  <span>👤 Usuário suspenso — Lucas Ferreira</span>
+                  <span style="color:var(--text-muted);font-size:11px">Hoje, 08:45</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
+                  <span>🏫 Nova escola criada — Vôlei Prainha BSB</span>
+                  <span style="color:var(--text-muted);font-size:11px">23/03/2026, 16:20</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
+                  <span>💳 Plano alterado — Arena Futebol SP → Pro</span>
+                  <span style="color:var(--text-muted);font-size:11px">22/03/2026, 14:05</span>
+                </div>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando logs…')">⬇️ Exportar logs</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('Carregando todos os logs…')">Ver histórico completo</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── AVANÇADO ── -->
+        <div class="settings-section" id="sec-avancado" style="display:none">
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon orange">⚙️</div>
+              <div>
+                <div class="section-title">Manutenção</div>
+                <div class="section-subtitle">Ações técnicas de manutenção da plataforma</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Modo de manutenção</div>
+                  <div class="toggle-desc">Exibir página de manutenção para todos os usuários (exceto super_admin)</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Modo de depuração (debug)</div>
+                  <div class="toggle-desc">Ativar logs detalhados nas Edge Functions (impacta performance)</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" />
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px">
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Cache limpo com sucesso','success')">🗑️ Limpar cache</button>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Jobs reiniciados','success')">🔄 Reiniciar jobs agendados</button>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Backup iniciado','success')">💾 Forçar backup do banco</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-icon red">⚠️</div>
+              <div>
+                <div class="section-title">Zona de Perigo</div>
+                <div class="section-subtitle">Ações irreversíveis — proceda com cuidado</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="danger-zone">
+                <div class="danger-row">
+                  <div class="danger-info">
+                    <div class="danger-title">Apagar todos os dados de teste</div>
+                    <div class="danger-desc">Remove escolas, usuários e dados criados no ambiente de staging</div>
+                  </div>
+                  <button class="btn btn-danger btn-sm" onclick="confirmDanger('Dados de teste removidos')">Apagar dados de teste</button>
+                </div>
+                <div style="height:1px;background:var(--danger-light)"></div>
+                <div class="danger-row">
+                  <div class="danger-info">
+                    <div class="danger-title">Revogar todas as sessões ativas</div>
+                    <div class="danger-desc">Desconecta todos os usuários da plataforma imediatamente</div>
+                  </div>
+                  <button class="btn btn-danger btn-sm" onclick="confirmDanger('Todas as sessões foram revogadas')">Revogar sessões</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- /sectionsWrap -->
+    </div><!-- /settings-layout -->
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ─── Sidebar ─── */
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+  function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+  /* ─── Section switching ─── */
+  function showSection(id, el) {
+    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-' + id).style.display = '';
+    if (el) el.classList.add('active');
+  }
+
+  /* ─── Danger confirm ─── */
+  function confirmDanger(msg) {
+    if (confirm('Tem certeza? Esta ação é irreversível.')) showToast(msg, 'success');
+  }
+
+  /* ─── Toast ─── */
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : type === 'danger' ? '⚠️ ' : 'ℹ️ ') + msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
