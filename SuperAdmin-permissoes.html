@@ -9,31 +9,35 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #1a56db;
-      --primary-dark: #1e429f;
-      --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669;
-      --success-light: #d1fae5;
-      --warning: #d97706;
-      --warning-light: #fef3c7;
-      --danger: #dc2626;
-      --danger-light: #fee2e2;
-      --purple: #7c3aed;
-      --purple-light: #ede9fe;
-      --bg: #f1f5f9;
-      --sidebar-w: 260px;
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
-      --card: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px;
-      --topbar-h: 56px;
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
 
     html { scroll-behavior: smooth; }
@@ -57,14 +61,17 @@
     .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
     .nav-item.active { background: var(--primary); }
     .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
-    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
     .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
-    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background .15s; }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
-    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+    .nav-item .nav-icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.stub { opacity:.45;cursor:default; }
+    .nav-item.stub:hover { background:transparent;color:rgba(255,255,255,.55); }
 
     /* MAIN */
     .main { display: flex; flex-direction: column; min-height: 100dvh; }
@@ -223,34 +230,20 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">🛡️</div>
       <div class="brand-text">
         <div class="name">Esportes Academy</div>
-        <div class="sub">PORTAL SUPERADMIN</div>
+        <div class="sub">SUPER ADMIN</div>
       </div>
     </div>
   </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item" href="SuperAdmin-dashboard.html" onclick="closeSidebar()"><span class="icon">🏠</span> Dashboard</a>
-    <a class="nav-item" href="SuperAdmin-schools.html" onclick="closeSidebar()"><span class="icon">🏫</span> Escolas <span class="nav-badge">24</span></a>
-    <a class="nav-item" href="SuperAdmin-usuarios.html" onclick="closeSidebar()"><span class="icon">👤</span> Usuários</a>
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="SuperAdmin-cobrancas.html" onclick="closeSidebar()"><span class="icon">💳</span> Cobranças</a>
-    <a class="nav-item" href="SuperAdmin-planos.html" onclick="closeSidebar()"><span class="icon">📦</span> Planos & Licenças</a>
-    <a class="nav-item" href="#" onclick="closeSidebar()"><span class="icon">📊</span> Relatórios</a>
-    <a class="nav-item" href="#" onclick="closeSidebar()"><span class="icon">🧾</span> Notas Fiscais</a>
-    <div class="nav-section-label">Sistema</div>
-    <a class="nav-item" href="SuperAdmin-configuracoes.html" onclick="closeSidebar()"><span class="icon">⚙️</span> Configurações</a>
-    <a class="nav-item" href="SuperAdmin-notificacoes.html" onclick="closeSidebar()"><span class="icon">🔔</span> Notificações <span class="nav-badge">5</span></a>
-    <a class="nav-item active" href="SuperAdmin-permissoes.html" onclick="closeSidebar()"><span class="icon">🛡️</span> Permissões</a>
-  </nav>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
       <div class="user-info">
-        <div class="user-name">Willianm Admin</div>
-        <div class="user-role">Super Administrador</div>
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
       </div>
     </div>
   </div>
@@ -306,7 +299,7 @@
     <div style="position:sticky;bottom:16px;display:flex;justify-content:flex-end;margin-top:20px;pointer-events:none;">
       <div style="pointer-events:all;display:flex;gap:8px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;box-shadow:var(--shadow-lg);">
         <button class="btn btn-secondary btn-sm" onclick="showToast('Alterações descartadas')">Descartar</button>
-        <button class="btn btn-primary btn-sm" onclick="showToast('Permissões salvas com sucesso','success')">💾 Salvar permissões</button>
+        <button class="btn btn-primary btn-sm" onclick="savePermissions()">💾 Salvar permissões</button>
       </div>
     </div>
 
@@ -584,5 +577,148 @@
   renderRoleInfo('super_admin');
   renderModules('super_admin');
 </script>
+<script>window.SUPERADMIN_PAGE = 'permissoes';</script>
+<!-- Bloco 2 — Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+  var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+  var ROLES_KEYS = ['super_admin', 'admin_escola', 'professor', 'pai'];
+
+  function supaFetch(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json'
+    }, opts.headers || {});
+    return fetch(SUPA_URL + path, opts);
+  }
+
+  /* ── Load permissions from DB ── */
+  function loadPermissions() {
+    supaFetch('/rest/v1/platform_settings?key=eq.permissions_config&select=value')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data[0] || !data[0].value) return;
+        var cfg = data[0].value;
+
+        /* Apply saved module permission values to MODULES */
+        if (Array.isArray(cfg.modules)) {
+          cfg.modules.forEach(function(savedMod, mi) {
+            if (!MODULES[mi]) return;
+            savedMod.perms.forEach(function(savedPerm, pi) {
+              if (!MODULES[mi].perms[pi]) return;
+              ROLES_KEYS.forEach(function(role) {
+                var saved = savedPerm[role];
+                var cur   = MODULES[mi].perms[pi][role];
+                /* Never overwrite locked/off — only restore true/false */
+                if (cur !== 'locked' && cur !== 'off' && (saved === true || saved === false)) {
+                  MODULES[mi].perms[pi][role] = saved;
+                }
+              });
+            });
+          });
+        }
+
+        /* Apply saved extra roles (custom roles) */
+        if (cfg.roles) {
+          Object.keys(cfg.roles).forEach(function(rk) {
+            if (!ROLES[rk]) {
+              ROLES[rk] = cfg.roles[rk];
+              /* Add tab */
+              var r = ROLES[rk];
+              var tabs = document.querySelector('.role-tabs');
+              var btn = document.createElement('button');
+              btn.className = 'role-tab';
+              btn.dataset.roleKey = rk;
+              btn.onclick = function() { switchRole(rk, btn); };
+              btn.innerHTML = '<span class="dot" style="background:' + (r.dot || '#6366f1') + '"></span> ' + r.label;
+              tabs.appendChild(btn);
+              /* Ensure MODULES have this role key */
+              MODULES.forEach(function(mod) {
+                mod.perms.forEach(function(perm) {
+                  if (perm[rk] === undefined) perm[rk] = false;
+                });
+              });
+            }
+          });
+        }
+
+        renderRoleInfo(currentRole);
+        renderModules(currentRole);
+      })
+      .catch(function() { /* silently use defaults */ });
+  }
+
+  /* ── Persist current state to DB ── */
+  function savePermissionsDB() {
+    var cfg = {
+      modules: MODULES,
+      roles: ROLES,
+      savedAt: new Date().toISOString()
+    };
+    supaFetch('/rest/v1/platform_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'permissions_config', value: cfg })
+    })
+    .then(function(r) {
+      if (r.ok) { showToast('Permiss\u00f5es salvas com sucesso', 'success'); }
+      else       { showToast('Erro ao salvar permiss\u00f5es', 'danger'); }
+    })
+    .catch(function() { showToast('Erro de conex\u00e3o', 'danger'); });
+  }
+
+  window.savePermissions = savePermissionsDB;
+
+  /* ── Override createRole to also persist ── */
+  window.createRole = function() {
+    var name = document.getElementById('inputNomePerfil').value.trim();
+    if (!name) { showToast('Informe o nome do perfil', 'danger'); return; }
+
+    var key = name.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    if (!key) key = 'perfil_' + Date.now();
+
+    ROLES[key] = {
+      label: name, badge: 'badge-admin', dot: '#6366f1',
+      desc: 'Perfil personalizado criado pelo administrador.',
+      users: 0, permsTotal: 0
+    };
+
+    /* Add tab */
+    var tabs = document.querySelector('.role-tabs');
+    var btn = document.createElement('button');
+    btn.className = 'role-tab';
+    btn.dataset.roleKey = key;
+    btn.onclick = function() { switchRole(key, btn); };
+    btn.innerHTML = '<span class="dot" style="background:#6366f1"></span> ' + name;
+    tabs.appendChild(btn);
+
+    /* Extend MODULES with default false for new role */
+    MODULES.forEach(function(mod) {
+      mod.perms.forEach(function(perm) { perm[key] = false; });
+    });
+
+    closeModal();
+    showToast('Perfil "' + name + '" criado', 'success');
+
+    /* Save immediately */
+    var cfg = { modules: MODULES, roles: ROLES, savedAt: new Date().toISOString() };
+    supaFetch('/rest/v1/platform_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'permissions_config', value: cfg })
+    });
+  };
+
+  /* ── Init ── */
+  loadPermissions();
+})();
+</script>
+<script src="superadmin-sidebar.js"></script>
 </body>
 </html>

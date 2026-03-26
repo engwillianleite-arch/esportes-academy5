@@ -4,25 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Esportes Academy — SuperAdmin-schools</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #1a56db; --primary-dark: #1e429f; --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669; --success-light: #d1fae5;
-      --warning: #d97706; --warning-light: #fef3c7;
-      --danger: #dc2626; --danger-light: #fee2e2;
-      --purple: #7c3aed; --purple-light: #ede9fe;
-      --bg: #f1f5f9; --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
-      --card: #ffffff; --text: #1e293b; --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px; --radius-sm: 8px;
-      --sidebar-w: 260px; --topbar-h: 56px;
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
 
     html { scroll-behavior: smooth; }
@@ -54,11 +70,17 @@
     .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
     .nav-item.active { background: var(--primary); }
     .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
-    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
     .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
-    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+    .nav-item .nav-icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.stub { opacity:.45;cursor:default; }
+    .nav-item.stub:hover { background:transparent;color:rgba(255,255,255,.55); }
     .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
     .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
     .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
@@ -361,34 +383,20 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">🛡️</div>
       <div class="brand-text">
         <div class="name">Esportes Academy</div>
-        <div class="sub">PORTAL ADMIN</div>
+        <div class="sub">SUPER ADMIN</div>
       </div>
     </div>
   </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item" href="admin-dashboard.html"><span class="icon">🏠</span> Dashboard</a>
-    <a class="nav-item active" href="schools.html"><span class="icon">🏫</span> Escolas <span class="nav-badge" id="sb-count">24</span></a>
-    <a class="nav-item" href="#"><span class="icon">👤</span> Usuários</a>
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="#"><span class="icon">💳</span> Cobranças</a>
-    <a class="nav-item" href="planos.html"><span class="icon">📦</span> Planos & Licenças</a>
-    <a class="nav-item" href="#"><span class="icon">📊</span> Relatórios</a>
-    <a class="nav-item" href="#"><span class="icon">🧾</span> Notas Fiscais</a>
-    <div class="nav-section-label">Sistema</div>
-    <a class="nav-item" href="#"><span class="icon">⚙️</span> Configurações</a>
-    <a class="nav-item" href="notificacoes.html"><span class="icon">🔔</span> Notificações <span class="nav-badge">5</span></a>
-    <a class="nav-item" href="#"><span class="icon">🛡️</span> Permissões</a>
-  </nav>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
       <div class="user-info">
-        <div class="user-name">Willianm Admin</div>
-        <div class="user-role">Super Administrador</div>
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
       </div>
     </div>
   </div>
@@ -422,33 +430,33 @@
       <div class="kpi-mini">
         <div class="kpi-mini-icon" style="background:#dbeafe;">🏫</div>
         <div class="kpi-mini-body">
-          <div class="value">8</div>
+          <div class="value" id="kpiTotal">-</div>
           <div class="label">Total de Escolas</div>
-          <div class="trend trend-up">▲ 12% este mês</div>
+          <div class="trend trend-up" id="kpiTotalTrend"></div>
         </div>
       </div>
       <div class="kpi-mini">
         <div class="kpi-mini-icon" style="background:var(--success-light);">✅</div>
         <div class="kpi-mini-body">
-          <div class="value">5</div>
+          <div class="value" id="kpiAtivas">-</div>
           <div class="label">Escolas Ativas</div>
-          <div class="trend trend-up">▲ 2 novos</div>
+          <div class="trend trend-up" id="kpiAtivasTrend"></div>
         </div>
       </div>
       <div class="kpi-mini">
         <div class="kpi-mini-icon" style="background:var(--warning-light);">⏳</div>
         <div class="kpi-mini-body">
-          <div class="value">2</div>
+          <div class="value" id="kpiTrial">-</div>
           <div class="label">Em Trial</div>
-          <div class="trend" style="color:var(--text-muted);">Expira em breve</div>
+          <div class="trend" style="color:var(--text-muted);" id="kpiTrialTrend"></div>
         </div>
       </div>
       <div class="kpi-mini">
         <div class="kpi-mini-icon" style="background:var(--danger-light);">🔴</div>
         <div class="kpi-mini-body">
-          <div class="value">1</div>
+          <div class="value" id="kpiInativa">-</div>
           <div class="label">Inativa</div>
-          <div class="trend trend-down">▼ Aguarda reativação</div>
+          <div class="trend trend-down" id="kpiInativaTrend"></div>
         </div>
       </div>
     </div>
@@ -515,13 +523,8 @@
         </div>
       </div>
       <div class="pagination">
-        <span class="text-sm text-muted" id="pagination-label">Mostrando 8 de 8 escolas</span>
-        <div class="pagination-pages">
-          <button class="btn btn-secondary btn-sm">← Ant.</button>
-          <button class="btn btn-primary btn-sm">1</button>
-          <button class="btn btn-secondary btn-sm" style="opacity:.4;cursor:not-allowed;">2</button>
-          <button class="btn btn-secondary btn-sm" style="opacity:.4;cursor:not-allowed;">Próx →</button>
-        </div>
+        <span class="text-sm text-muted" id="pagination-label">Carregando…</span>
+        <div class="pagination-pages" id="pagination-btns"></div>
       </div>
     </div>
 
@@ -557,380 +560,198 @@
 </div>
 
 <!-- ════ SCRIPTS ════ -->
+
+<!-- ═══ BLOCO 1: pure UI — always executes ═══ -->
 <script>
+/* ──────────────────────────────────────────────────
+   STATE
+────────────────────────────────────────────────── */
+var SCHOOLS = [];
+var FILTERED = [];
+var CUR_PAGE = 1;
+var PAGE_SIZE = 20;
+var currentSchoolId  = null;
+var panelMode        = null; // 'view'|'edit'|'create'
+var pendingToggleId  = null;
+var selectedPersonType  = 'JURIDICA';
+var selectedBillingType = 'PIX';
 
-/* ─────────────────────────────────────
-   MOCKED DATA — Asaas ready fields
-───────────────────────────────────── */
-const schools = [
-  {
-    id: 'SCH001', logo: '⚽', logoColor: '#dbeafe',
-    name: 'Academia Futebol SP',
-    city: 'São Paulo', state: 'SP',
-    sports: ['Futebol', 'Futsal'],
-    plan: 'Premium', status: 'active',
-    students: 148, capacity: 200,
-    monthlyValue: 2960, dueDay: 5, nextDueDate: '01/04/2026',
-    createdAt: '15/03/2024',
-    // Asaas Customer
-    personType: 'JURIDICA',
-    companyName: 'Academia de Futebol SP Ltda',
-    responsibleName: 'Carlos Eduardo Mendes',
-    cpfCnpj: '12.345.678/0001-90',
-    email: 'contato@academiasp.com.br',
-    phone: '(11) 3456-7890', mobilePhone: '(11) 99876-5432',
-    additionalEmails: 'financeiro@academiasp.com.br',
-    postalCode: '01310-100', address: 'Av. Paulista', addressNumber: '1500',
-    complement: 'Sala 201', province: 'Bela Vista',
-    cityName: 'São Paulo', stateName: 'SP',
-    municipalInscription: '12345678', stateInscription: '123456789012',
-    externalReference: 'SCH001',
-    notificationDisabled: false,
-    observations: 'Cliente VIP desde 2024. Paga sempre em dia.',
-    // Asaas Billing
-    asaasCustomerId: 'cus_000001234567',
-    billingType: 'PIX',
-    discount: { value: 5, dueDateLimitDays: 3 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'paid',
-    paymentHistory: [
-      { month: 'Mar/2026', value: 2960, status: 'paid', date: '01/03/2026' },
-      { month: 'Fev/2026', value: 2960, status: 'paid', date: '01/02/2026' },
-      { month: 'Jan/2026', value: 2960, status: 'paid', date: '01/01/2026' },
-    ]
-  },
-  {
-    id: 'SCH002', logo: '🏊', logoColor: '#d1fae5',
-    name: 'Natação Rio Verde',
-    city: 'Campinas', state: 'SP',
-    sports: ['Natação', 'Hidroginástica'],
-    plan: 'Pro', status: 'active',
-    students: 96, capacity: 100,
-    monthlyValue: 1920, dueDay: 5, nextDueDate: '05/04/2026',
-    createdAt: '02/06/2024',
-    personType: 'JURIDICA',
-    companyName: 'Rio Verde Esportes Aquáticos Ltda',
-    responsibleName: 'Ana Paula Silveira',
-    cpfCnpj: '98.765.432/0001-10',
-    email: 'admin@natacaorioverde.com.br',
-    phone: '(19) 3321-4455', mobilePhone: '(19) 99654-3210',
-    additionalEmails: '',
-    postalCode: '13025-020', address: 'Rua Boa Vista', addressNumber: '340',
-    complement: '', province: 'Cambuí',
-    cityName: 'Campinas', stateName: 'SP',
-    municipalInscription: '87654321', stateInscription: '876543210987',
-    externalReference: 'SCH002',
-    notificationDisabled: false,
-    observations: 'Capacidade quase esgotada. Aviso para expansão.',
-    asaasCustomerId: 'cus_000002345678',
-    billingType: 'BOLETO',
-    discount: { value: 0, dueDateLimitDays: 0 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'paid',
-    paymentHistory: [
-      { month: 'Mar/2026', value: 1920, status: 'paid', date: '05/03/2026' },
-      { month: 'Fev/2026', value: 1920, status: 'paid', date: '05/02/2026' },
-      { month: 'Jan/2026', value: 1920, status: 'paid', date: '06/01/2026' },
-    ]
-  },
-  {
-    id: 'SCH003', logo: '🥋', logoColor: '#ede9fe',
-    name: 'Judô Shotokan RJ',
-    city: 'Rio de Janeiro', state: 'RJ',
-    sports: ['Judô', 'Karatê'],
-    plan: 'Basic', status: 'trial',
-    students: 32, capacity: 100,
-    monthlyValue: 640, dueDay: 10, nextDueDate: '28/03/2026',
-    createdAt: '01/03/2026',
-    personType: 'FISICA',
-    companyName: '',
-    responsibleName: 'Roberto Yamamoto',
-    cpfCnpj: '321.654.987-00',
-    email: 'roberto.yamamoto@gmail.com',
-    phone: '(21) 2234-5566', mobilePhone: '(21) 99123-4567',
-    additionalEmails: '',
-    postalCode: '20040-020', address: 'Av. Rio Branco', addressNumber: '88',
-    complement: 'Ap. 302', province: 'Centro',
-    cityName: 'Rio de Janeiro', stateName: 'RJ',
-    municipalInscription: '', stateInscription: '',
-    externalReference: 'SCH003',
-    notificationDisabled: false,
-    observations: 'Trial expira em 5 dias. Enviar proposta de conversão.',
-    asaasCustomerId: '',
-    billingType: 'PIX',
-    discount: { value: 0, dueDateLimitDays: 0 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'trial',
-    paymentHistory: []
-  },
-  {
-    id: 'SCH004', logo: '🎾', logoColor: '#fef3c7',
-    name: 'Tennis Club BH',
-    city: 'Belo Horizonte', state: 'MG',
-    sports: ['Tennis', 'Beach Tennis'],
-    plan: 'Premium', status: 'active',
-    students: 204, capacity: 250,
-    monthlyValue: 4080, dueDay: 10, nextDueDate: '10/04/2026',
-    createdAt: '20/01/2024',
-    personType: 'JURIDICA',
-    companyName: 'Tennis Club Belo Horizonte S/A',
-    responsibleName: 'Fernanda Costa',
-    cpfCnpj: '45.678.901/0001-23',
-    email: 'contato@tennisclubBH.com.br',
-    phone: '(31) 3344-5566', mobilePhone: '(31) 99234-5678',
-    additionalEmails: 'financeiro@tennisclubBH.com.br',
-    postalCode: '30130-110', address: 'Av. Afonso Pena', addressNumber: '3001',
-    complement: '', province: 'Serra',
-    cityName: 'Belo Horizonte', stateName: 'MG',
-    municipalInscription: '34567890', stateInscription: '345678901234',
-    externalReference: 'SCH004',
-    notificationDisabled: false,
-    observations: 'Maior escola da plataforma. Interesse em plano Enterprise.',
-    asaasCustomerId: 'cus_000004567890',
-    billingType: 'CREDIT_CARD',
-    discount: { value: 10, dueDateLimitDays: 5 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'paid',
-    paymentHistory: [
-      { month: 'Mar/2026', value: 4080, status: 'paid', date: '10/03/2026' },
-      { month: 'Fev/2026', value: 4080, status: 'paid', date: '10/02/2026' },
-      { month: 'Jan/2026', value: 4080, status: 'paid', date: '10/01/2026' },
-    ]
-  },
-  {
-    id: 'SCH005', logo: '🏀', logoColor: '#fee2e2',
-    name: 'Basketball Academy Sul',
-    city: 'Porto Alegre', state: 'RS',
-    sports: ['Basquete'],
-    plan: 'Pro', status: 'pending',
-    students: 67, capacity: 120,
-    monthlyValue: 1340, dueDay: 15, nextDueDate: '15/03/2026',
-    createdAt: '10/09/2024',
-    personType: 'JURIDICA',
-    companyName: 'Basketball Academy do Sul Ltda',
-    responsibleName: 'Paulo Saldanha',
-    cpfCnpj: '67.890.123/0001-45',
-    email: 'paulo@basketacademysul.com.br',
-    phone: '(51) 3321-7788', mobilePhone: '(51) 99876-1234',
-    additionalEmails: '',
-    postalCode: '90010-180', address: 'Av. Borges de Medeiros', addressNumber: '200',
-    complement: 'Sala 10', province: 'Centro Histórico',
-    cityName: 'Porto Alegre', stateName: 'RS',
-    municipalInscription: '56789012', stateInscription: '567890123456',
-    externalReference: 'SCH005',
-    notificationDisabled: true,
-    observations: 'Pagamento em atraso. 3 dias. Entrar em contato.',
-    asaasCustomerId: 'cus_000005678901',
-    billingType: 'BOLETO',
-    discount: { value: 0, dueDateLimitDays: 0 },
-    interest: { value: 2 }, fine: { value: 3 },
-    paymentStatus: 'overdue',
-    paymentHistory: [
-      { month: 'Mar/2026', value: 1340, status: 'overdue', date: '—' },
-      { month: 'Fev/2026', value: 1340, status: 'paid', date: '16/02/2026' },
-      { month: 'Jan/2026', value: 1340, status: 'paid', date: '15/01/2026' },
-    ]
-  },
-  {
-    id: 'SCH006', logo: '💪', logoColor: '#fce7f3',
-    name: 'CrossFit Manaus',
-    city: 'Manaus', state: 'AM',
-    sports: ['CrossFit', 'Funcional'],
-    plan: 'Basic', status: 'trial',
-    students: 18, capacity: 80,
-    monthlyValue: 560, dueDay: 20, nextDueDate: '20/04/2026',
-    createdAt: '21/03/2026',
-    personType: 'FISICA',
-    companyName: '',
-    responsibleName: 'Diego Ferreira',
-    cpfCnpj: '456.789.012-34',
-    email: 'diego.ferreira@crossfitmanaus.com',
-    phone: '(92) 3345-6677', mobilePhone: '(92) 99345-6789',
-    additionalEmails: '',
-    postalCode: '69010-060', address: 'Av. Eduardo Ribeiro', addressNumber: '520',
-    complement: '', province: 'Centro',
-    cityName: 'Manaus', stateName: 'AM',
-    municipalInscription: '', stateInscription: '',
-    externalReference: 'SCH006',
-    notificationDisabled: false,
-    observations: 'Aguardando aprovação de documentação.',
-    asaasCustomerId: '',
-    billingType: 'PIX',
-    discount: { value: 0, dueDateLimitDays: 0 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'trial',
-    paymentHistory: []
-  },
-  {
-    id: 'SCH007', logo: '🏐', logoColor: '#ecfdf5',
-    name: 'Volleyball Stars CE',
-    city: 'Fortaleza', state: 'CE',
-    sports: ['Vôlei', 'Beach Volley'],
-    plan: 'Pro', status: 'active',
-    students: 115, capacity: 150,
-    monthlyValue: 2300, dueDay: 1, nextDueDate: '01/04/2026',
-    createdAt: '05/07/2024',
-    personType: 'JURIDICA',
-    companyName: 'Volleyball Stars Nordeste Ltda',
-    responsibleName: 'Mariana Oliveira',
-    cpfCnpj: '23.456.789/0001-67',
-    email: 'contato@volleyballstars.com.br',
-    phone: '(85) 3456-7891', mobilePhone: '(85) 99567-8901',
-    additionalEmails: 'financeiro@volleyballstars.com.br',
-    postalCode: '60160-230', address: 'Av. Santos Dumont', addressNumber: '1020',
-    complement: '', province: 'Aldeota',
-    cityName: 'Fortaleza', stateName: 'CE',
-    municipalInscription: '67890123', stateInscription: '678901234567',
-    externalReference: 'SCH007',
-    notificationDisabled: false,
-    observations: 'Interesse em módulo de campeonatos.',
-    asaasCustomerId: 'cus_000007890123',
-    billingType: 'PIX',
-    discount: { value: 5, dueDateLimitDays: 3 },
-    interest: { value: 1 }, fine: { value: 2 },
-    paymentStatus: 'paid',
-    paymentHistory: [
-      { month: 'Mar/2026', value: 2300, status: 'paid', date: '01/03/2026' },
-      { month: 'Fev/2026', value: 2300, status: 'paid', date: '01/02/2026' },
-    ]
-  },
-  {
-    id: 'SCH008', logo: '🤸', logoColor: '#f5f3ff',
-    name: 'Ginástica Olímpica SP',
-    city: 'São Paulo', state: 'SP',
-    sports: ['Ginástica Artística', 'Ginástica Rítmica'],
-    plan: 'Basic', status: 'inactive',
-    students: 0, capacity: 60,
-    monthlyValue: 480, dueDay: 15, nextDueDate: '—',
-    createdAt: '10/04/2024',
-    personType: 'FISICA',
-    companyName: '',
-    responsibleName: 'Luísa Tambini',
-    cpfCnpj: '789.012.345-56',
-    email: 'luisa.tambini@gmail.com',
-    phone: '(11) 2234-5678', mobilePhone: '(11) 97654-3210',
-    additionalEmails: '',
-    postalCode: '04040-001', address: 'Rua Vergueiro', addressNumber: '3185',
-    complement: 'Sala 14', province: 'Vila Mariana',
-    cityName: 'São Paulo', stateName: 'SP',
-    municipalInscription: '', stateInscription: '',
-    externalReference: 'SCH008',
-    notificationDisabled: true,
-    observations: 'Inativada por inadimplência. Contato feito em 10/02/2026.',
-    asaasCustomerId: 'cus_000008901234',
-    billingType: 'BOLETO',
-    discount: { value: 0, dueDateLimitDays: 0 },
-    interest: { value: 2 }, fine: { value: 3 },
-    paymentStatus: 'inactive',
-    paymentHistory: [
-      { month: 'Jan/2026', value: 480, status: 'overdue', date: '—' },
-      { month: 'Dez/2025', value: 480, status: 'overdue', date: '—' },
-    ]
-  }
-];
-
-/* current state */
-let currentSchoolId = null;
-let panelMode = null; // 'view' | 'edit' | 'create'
-let pendingToggleId = null;
-let selectedPersonType = 'JURIDICA';
-let selectedBillingType = 'PIX';
-
-/* ─── RENDER TABLE ─── */
-function statusBadge(status){
-  const map = { active:'badge-active', trial:'badge-trial', pending:'badge-pending', inactive:'badge-inactive' };
-  const labels = { active:'● Ativa', trial:'◉ Trial', pending:'◎ Pendente', inactive:'○ Inativa' };
-  return `<span class="badge ${map[status]||'badge-inactive'}">${labels[status]||status}</span>`;
+/* ──────────────────────────────────────────────────
+   HELPERS
+────────────────────────────────────────────────── */
+function statusBadge(s){
+  var map    = {active:'badge-active',trial:'badge-trial',pending:'badge-pending',inactive:'badge-inactive'};
+  var labels = {active:'\u25cf Ativa',trial:'\u25ce Trial',pending:'\u25ce Pendente',inactive:'\u25cb Inativa'};
+  return '<span class="badge '+(map[s]||'badge-inactive')+'">'+(labels[s]||s)+'</span>';
 }
-
 function typeBadge(pt){
   return pt==='JURIDICA'
     ? '<span class="type-tag type-pj">PJ</span>'
     : '<span class="type-tag type-pf">PF</span>';
 }
-
-function planChip(plan){
-  const map = { Premium:'chip-blue', Pro:'chip-green', Basic:'chip-gray' };
-  return `<span class="chip ${map[plan]||'chip-gray'}">${plan}</span>`;
+function planChip(p){
+  var map={Premium:'chip-blue',Pro:'chip-green',Basic:'chip-gray'};
+  return '<span class="chip '+(map[p]||'chip-gray')+'">'+p+'</span>';
+}
+function billingIcon(bt){
+  return {PIX:'\u26a1',BOLETO:'\ud83d\udcc4',CREDIT_CARD:'\ud83d\udcb3',UNDEFINED:'\ud83d\udd04'}[bt]||'-';
+}
+function fmtCurrency(v){
+  return 'R$ '+(Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function fmtDate(d){
+  if(!d) return '-';
+  var dt = new Date(d);
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('pt-BR');
 }
 
-function billingIcon(bt){ return {PIX:'⚡',BOLETO:'📄',CREDIT_CARD:'💳',UNDEFINED:'🔄'}[bt]||'—'; }
+/* ──────────────────────────────────────────────────
+   KPI
+────────────────────────────────────────────────── */
+function updateKPIs(list){
+  var total   = list.length;
+  var ativas  = list.filter(function(s){return s.status==='active';}).length;
+  var trial   = list.filter(function(s){return s.status==='trial';}).length;
+  var inativa = list.filter(function(s){return s.status==='inactive';}).length;
+  var el;
+  el=document.getElementById('kpiTotal');   if(el) el.textContent=total;
+  el=document.getElementById('kpiAtivas');  if(el) el.textContent=ativas;
+  el=document.getElementById('kpiTrial');   if(el) el.textContent=trial;
+  el=document.getElementById('kpiInativa'); if(el) el.textContent=inativa;
+  el=document.getElementById('kpiTotalTrend');   if(el) el.textContent=total+' escola'+(total!==1?'s':'');
+  el=document.getElementById('kpiAtivasTrend');  if(el) el.textContent=ativas+' ativas';
+  el=document.getElementById('kpiTrialTrend');   if(el) el.textContent=trial+' em teste';
+  el=document.getElementById('kpiInativaTrend'); if(el) el.textContent=inativa+' suspensa'+(inativa!==1?'s':'');
+}
 
+/* ──────────────────────────────────────────────────
+   RENDER TABLE
+────────────────────────────────────────────────── */
 function renderTable(list){
-  const tbody = document.getElementById('schools-tbody');
-  const empty = document.getElementById('empty-state');
-  const label = document.getElementById('table-count-label');
-  const pagLabel = document.getElementById('pagination-label');
+  FILTERED = list;
+  CUR_PAGE = 1;
+  renderPage();
+}
 
-  if(list.length===0){
+function renderPage(){
+  var tbody  = document.getElementById('schools-tbody');
+  var empty  = document.getElementById('empty-state');
+  var label  = document.getElementById('table-count-label');
+  var pagLbl = document.getElementById('pagination-label');
+
+  if(!FILTERED.length){
     tbody.innerHTML=''; empty.style.display='block';
     label.textContent='Nenhuma escola encontrada';
-    pagLabel.textContent='Mostrando 0 escolas';
+    pagLbl.textContent='0 escolas';
+    renderPaginationBtns(0);
     return;
   }
   empty.style.display='none';
-  label.textContent=`Mostrando ${list.length} escola${list.length!==1?'s':''}`;
-  pagLabel.textContent=`Mostrando ${list.length} de ${schools.length} escolas`;
 
-  tbody.innerHTML = list.map(s=>`
-    <tr onclick="openView('${s.id}')">
-      <td>
-        <div class="school-cell">
-          <div class="school-logo-sm" style="background:${s.logoColor}">${s.logo}</div>
-          <div>
-            <div class="school-name">${s.name}</div>
-            <div class="school-city">${s.city}, ${s.state}</div>
-          </div>
-        </div>
-      </td>
-      <td>${typeBadge(s.personType)}</td>
-      <td class="text-muted text-sm">${s.cpfCnpj}</td>
-      <td>
-        <div class="text-sm fw-600">${s.email}</div>
-        <div class="text-sm text-muted">${s.mobilePhone||s.phone||'—'}</div>
-      </td>
-      <td>${planChip(s.plan)}</td>
-      <td>${statusBadge(s.status)}</td>
-      <td>
-        <span class="fw-600">${s.students}</span>
-        <span class="text-muted text-sm"> / ${s.capacity}</span>
-      </td>
-      <td>${billingIcon(s.billingType)} <span class="text-sm">${s.billingType}</span></td>
-      <td class="text-muted text-sm">${s.nextDueDate}</td>
-      <td onclick="event.stopPropagation()">
-        <div class="row-actions">
-          <button class="action-btn" title="Visualizar" onclick="openView('${s.id}')">👁</button>
-          <button class="action-btn" title="Editar" onclick="openEdit('${s.id}')">✏️</button>
-          <button class="action-btn ${s.status==='inactive'?'success':'danger'}" title="${s.status==='inactive'?'Ativar':'Inativar'}" onclick="askToggleStatus('${s.id}')">${s.status==='inactive'?'🟢':'🔴'}</button>
-        </div>
-      </td>
-    </tr>`).join('');
+  var start = (CUR_PAGE-1)*PAGE_SIZE;
+  var page  = FILTERED.slice(start, start+PAGE_SIZE);
+
+  label.textContent='Mostrando '+FILTERED.length+' escola'+(FILTERED.length!==1?'s':'');
+  pagLbl.textContent='Mostrando '+(start+1)+'-'+(start+page.length)+' de '+FILTERED.length;
+
+  tbody.innerHTML=page.map(function(s){
+    var logo  = s.logo_emoji||'\ud83c\udfeb';
+    var cor   = s.logo_cor||'#dbeafe';
+    var nome  = s.nome_fantasia||'-';
+    var cid   = (s.cidade||'-')+', '+(s.estado||'-');
+    var doc   = s.cpf_cnpj||s.cnpj||'-';
+    var email = s.email||'-';
+    var tel   = s.celular||s.telefone||'-';
+    var plan  = s.plano||'-';
+    var alun  = s.total_alunos||0;
+    var cap   = s.capacidade||100;
+    var bt    = s.tipo_cobranca||'PIX';
+    var venc  = s.proximo_vencimento?fmtDate(s.proximo_vencimento):'-';
+    var sid   = s.id;
+    var isInact = s.status==='inactive';
+    return '<tr onclick="openView(\''+sid+'\')">'
+      +'<td><div class="school-cell">'
+      +'<div class="school-logo-sm" style="background:'+cor+'">'+logo+'</div>'
+      +'<div><div class="school-name">'+nome+'</div><div class="school-city">'+cid+'</div></div>'
+      +'</div></td>'
+      +'<td>'+typeBadge(s.person_type||'JURIDICA')+'</td>'
+      +'<td class="text-muted text-sm">'+doc+'</td>'
+      +'<td><div class="text-sm fw-600">'+email+'</div><div class="text-sm text-muted">'+tel+'</div></td>'
+      +'<td>'+planChip(plan)+'</td>'
+      +'<td>'+statusBadge(s.status||'inactive')+'</td>'
+      +'<td><span class="fw-600">'+alun+'</span><span class="text-muted text-sm"> / '+cap+'</span></td>'
+      +'<td>'+billingIcon(bt)+' <span class="text-sm">'+bt+'</span></td>'
+      +'<td class="text-muted text-sm">'+venc+'</td>'
+      +'<td onclick="event.stopPropagation()">'
+      +'<div class="row-actions">'
+      +'<button class="action-btn" title="Visualizar" onclick="openView(\''+sid+'\')">&#128065;</button>'
+      +'<button class="action-btn" title="Editar" onclick="openEdit(\''+sid+'\')">&#9999;&#65039;</button>'
+      +'<button class="action-btn '+(isInact?'success':'danger')+'" title="'+(isInact?'Ativar':'Inativar')+'" onclick="askToggleStatus(\''+sid+'\')">'+(isInact?'&#128994;':'&#128308;')+'</button>'
+      +'</div></td></tr>';
+  }).join('');
+
+  renderPaginationBtns(FILTERED.length);
 }
 
-/* ─── FILTER ─── */
-function filterTable(){
-  const q  = (document.getElementById('table-search').value||document.getElementById('topbar-search').value).toLowerCase();
-  const st = document.getElementById('filter-status').value;
-  const pt = document.getElementById('filter-type').value;
-  const pl = document.getElementById('filter-plan').value;
+function renderPaginationBtns(total){
+  var el = document.getElementById('pagination-btns');
+  if(!el) return;
+  var pages = Math.ceil(total/PAGE_SIZE);
+  if(pages<=1){ el.innerHTML=''; return; }
+  var html='';
+  var prev = CUR_PAGE>1;
+  html+='<button class="btn btn-secondary btn-sm" '+(prev?'onclick="changePage(CUR_PAGE-1)"':'disabled style="opacity:.4"')+'>\u2190 Ant.</button>';
+  for(var i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-CUR_PAGE)<=1){
+      html+='<button class="btn '+(i===CUR_PAGE?'btn-primary':'btn-secondary')+' btn-sm" onclick="changePage('+i+')">'+i+'</button>';
+    } else if(i===2&&CUR_PAGE>4){
+      html+='<span style="padding:0 4px;align-self:center;color:var(--text-muted)">…</span>';
+    } else if(i===pages-1&&CUR_PAGE<pages-3){
+      html+='<span style="padding:0 4px;align-self:center;color:var(--text-muted)">…</span>';
+    }
+  }
+  var nxt = CUR_PAGE<pages;
+  html+='<button class="btn btn-secondary btn-sm" '+(nxt?'onclick="changePage(CUR_PAGE+1)"':'disabled style="opacity:.4"')+'>Pr\u00f3x \u2192</button>';
+  el.innerHTML=html;
+}
 
-  const result = schools.filter(s=>{
-    const matchQ  = !q || s.name.toLowerCase().includes(q) || s.cpfCnpj.includes(q) || s.city.toLowerCase().includes(q) || (s.companyName||'').toLowerCase().includes(q);
-    const matchSt = !st || s.status===st;
-    const matchPt = !pt || s.personType===pt;
-    const matchPl = !pl || s.plan===pl;
-    return matchQ && matchSt && matchPt && matchPl;
+function changePage(p){
+  CUR_PAGE=p;
+  renderPage();
+}
+
+/* ──────────────────────────────────────────────────
+   FILTER
+────────────────────────────────────────────────── */
+function filterTable(){
+  var q  = ((document.getElementById('table-search')||{}).value||(document.getElementById('topbar-search')||{}).value||'').toLowerCase();
+  var st = (document.getElementById('filter-status')||{}).value||'';
+  var pt = (document.getElementById('filter-type')||{}).value||'';
+  var pl = (document.getElementById('filter-plan')||{}).value||'';
+
+  var result = SCHOOLS.filter(function(s){
+    var nome = (s.nome_fantasia||'').toLowerCase();
+    var doc  = (s.cpf_cnpj||s.cnpj||'');
+    var cid  = (s.cidade||'').toLowerCase();
+    var rz   = (s.razao_social||'').toLowerCase();
+    var matchQ  = !q || nome.includes(q)||doc.includes(q)||cid.includes(q)||rz.includes(q);
+    var matchSt = !st || s.status===st;
+    var matchPt = !pt || (s.person_type||'JURIDICA')===pt;
+    var matchPl = !pl || (s.plano||'')=== pl;
+    return matchQ&&matchSt&&matchPt&&matchPl;
   });
   renderTable(result);
 }
 
-/* ─── PANEL OPEN/CLOSE ─── */
+/* ──────────────────────────────────────────────────
+   PANEL OPEN / CLOSE
+────────────────────────────────────────────────── */
 function openPanel(){
   document.getElementById('panelOverlay').classList.add('show');
   document.getElementById('sidePanel').classList.add('open');
   document.body.style.overflow='hidden';
 }
-
 function closePanel(){
   document.getElementById('panelOverlay').classList.remove('show');
   document.getElementById('sidePanel').classList.remove('open');
@@ -938,203 +759,149 @@ function closePanel(){
   currentSchoolId=null; panelMode=null;
 }
 
-/* ─── VIEW ─── */
+/* ──────────────────────────────────────────────────
+   VIEW PANEL
+────────────────────────────────────────────────── */
 function openView(id){
-  const s = schools.find(x=>x.id===id);
+  var s=SCHOOLS.find(function(x){return x.id===id;});
   if(!s) return;
   currentSchoolId=id; panelMode='view';
 
-  document.getElementById('panelHeaderLogo').style.background=s.logoColor;
-  document.getElementById('panelHeaderLogo').textContent=s.logo;
-  document.getElementById('panelTitle').textContent=s.name;
-  document.getElementById('panelSub').textContent=`${s.city}, ${s.state} · ${s.personType==='JURIDICA'?'Pessoa Jurídica':'Pessoa Física'}`;
+  var logo = s.logo_emoji||'\ud83c\udfeb';
+  var cor  = s.logo_cor||'#dbeafe';
+  var nome = s.nome_fantasia||'-';
+  var cidade = (s.cidade||'-')+', '+(s.estado||'-');
 
-  const pctCapacity = Math.round(s.students/s.capacity*100);
-  const payStatusMap = { paid:'badge-active', overdue:'badge-pending', trial:'badge-trial', inactive:'badge-inactive' };
-  const payLabels    = { paid:'Em dia', overdue:'Em atraso', trial:'Trial', inactive:'Inativa' };
+  document.getElementById('panelHeaderLogo').style.background=cor;
+  document.getElementById('panelHeaderLogo').textContent=logo;
+  document.getElementById('panelTitle').textContent=nome;
+  document.getElementById('panelSub').textContent=cidade+' \u00b7 '+((s.person_type||'JURIDICA')==='JURIDICA'?'Pessoa Jur\u00eddica':'Pessoa F\u00edsica');
 
-  document.getElementById('panelBody').innerHTML=`
-    <div class="tabs" id="viewTabs">
-      <button class="tab-item active" onclick="switchTab('tab-geral')">Dados Gerais</button>
-      <button class="tab-item" onclick="switchTab('tab-asaas')">Cobrança Asaas</button>
-      <button class="tab-item" onclick="switchTab('tab-alunos')">Alunos (${s.students})</button>
-      <button class="tab-item" onclick="switchTab('tab-historico')">Histórico</button>
-    </div>
+  var pct  = s.capacidade?Math.round((s.total_alunos||0)/s.capacidade*100):0;
+  var hist = s.historico_pagamentos||[];
+  var payMap = {paid:'badge-active',overdue:'badge-pending',trial:'badge-trial',inactive:'badge-inactive'};
+  var payLbl = {paid:'Em dia',overdue:'Em atraso',trial:'Trial',inactive:'Inativa'};
+  var pst = s.status_pagamento||s.status||'inactive';
 
-    <!-- TAB GERAL -->
-    <div class="tab-content active" id="tab-geral">
-      <div class="school-hero">
-        <div class="school-hero-logo" style="background:${s.logoColor}">${s.logo}</div>
-        <div class="school-hero-info">
-          <div class="hero-name">${s.name}</div>
-          <div class="hero-meta">${s.city}, ${s.state} · Desde ${s.createdAt}</div>
-          <div class="school-hero-badges">
-            ${statusBadge(s.status)} ${planChip(s.plan)}
-            <span class="badge ${payStatusMap[s.paymentStatus]}">${payLabels[s.paymentStatus]}</span>
-          </div>
-        </div>
-      </div>
+  document.getElementById('panelBody').innerHTML=''
+    +'<div class="tabs" id="viewTabs">'
+    +'<button class="tab-item active" onclick="switchTab(event,\'tab-geral\')">Dados Gerais</button>'
+    +'<button class="tab-item" onclick="switchTab(event,\'tab-asaas\')">Cobran\u00e7a Asaas</button>'
+    +'<button class="tab-item" onclick="switchTab(event,\'tab-alunos\')">Alunos ('+( s.total_alunos||0)+')</button>'
+    +'<button class="tab-item" onclick="switchTab(event,\'tab-historico\')">Hist\u00f3rico</button>'
+    +'</div>'
 
-      <div class="info-section">
-        <div class="info-section-title">Identificação</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">Tipo de Pessoa</div><div class="info-value">${s.personType==='JURIDICA'?'🏢 Pessoa Jurídica':'👤 Pessoa Física'}</div></div>
-          <div class="info-item"><div class="info-label">CPF / CNPJ</div><div class="info-value">${s.cpfCnpj}</div></div>
-          ${s.personType==='JURIDICA'?`<div class="info-item full"><div class="info-label">Razão Social</div><div class="info-value">${s.companyName}</div></div>`:''}
-          <div class="info-item"><div class="info-label">Responsável</div><div class="info-value">${s.responsibleName}</div></div>
-          ${s.personType==='JURIDICA'?`
-          <div class="info-item"><div class="info-label">Insc. Municipal</div><div class="info-value">${s.municipalInscription||'—'}</div></div>
-          <div class="info-item"><div class="info-label">Insc. Estadual</div><div class="info-value">${s.stateInscription||'—'}</div></div>`:''}
-        </div>
-      </div>
+    +'<div class="tab-content active" id="tab-geral">'
+    +'<div class="school-hero">'
+    +'<div class="school-hero-logo" style="background:'+cor+'">'+logo+'</div>'
+    +'<div class="school-hero-info">'
+    +'<div class="hero-name">'+nome+'</div>'
+    +'<div class="hero-meta">'+cidade+' \u00b7 Desde '+fmtDate(s.created_at)+'</div>'
+    +'<div class="school-hero-badges">'+statusBadge(s.status||'inactive')+' '+planChip(s.plano||'-')
+    +'<span class="badge '+(payMap[pst]||'badge-inactive')+'">'+(payLbl[pst]||pst)+'</span></div>'
+    +'</div></div>'
+    +'<div class="info-section"><div class="info-section-title">Identifica\u00e7\u00e3o</div><div class="info-grid">'
+    +'<div class="info-item"><div class="info-label">Tipo</div><div class="info-value">'+((s.person_type||'JURIDICA')==='JURIDICA'?'\ud83c\udfe2 Pessoa Jur\u00eddica':'\ud83d\udc64 Pessoa F\u00edsica')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">CPF / CNPJ</div><div class="info-value">'+(s.cpf_cnpj||s.cnpj||'-')+'</div></div>'
+    +((s.person_type||'JURIDICA')==='JURIDICA'?'<div class="info-item full"><div class="info-label">Raz\u00e3o Social</div><div class="info-value">'+(s.razao_social||'-')+'</div></div>':'')
+    +'<div class="info-item"><div class="info-label">Respons\u00e1vel</div><div class="info-value">'+(s.nome_responsavel||'-')+'</div></div>'
+    +((s.person_type||'JURIDICA')==='JURIDICA'?'<div class="info-item"><div class="info-label">Insc. Municipal</div><div class="info-value">'+(s.inscricao_municipal||'-')+'</div></div><div class="info-item"><div class="info-label">Insc. Estadual</div><div class="info-value">'+(s.inscricao_estadual||'-')+'</div></div>':'')
+    +'</div></div>'
+    +'<div class="info-section"><div class="info-section-title">Contato</div><div class="info-grid">'
+    +'<div class="info-item full"><div class="info-label">E-mail</div><div class="info-value">'+(s.email||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Telefone</div><div class="info-value">'+(s.telefone||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Celular</div><div class="info-value">'+(s.celular||'-')+'</div></div>'
+    +'</div></div>'
+    +'<div class="info-section"><div class="info-section-title">Endere\u00e7o</div><div class="info-grid">'
+    +'<div class="info-item"><div class="info-label">CEP</div><div class="info-value">'+(s.cep||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Bairro</div><div class="info-value">'+(s.bairro||'-')+'</div></div>'
+    +'<div class="info-item full"><div class="info-label">Logradouro</div><div class="info-value">'+(s.logradouro||'-')+', '+(s.numero||s/n||'')+(s.complemento?' \u2014 '+s.complemento:'')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Cidade</div><div class="info-value">'+(s.cidade||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Estado</div><div class="info-value">'+(s.estado||'-')+'</div></div>'
+    +'</div></div>'
+    +'<div class="info-section"><div class="info-section-title">Escola</div><div class="info-grid">'
+    +'<div class="info-item"><div class="info-label">Modalidades</div><div class="info-value">'+(s.modalidades||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Plano</div><div class="info-value">'+(s.plano||'-')+'</div></div>'
+    +'<div class="info-item"><div class="info-label">Capacidade ('+pct+'%)</div>'
+    +'<div style="margin-top:4px;"><div class="progress-bar-wrap"><div class="progress-bar" style="width:'+pct+'%"></div></div></div>'
+    +'<div class="info-value" style="margin-top:4px;">'+(s.total_alunos||0)+' / '+(s.capacidade||100)+' alunos</div></div>'
+    +'<div class="info-item"><div class="info-label">Ref. Externa</div><div class="info-value">'+(s.referencia_externa||'-')+'</div></div>'
+    +(s.observacoes?'<div class="info-item full"><div class="info-label">Observa\u00e7\u00f5es</div><div class="info-value">'+s.observacoes+'</div></div>':'')
+    +'</div></div>'
+    +'</div>'/* end tab-geral */
 
-      <div class="info-section">
-        <div class="info-section-title">Contato</div>
-        <div class="info-grid">
-          <div class="info-item full"><div class="info-label">E-mail</div><div class="info-value">${s.email}</div></div>
-          <div class="info-item"><div class="info-label">Telefone</div><div class="info-value">${s.phone||'—'}</div></div>
-          <div class="info-item"><div class="info-label">Celular</div><div class="info-value">${s.mobilePhone||'—'}</div></div>
-          ${s.additionalEmails?`<div class="info-item full"><div class="info-label">Emails Adicionais</div><div class="info-value">${s.additionalEmails}</div></div>`:''}
-        </div>
-      </div>
+    +'<div class="tab-content" id="tab-asaas">'
+    +'<div style="margin-bottom:12px;"><span class="asaas-badge">\ud83d\udd17 Integra\u00e7\u00e3o Asaas</span></div>'
+    +'<div class="info-section"><div class="info-section-title">Dados do Cliente (Asaas)</div><div class="info-grid">'
+    +'<div class="info-item asaas-field"><div class="info-label">Customer ID</div><div class="info-value">'+(s.asaas_customer_id||'N\u00e3o registrado')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">personType</div><div class="info-value">'+(s.person_type||'JURIDICA')+'</div></div>'
+    +'<div class="info-item asaas-field full"><div class="info-label">cpfCnpj</div><div class="info-value">'+(s.cpf_cnpj||s.cnpj||'-')+'</div></div>'
+    +'<div class="info-item asaas-field full"><div class="info-label">name / company</div><div class="info-value">'+((s.person_type||'JURIDICA')==='JURIDICA'?s.razao_social:s.nome_responsavel)||'-'+'</div></div>'
+    +'<div class="info-item asaas-field full"><div class="info-label">email</div><div class="info-value">'+(s.email||'-')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">phone</div><div class="info-value">'+(s.telefone||'-')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">mobilePhone</div><div class="info-value">'+(s.celular||'-')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">postalCode</div><div class="info-value">'+(s.cep||'-')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">province</div><div class="info-value">'+(s.bairro||'-')+'</div></div>'
+    +'<div class="info-item asaas-field full"><div class="info-label">address / number</div><div class="info-value">'+(s.logradouro||'-')+', '+(s.numero||'')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">notificationDisabled</div><div class="info-value">'+(s.notif_desabilitada?'Sim (OFF)':'N\u00e3o (ON)')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">externalReference</div><div class="info-value">'+(s.referencia_externa||'-')+'</div></div>'
+    +'</div></div>'
+    +'<div class="info-section"><div class="info-section-title">Cobran\u00e7a</div><div class="info-grid">'
+    +'<div class="info-item asaas-field"><div class="info-label">billingType</div>'
+    +'<div class="billing-type-row">'+['PIX','BOLETO','CREDIT_CARD'].map(function(bt){return '<span class="billing-chip '+((s.tipo_cobranca||'PIX')===bt?'active':'')+'">'+(billingIcon(bt))+' '+bt+'</span>';}).join('')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">Mensalidade</div><div class="info-value">'+fmtCurrency(s.mensalidade)+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">Dia Vencimento</div><div class="info-value">Todo dia '+(s.dia_vencimento||5)+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">Desconto</div><div class="info-value">'+((s.desconto_perc||0)?s.desconto_perc+'% (at\u00e9 '+(s.desconto_dias||0)+'d antes)':'Sem desconto')+'</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">Juros a.m.</div><div class="info-value">'+(s.juros_perc||1)+'%</div></div>'
+    +'<div class="info-item asaas-field"><div class="info-label">Multa</div><div class="info-value">'+(s.multa_perc||2)+'%</div></div>'
+    +'</div></div>'
+    +'</div>'/* end tab-asaas */
 
-      <div class="info-section">
-        <div class="info-section-title">Endereço</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">CEP</div><div class="info-value">${s.postalCode}</div></div>
-          <div class="info-item"><div class="info-label">Bairro</div><div class="info-value">${s.province}</div></div>
-          <div class="info-item full"><div class="info-label">Logradouro</div><div class="info-value">${s.address}, ${s.addressNumber}${s.complement?' — '+s.complement:''}</div></div>
-          <div class="info-item"><div class="info-label">Cidade</div><div class="info-value">${s.cityName}</div></div>
-          <div class="info-item"><div class="info-label">Estado</div><div class="info-value">${s.stateName}</div></div>
-        </div>
-      </div>
+    +'<div class="tab-content" id="tab-alunos">'
+    +(!(s.total_alunos)
+      ?'<div class="empty-state"><div class="es-icon">\ud83d\udc68\u200d\ud83c\udf93</div><div class="es-text">Nenhum aluno cadastrado ainda.</div></div>'
+      :'<div class="empty-state"><div class="es-icon">\ud83d\udc68\u200d\ud83c\udf93</div><div class="es-text">Acesse a tela de Usu\u00e1rios para ver os alunos desta escola.</div></div>')
+    +'</div>'/* end tab-alunos */
 
-      <div class="info-section">
-        <div class="info-section-title">Escola</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">Modalidades</div><div class="info-value">${s.sports.join(', ')}</div></div>
-          <div class="info-item"><div class="info-label">Plano</div><div class="info-value">${s.plan}</div></div>
-          <div class="info-item">
-            <div class="info-label">Capacidade (${pctCapacity}%)</div>
-            <div style="margin-top:4px;"><div class="progress-bar-wrap"><div class="progress-bar" style="width:${pctCapacity}%"></div></div></div>
-            <div class="info-value" style="margin-top:4px;">${s.students} / ${s.capacity} alunos</div>
-          </div>
-          <div class="info-item"><div class="info-label">ID Externo</div><div class="info-value">${s.externalReference}</div></div>
-          ${s.observations?`<div class="info-item full"><div class="info-label">Observações</div><div class="info-value">${s.observations}</div></div>`:''}
-        </div>
-      </div>
-    </div>
+    +'<div class="tab-content" id="tab-historico">'
+    +(hist.length===0
+      ?'<div class="empty-state"><div class="es-icon">\ud83d\udcc4</div><div class="es-text">Nenhum pagamento registrado ainda.</div></div>'
+      :hist.map(function(p){
+          var icon  = p.status==='paid'?'\u2705':p.status==='overdue'?'\u274c':'\u23f3';
+          var bg    = p.status==='paid'?'var(--success-light)':p.status==='overdue'?'var(--danger-light)':'var(--warning-light)';
+          var color = p.status==='paid'?'var(--success)':p.status==='overdue'?'var(--danger)':'var(--warning)';
+          return '<div class="payment-row">'
+            +'<div class="pay-icon" style="background:'+bg+'">'+icon+'</div>'
+            +'<div class="pay-info"><div class="pay-desc">Mensalidade '+p.month+'</div>'
+            +'<div class="pay-date">'+(p.status==='paid'?'Pago em '+p.date:p.status==='overdue'?'\u26a0 Em atraso':'-')+'</div></div>'
+            +'<div class="pay-value" style="color:'+color+'">'+fmtCurrency(p.value)+'</div></div>';
+        }).join(''))
+    +'</div>';/* end tab-historico */
 
-    <!-- TAB ASAAS -->
-    <div class="tab-content" id="tab-asaas">
-      <div style="margin-bottom:12px;"><span class="asaas-badge">🔗 Integração Asaas</span></div>
-      <div class="info-section">
-        <div class="info-section-title">Dados do Cliente (Asaas)</div>
-        <div class="info-grid">
-          <div class="info-item asaas-field"><div class="info-label">Customer ID</div><div class="info-value">${s.asaasCustomerId||'Não registrado'}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">personType (auto)</div><div class="info-value">${s.personType}</div></div>
-          <div class="info-item asaas-field full"><div class="info-label">cpfCnpj</div><div class="info-value">${s.cpfCnpj}</div></div>
-          <div class="info-item asaas-field full"><div class="info-label">name / company</div><div class="info-value">${s.personType==='JURIDICA'?s.companyName:s.responsibleName}</div></div>
-          <div class="info-item asaas-field full"><div class="info-label">email</div><div class="info-value">${s.email}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">phone</div><div class="info-value">${s.phone||'—'}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">mobilePhone</div><div class="info-value">${s.mobilePhone||'—'}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">postalCode</div><div class="info-value">${s.postalCode}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">province (bairro)</div><div class="info-value">${s.province}</div></div>
-          <div class="info-item asaas-field full"><div class="info-label">address / addressNumber</div><div class="info-value">${s.address}, ${s.addressNumber}${s.complement?' — '+s.complement:''}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">notificationDisabled</div><div class="info-value">${s.notificationDisabled?'Sim (notificações OFF)':'Não (notificações ON)'}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">externalReference</div><div class="info-value">${s.externalReference}</div></div>
-        </div>
-      </div>
-      <div class="info-section">
-        <div class="info-section-title">Configuração de Cobrança</div>
-        <div class="info-grid">
-          <div class="info-item asaas-field"><div class="info-label">billingType</div>
-            <div class="billing-type-row">
-              ${['PIX','BOLETO','CREDIT_CARD'].map(bt=>`<span class="billing-chip ${s.billingType===bt?'active':''}">${billingIcon(bt)} ${bt}</span>`).join('')}
-            </div>
-          </div>
-          <div class="info-item asaas-field"><div class="info-label">value (mensalidade)</div><div class="info-value">R$ ${s.monthlyValue.toLocaleString('pt-BR')}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">dueDate (dia)</div><div class="info-value">Todo dia ${s.dueDay}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">discount</div><div class="info-value">${s.discount.value?`${s.discount.value}% (até ${s.discount.dueDateLimitDays}d antes)`:'Sem desconto'}</div></div>
-          <div class="info-item asaas-field"><div class="info-label">interest (juros)</div><div class="info-value">${s.interest.value}% a.m.</div></div>
-          <div class="info-item asaas-field"><div class="info-label">fine (multa)</div><div class="info-value">${s.fine.value}%</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB ALUNOS -->
-    <div class="tab-content" id="tab-alunos">
-      ${s.students===0
-        ? `<div class="empty-state"><div class="es-icon">👨‍🎓</div><div class="es-text">Nenhum aluno cadastrado ainda.</div></div>`
-        : `
-        <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-          <span class="text-sm text-muted">${s.students} alunos · ${s.capacity} capacidade máxima</span>
-          <button class="btn btn-secondary btn-sm">Ver todos</button>
-        </div>
-        ${[
-          {name:'Lucas Almeida',sport:s.sports[0],status:'active'},
-          {name:'Maria Santos',sport:s.sports[0],status:'active'},
-          {name:'João Pereira',sport:s.sports[s.sports.length-1]||s.sports[0],status:'active'},
-          {name:'Ana Rodrigues',sport:s.sports[0],status:'inactive'},
-          {name:'Pedro Costa',sport:s.sports[s.sports.length-1]||s.sports[0],status:'active'},
-        ].map(a=>`
-          <div class="student-row">
-            <div class="student-av">${a.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
-            <div>
-              <div class="student-name">${a.name}</div>
-              <div class="student-sport">${a.sport}</div>
-            </div>
-            <div class="student-status">${statusBadge(a.status)}</div>
-          </div>`).join('')}
-        <p class="text-muted text-sm" style="margin-top:10px;text-align:center;">Mostrando 5 de ${s.students} alunos</p>
-      `}
-    </div>
-
-    <!-- TAB HISTÓRICO -->
-    <div class="tab-content" id="tab-historico">
-      ${s.paymentHistory.length===0
-        ? `<div class="empty-state"><div class="es-icon">📄</div><div class="es-text">Nenhum pagamento registrado ainda.</div></div>`
-        : s.paymentHistory.map(p=>{
-            const icon = p.status==='paid'?'✅':p.status==='overdue'?'❌':'⏳';
-            const bg   = p.status==='paid'?'var(--success-light)':p.status==='overdue'?'var(--danger-light)':'var(--warning-light)';
-            const color= p.status==='paid'?'var(--success)':p.status==='overdue'?'var(--danger)':'var(--warning)';
-            return `
-            <div class="payment-row">
-              <div class="pay-icon" style="background:${bg}">${icon}</div>
-              <div class="pay-info">
-                <div class="pay-desc">Mensalidade ${p.month}</div>
-                <div class="pay-date">${p.status==='paid'?'Pago em '+p.date:p.status==='overdue'?'⚠ Em atraso':'—'}</div>
-              </div>
-              <div class="pay-value" style="color:${color}">R$ ${p.value.toLocaleString('pt-BR')}</div>
-            </div>`;
-          }).join('')
-      }
-    </div>
-  `;
-
-  document.getElementById('panelFooter').innerHTML=`
-    <button class="btn btn-secondary" onclick="closePanel()">Fechar</button>
-    <button class="btn btn-secondary" onclick="openEdit('${s.id}')">✏️ Editar</button>
-    <button class="btn ${s.status==='inactive'?'btn-success':'btn-danger'}" onclick="askToggleStatus('${s.id}')">${s.status==='inactive'?'🟢 Ativar':'🔴 Inativar'}</button>
-  `;
+  document.getElementById('panelFooter').innerHTML=''
+    +'<button class="btn btn-secondary" onclick="closePanel()">Fechar</button>'
+    +'<button class="btn btn-secondary" onclick="openEdit(\''+id+'\')">&#9999;&#65039; Editar</button>'
+    +'<button class="btn '+(s.status==='inactive'?'btn-success':'btn-danger')+'" onclick="askToggleStatus(\''+id+'\')">'+(s.status==='inactive'?'&#128994; Ativar':'&#128308; Inativar')+'</button>';
 
   openPanel();
 }
 
-function switchTab(id){
-  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+function switchTab(evt, tabId){
+  document.querySelectorAll('#viewTabs .tab-item').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  document.getElementById(tabId).classList.add('active');
+  if(evt&&evt.currentTarget) evt.currentTarget.classList.add('active');
 }
 
-/* ─── EDIT / CREATE ─── */
+/* ──────────────────────────────────────────────────
+   EDIT / CREATE
+────────────────────────────────────────────────── */
 function openEdit(id){
-  const s = schools.find(x=>x.id===id);
+  var s=SCHOOLS.find(function(x){return x.id===id;});
   if(!s) return;
   currentSchoolId=id; panelMode='edit';
-  selectedPersonType = s.personType;
-  selectedBillingType = s.billingType;
+  selectedPersonType  = s.person_type||'JURIDICA';
+  selectedBillingType = s.tipo_cobranca||'PIX';
   renderForm(s);
   openPanel();
 }
@@ -1147,382 +914,235 @@ function openCreate(){
 }
 
 function renderForm(s){
-  const isEdit = !!s;
-  document.getElementById('panelHeaderLogo').style.background = isEdit ? s.logoColor : 'var(--primary-light)';
-  document.getElementById('panelHeaderLogo').textContent = isEdit ? s.logo : '🏫';
-  document.getElementById('panelTitle').textContent = isEdit ? `Editar: ${s.name}` : 'Nova Escola';
-  document.getElementById('panelSub').textContent = isEdit ? `ID: ${s.id}` : 'Preencha os dados da escola';
+  var isEdit=!!s;
+  var logo = isEdit?(s.logo_emoji||'\ud83c\udfeb'):'\ud83c\udfeb';
+  var cor  = isEdit?(s.logo_cor||'#dbeafe'):'var(--primary-light)';
+  document.getElementById('panelHeaderLogo').style.background=cor;
+  document.getElementById('panelHeaderLogo').textContent=logo;
+  document.getElementById('panelTitle').textContent=isEdit?'Editar: '+(s.nome_fantasia||''):'Nova Escola';
+  document.getElementById('panelSub').textContent=isEdit?'ID: '+s.id:'Preencha os dados da escola';
 
-  document.getElementById('panelBody').innerHTML=`
+  var states=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
-    <!-- 1. TIPO DE PESSOA -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">👤</div>
-        <div class="form-section-title">Tipo de Pessoa <span style="color:var(--text-muted);font-weight:400;font-size:11px;">(define campos Asaas)</span></div>
-      </div>
-      <div class="person-type-toggle">
-        <div class="person-type-opt ${selectedPersonType==='JURIDICA'?'selected':''}" onclick="setPersonType('JURIDICA')">
-          <div class="pt-icon">🏢</div>
-          <div class="pt-label">Pessoa Jurídica</div>
-          <div class="pt-sub">CNPJ · Empresa</div>
-        </div>
-        <div class="person-type-opt ${selectedPersonType==='FISICA'?'selected':''}" onclick="setPersonType('FISICA')">
-          <div class="pt-icon">👤</div>
-          <div class="pt-label">Pessoa Física</div>
-          <div class="pt-sub">CPF · Autônomo</div>
-        </div>
-      </div>
-    </div>
+  document.getElementById('panelBody').innerHTML=''
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon">\ud83d\udc64</div><div class="form-section-title">Tipo de Pessoa</div></div>'
+    +'<div class="person-type-toggle">'
+    +'<div class="person-type-opt '+(selectedPersonType==='JURIDICA'?'selected':'')+'" onclick="setPersonType(event,\'JURIDICA\')">'
+    +'<div class="pt-icon">\ud83c\udfe2</div><div class="pt-label">Pessoa Jur\u00eddica</div><div class="pt-sub">CNPJ \u00b7 Empresa</div></div>'
+    +'<div class="person-type-opt '+(selectedPersonType==='FISICA'?'selected':'')+'" onclick="setPersonType(event,\'FISICA\')">'
+    +'<div class="pt-icon">\ud83d\udc64</div><div class="pt-label">Pessoa F\u00edsica</div><div class="pt-sub">CPF \u00b7 Aut\u00f4nomo</div></div>'
+    +'</div></div>'
 
-    <!-- 2. DADOS DA ESCOLA -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">🏫</div>
-        <div class="form-section-title">Dados da Escola</div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">Nome da Escola <span class="required">*</span></label>
-          <input class="form-input" id="f-name" placeholder="Ex: Academia Futebol SP" value="${isEdit?s.name:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Modalidades <span class="required">*</span></label>
-          <input class="form-input" id="f-sports" placeholder="Futebol, Natação…" value="${isEdit?s.sports.join(', '):''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Capacidade Máx. <span class="required">*</span></label>
-          <input class="form-input" id="f-capacity" type="number" placeholder="Ex: 200" value="${isEdit?s.capacity:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Plano <span class="required">*</span></label>
-          <select class="form-select" id="f-plan">
-            ${['Premium','Pro','Basic'].map(p=>`<option ${isEdit&&s.plan===p?'selected':''}>${p}</option>`).join('')}
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-select" id="f-status">
-            <option value="active"  ${isEdit&&s.status==='active' ?'selected':''}>Ativa</option>
-            <option value="trial"   ${isEdit&&s.status==='trial'  ?'selected':''}>Trial</option>
-            <option value="pending" ${isEdit&&s.status==='pending'?'selected':''}>Pendente</option>
-            <option value="inactive"${isEdit&&s.status==='inactive'?'selected':''}>Inativa</option>
-          </select>
-        </div>
-      </div>
-    </div>
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon">\ud83c\udfeb</div><div class="form-section-title">Dados da Escola</div></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-group full"><label class="form-label">Nome Fantasia <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-name" placeholder="Ex: Academia Futebol SP" value="'+(isEdit?s.nome_fantasia||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Modalidades</label>'
+    +'<input class="form-input" id="f-sports" placeholder="Futebol, Nata\u00e7\u00e3o\u2026" value="'+(isEdit?s.modalidades||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Capacidade M\u00e1x.</label>'
+    +'<input class="form-input" id="f-capacity" type="number" placeholder="200" value="'+(isEdit?s.capacidade||100:100)+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Plano <span class="required">*</span></label>'
+    +'<select class="form-select" id="f-plan">'+['Premium','Pro','Basic'].map(function(p){return '<option value="'+p+'" '+(isEdit&&s.plano===p?'selected':'')+'>'+p+'</option>';}).join('')+'</select></div>'
+    +'<div class="form-group"><label class="form-label">Status</label>'
+    +'<select class="form-select" id="f-status">'
+    +'<option value="active" '+(isEdit&&s.status==='active'?'selected':'')+'>Ativa</option>'
+    +'<option value="trial" '+(isEdit&&s.status==='trial'?'selected':'')+'>Trial</option>'
+    +'<option value="pending" '+(isEdit&&s.status==='pending'?'selected':'')+'>Pendente</option>'
+    +'<option value="inactive" '+(isEdit&&s.status==='inactive'?'selected':'')+'>Inativa</option>'
+    +'</select></div>'
+    +'</div></div>'
 
-    <!-- 3. IDENTIFICAÇÃO (Asaas: name/company, cpfCnpj) -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">📋</div>
-        <div class="form-section-title">Identificação <span style="color:#0ea5e9;font-size:10px;font-weight:700;background:#e0f2fe;padding:2px 6px;border-radius:4px;margin-left:6px;">Asaas: name / cpfCnpj</span></div>
-      </div>
-      <div class="form-grid" id="identification-fields">
-        ${renderIdentificationFields(s)}
-      </div>
-    </div>
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon">\ud83d\udccb</div>'
+    +'<div class="form-section-title">Identifica\u00e7\u00e3o <span style="color:#0ea5e9;font-size:10px;font-weight:700;background:#e0f2fe;padding:2px 6px;border-radius:4px;margin-left:6px;">Asaas</span></div></div>'
+    +'<div class="form-grid" id="identification-fields">'+renderIdentificationFields(s)+'</div></div>'
 
-    <!-- 4. CONTATO (Asaas: email, phone, mobilePhone) -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">📞</div>
-        <div class="form-section-title">Contato <span style="color:#0ea5e9;font-size:10px;font-weight:700;background:#e0f2fe;padding:2px 6px;border-radius:4px;margin-left:6px;">Asaas: email, phone</span></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">E-mail <span class="required">*</span> <span class="hint">(usado nas cobranças Asaas)</span></label>
-          <input class="form-input" id="f-email" type="email" placeholder="contato@escola.com.br" value="${isEdit?s.email:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Telefone <span class="hint">phone</span></label>
-          <input class="form-input" id="f-phone" placeholder="(11) 3456-7890" value="${isEdit?s.phone:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Celular <span class="hint">mobilePhone</span></label>
-          <input class="form-input" id="f-mobile" placeholder="(11) 99999-9999" value="${isEdit?s.mobilePhone:''}" />
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Emails adicionais <span class="hint">separados por vírgula</span></label>
-          <input class="form-input" id="f-extra-emails" placeholder="financeiro@escola.com.br" value="${isEdit?s.additionalEmails:''}" />
-        </div>
-      </div>
-    </div>
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon">\ud83d\udcde</div>'
+    +'<div class="form-section-title">Contato</div></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-group full"><label class="form-label">E-mail <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-email" type="email" placeholder="contato@escola.com.br" value="'+(isEdit?s.email||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Telefone</label>'
+    +'<input class="form-input" id="f-phone" placeholder="(11) 3456-7890" value="'+(isEdit?s.telefone||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Celular</label>'
+    +'<input class="form-input" id="f-mobile" placeholder="(11) 99999-9999" value="'+(isEdit?s.celular||'':'')+'" /></div>'
+    +'<div class="form-group full"><label class="form-label">Emails adicionais</label>'
+    +'<input class="form-input" id="f-extra-emails" placeholder="financeiro@escola.com.br" value="'+(isEdit?s.emails_adicionais||'':'')+'" /></div>'
+    +'</div></div>'
 
-    <!-- 5. ENDEREÇO (Asaas: postalCode, address, province…) -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">📍</div>
-        <div class="form-section-title">Endereço <span style="color:#0ea5e9;font-size:10px;font-weight:700;background:#e0f2fe;padding:2px 6px;border-radius:4px;margin-left:6px;">Asaas: postalCode, address…</span></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">CEP <span class="required">*</span> <span class="hint">postalCode</span></label>
-          <div class="input-with-btn">
-            <input class="form-input" id="f-cep" placeholder="00000-000" value="${isEdit?s.postalCode:''}" />
-            <button class="btn btn-secondary btn-sm" onclick="buscarCep()">Buscar</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Bairro <span class="hint">province</span></label>
-          <input class="form-input" id="f-province" placeholder="Bela Vista" value="${isEdit?s.province:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Logradouro <span class="required">*</span></label>
-          <input class="form-input" id="f-address" placeholder="Av. Paulista" value="${isEdit?s.address:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Número <span class="required">*</span></label>
-          <input class="form-input" id="f-number" placeholder="1500" value="${isEdit?s.addressNumber:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Complemento</label>
-          <input class="form-input" id="f-complement" placeholder="Sala 201" value="${isEdit?s.complement:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cidade <span class="required">*</span></label>
-          <input class="form-input" id="f-city" placeholder="São Paulo" value="${isEdit?s.cityName:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Estado <span class="required">*</span></label>
-          <select class="form-select" id="f-state">
-            ${['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'].map(uf=>`<option ${isEdit&&s.stateName===uf?'selected':''}>${uf}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    </div>
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon">\ud83d\udccd</div>'
+    +'<div class="form-section-title">Endere\u00e7o</div></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-group"><label class="form-label">CEP <span class="required">*</span></label>'
+    +'<div class="input-with-btn"><input class="form-input" id="f-cep" placeholder="00000-000" value="'+(isEdit?s.cep||'':'')+'" />'
+    +'<button class="btn btn-secondary btn-sm" onclick="buscarCep()">Buscar</button></div></div>'
+    +'<div class="form-group"><label class="form-label">Bairro</label>'
+    +'<input class="form-input" id="f-province" placeholder="Bela Vista" value="'+(isEdit?s.bairro||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Logradouro <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-address" placeholder="Av. Paulista" value="'+(isEdit?s.logradouro||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">N\u00famero <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-number" placeholder="1500" value="'+(isEdit?s.numero||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Complemento</label>'
+    +'<input class="form-input" id="f-complement" placeholder="Sala 201" value="'+(isEdit?s.complemento||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Cidade <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-city" placeholder="S\u00e3o Paulo" value="'+(isEdit?s.cidade||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Estado</label>'
+    +'<select class="form-select" id="f-state">'+states.map(function(uf){return '<option '+(isEdit&&s.estado===uf?'selected':'')+'>'+uf+'</option>';}).join('')+'</select></div>'
+    +'</div></div>'
 
-    <!-- 6. COBRANÇA ASAAS -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon" style="background:#e0f2fe;">🔗</div>
-        <div class="form-section-title">Configuração de Cobrança <span style="color:#0ea5e9;font-size:10px;font-weight:700;background:#e0f2fe;padding:2px 6px;border-radius:4px;margin-left:6px;">Asaas Billing</span></div>
-      </div>
-      <div class="form-group" style="margin-bottom:14px;">
-        <label class="form-label">Tipo de Cobrança <span class="hint">billingType</span></label>
-        <div class="billing-opts" id="billing-opts">
-          ${renderBillingOpts()}
-        </div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Valor Mensalidade <span class="required">*</span> <span class="hint">value (R$)</span></label>
-          <input class="form-input" id="f-value" type="number" placeholder="1500" value="${isEdit?s.monthlyValue:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Dia de Vencimento <span class="required">*</span> <span class="hint">dueDate</span></label>
-          <input class="form-input" id="f-dueday" type="number" min="1" max="28" placeholder="5" value="${isEdit?s.dueDay:''}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Desconto <span class="hint">discount.value %</span></label>
-          <input class="form-input" id="f-discount" type="number" placeholder="0" value="${isEdit?s.discount.value:0}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Dias p/ desconto <span class="hint">dueDateLimitDays</span></label>
-          <input class="form-input" id="f-discount-days" type="number" placeholder="3" value="${isEdit?s.discount.dueDateLimitDays:0}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Juros ao mês <span class="hint">interest.value %</span></label>
-          <input class="form-input" id="f-interest" type="number" step="0.1" placeholder="1" value="${isEdit?s.interest.value:1}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Multa por atraso <span class="hint">fine.value %</span></label>
-          <input class="form-input" id="f-fine" type="number" step="0.1" placeholder="2" value="${isEdit?s.fine.value:2}" />
-        </div>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Desativar notificações</div>
-          <div class="toggle-sub">notificationDisabled — o Asaas não enviará e-mails de cobrança</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="f-notif" ${isEdit&&s.notificationDisabled?'checked':''} />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="form-group" style="margin-top:12px;">
-        <label class="form-label">Observações <span class="hint">observations</span></label>
-        <textarea class="form-textarea" id="f-obs" placeholder="Notas internas sobre a escola…">${isEdit?s.observations:''}</textarea>
-      </div>
-    </div>
-  `;
+    +'<div class="form-section"><div class="form-section-header"><div class="form-section-icon" style="background:#e0f2fe;">\ud83d\udd17</div>'
+    +'<div class="form-section-title">Cobran\u00e7a Asaas</div></div>'
+    +'<div class="form-group" style="margin-bottom:14px;"><label class="form-label">Tipo de Cobran\u00e7a</label>'
+    +'<div class="billing-opts" id="billing-opts">'+renderBillingOpts()+'</div></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-group"><label class="form-label">Mensalidade (R$) <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-value" type="number" placeholder="1500" value="'+(isEdit?s.mensalidade||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Dia Vencimento</label>'
+    +'<input class="form-input" id="f-dueday" type="number" min="1" max="28" placeholder="5" value="'+(isEdit?s.dia_vencimento||5:5)+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Desconto %</label>'
+    +'<input class="form-input" id="f-discount" type="number" placeholder="0" value="'+(isEdit?s.desconto_perc||0:0)+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Dias p/ desconto</label>'
+    +'<input class="form-input" id="f-discount-days" type="number" placeholder="3" value="'+(isEdit?s.desconto_dias||0:0)+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Juros a.m. %</label>'
+    +'<input class="form-input" id="f-interest" type="number" step="0.1" placeholder="1" value="'+(isEdit?s.juros_perc||1:1)+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Multa %</label>'
+    +'<input class="form-input" id="f-fine" type="number" step="0.1" placeholder="2" value="'+(isEdit?s.multa_perc||2:2)+'" /></div>'
+    +'</div>'
+    +'<div class="toggle-row"><div><div class="toggle-label">Desativar notifica\u00e7\u00f5es</div>'
+    +'<div class="toggle-sub">notificationDisabled</div></div>'
+    +'<label class="toggle"><input type="checkbox" id="f-notif" '+(isEdit&&s.notif_desabilitada?'checked':'')+' />'
+    +'<span class="toggle-slider"></span></label></div>'
+    +'<div class="form-group" style="margin-top:12px;"><label class="form-label">Observa\u00e7\u00f5es</label>'
+    +'<textarea class="form-textarea" id="f-obs" placeholder="Notas internas\u2026">'+(isEdit?s.observacoes||'':'')+'</textarea>'
+    +'</div></div>';
 
-  document.getElementById('panelFooter').innerHTML=`
-    <button class="btn btn-secondary" onclick="closePanel()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveSchool()">${isEdit?'💾 Salvar Alterações':'✅ Cadastrar Escola'}</button>
-  `;
+  document.getElementById('panelFooter').innerHTML=''
+    +'<button class="btn btn-secondary" onclick="closePanel()">Cancelar</button>'
+    +'<button class="btn btn-primary" onclick="saveSchool()">'+(isEdit?'\ud83d\udcbe Salvar Altera\u00e7\u00f5es':'\u2705 Cadastrar Escola')+'</button>';
 }
 
 function renderIdentificationFields(s){
-  const isEdit = !!s;
-  if(selectedPersonType==='JURIDICA') return `
-    <div class="form-group full">
-      <label class="form-label">Razão Social <span class="required">*</span> <span class="hint">company</span></label>
-      <input class="form-input" id="f-company" placeholder="Academia de Futebol SP Ltda" value="${isEdit?s.companyName:''}" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">CNPJ <span class="required">*</span> <span class="hint">cpfCnpj</span></label>
-      <input class="form-input" id="f-cpfcnpj" placeholder="00.000.000/0001-00" value="${isEdit?s.cpfCnpj:''}" maxlength="18" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Responsável</label>
-      <input class="form-input" id="f-responsible" placeholder="Nome do responsável" value="${isEdit?s.responsibleName:''}" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Inscrição Municipal <span class="hint">municipalInscription</span></label>
-      <input class="form-input" id="f-munic" placeholder="12345678" value="${isEdit&&s.municipalInscription?s.municipalInscription:''}" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Inscrição Estadual <span class="hint">stateInscription</span></label>
-      <input class="form-input" id="f-state-insc" placeholder="123456789012" value="${isEdit&&s.stateInscription?s.stateInscription:''}" />
-    </div>`;
-  else return `
-    <div class="form-group full">
-      <label class="form-label">Nome Completo <span class="required">*</span> <span class="hint">name</span></label>
-      <input class="form-input" id="f-responsible" placeholder="Ex: João da Silva" value="${isEdit?s.responsibleName:''}" />
-    </div>
-    <div class="form-group full">
-      <label class="form-label">CPF <span class="required">*</span> <span class="hint">cpfCnpj</span></label>
-      <input class="form-input" id="f-cpfcnpj" placeholder="000.000.000-00" value="${isEdit?s.cpfCnpj:''}" maxlength="14" />
-    </div>`;
+  var isEdit=!!s;
+  if(selectedPersonType==='JURIDICA') return ''
+    +'<div class="form-group full"><label class="form-label">Raz\u00e3o Social <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-company" placeholder="Academia de Futebol SP Ltda" value="'+(isEdit?s.razao_social||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">CNPJ <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-cpfcnpj" placeholder="00.000.000/0001-00" value="'+(isEdit?s.cpf_cnpj||s.cnpj||'':'')+'" maxlength="18" /></div>'
+    +'<div class="form-group"><label class="form-label">Respons\u00e1vel</label>'
+    +'<input class="form-input" id="f-responsible" placeholder="Nome do respons\u00e1vel" value="'+(isEdit?s.nome_responsavel||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Insc. Municipal</label>'
+    +'<input class="form-input" id="f-munic" placeholder="12345678" value="'+(isEdit?s.inscricao_municipal||'':'')+'" /></div>'
+    +'<div class="form-group"><label class="form-label">Insc. Estadual</label>'
+    +'<input class="form-input" id="f-state-insc" placeholder="123456789012" value="'+(isEdit?s.inscricao_estadual||'':'')+'" /></div>';
+  else return ''
+    +'<div class="form-group full"><label class="form-label">Nome Completo <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-responsible" placeholder="Jo\u00e3o da Silva" value="'+(isEdit?s.nome_responsavel||'':'')+'" /></div>'
+    +'<div class="form-group full"><label class="form-label">CPF <span class="required">*</span></label>'
+    +'<input class="form-input" id="f-cpfcnpj" placeholder="000.000.000-00" value="'+(isEdit?s.cpf_cnpj||'':'')+'" maxlength="14" /></div>';
 }
 
 function renderBillingOpts(){
-  return [
-    {type:'PIX',icon:'⚡',label:'PIX'},
-    {type:'BOLETO',icon:'📄',label:'Boleto'},
-    {type:'CREDIT_CARD',icon:'💳',label:'Cartão'},
-    {type:'UNDEFINED',icon:'🔄',label:'Indefinido'},
-  ].map(o=>`
-    <div class="billing-opt ${selectedBillingType===o.type?'selected':''}" onclick="setBillingType('${o.type}')">
-      <div class="bo-icon">${o.icon}</div>
-      <div class="bo-label">${o.label}</div>
-    </div>`).join('');
+  return [{type:'PIX',icon:'\u26a1',label:'PIX'},{type:'BOLETO',icon:'\ud83d\udcc4',label:'Boleto'},
+          {type:'CREDIT_CARD',icon:'\ud83d\udcb3',label:'Cart\u00e3o'},{type:'UNDEFINED',icon:'\ud83d\udd04',label:'Indefinido'}]
+    .map(function(o){return '<div class="billing-opt '+(selectedBillingType===o.type?'selected':'')+'" onclick="setBillingType(event,\''+o.type+'\')">'
+      +'<div class="bo-icon">'+o.icon+'</div><div class="bo-label">'+o.label+'</div></div>';}).join('');
 }
 
-function setPersonType(pt){
+function setPersonType(evt, pt){
   selectedPersonType=pt;
-  document.querySelectorAll('.person-type-opt').forEach(el=>el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  // re-render only identification fields
-  const s = currentSchoolId ? schools.find(x=>x.id===currentSchoolId) : null;
+  document.querySelectorAll('.person-type-opt').forEach(function(el){el.classList.remove('selected');});
+  if(evt&&evt.currentTarget) evt.currentTarget.classList.add('selected');
+  var s = currentSchoolId?SCHOOLS.find(function(x){return x.id===currentSchoolId;}):null;
   document.getElementById('identification-fields').innerHTML=renderIdentificationFields(s);
 }
 
-function setBillingType(bt){
+function setBillingType(evt, bt){
   selectedBillingType=bt;
-  document.querySelectorAll('.billing-opt').forEach(el=>el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  document.querySelectorAll('.billing-opt').forEach(function(el){el.classList.remove('selected');});
+  if(evt&&evt.currentTarget) evt.currentTarget.classList.add('selected');
 }
 
 function buscarCep(){
-  const cep = document.getElementById('f-cep').value.replace(/\D/g,'');
-  if(cep.length!==8){ alert('CEP inválido'); return; }
-  fetch(`https://viacep.com.br/ws/${cep}/json/`)
-    .then(r=>r.json()).then(d=>{
-      if(d.erro){ alert('CEP não encontrado'); return; }
-      document.getElementById('f-address').value  = d.logradouro||'';
-      document.getElementById('f-province').value = d.bairro||'';
-      document.getElementById('f-city').value     = d.localidade||'';
-      document.getElementById('f-state').value    = d.uf||'SP';
-    }).catch(()=>alert('Erro ao buscar CEP'));
+  var cep=(document.getElementById('f-cep')||{}).value.replace(/\D/g,'');
+  if(cep.length!==8){ showToast('CEP inv\u00e1lido','danger'); return; }
+  fetch('https://viacep.com.br/ws/'+cep+'/json/')
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.erro){ showToast('CEP n\u00e3o encontrado','danger'); return; }
+      document.getElementById('f-address').value  =d.logradouro||'';
+      document.getElementById('f-province').value =d.bairro||'';
+      document.getElementById('f-city').value      =d.localidade||'';
+      document.getElementById('f-state').value     =d.uf||'SP';
+    }).catch(function(){showToast('Erro ao buscar CEP','danger');});
 }
 
-/* ─── SAVE ─── */
-function saveSchool(){
-  const name = (document.getElementById('f-name')||{}).value;
-  if(!name){ alert('Preencha o nome da escola.'); return; }
+/* ──────────────────────────────────────────────────
+   SAVE STUB (overwritten by Bloco 2)
+────────────────────────────────────────────────── */
+function saveSchool(){ showToast('Supabase n\u00e3o conectado','danger'); }
 
-  if(panelMode==='edit' && currentSchoolId){
-    const idx = schools.findIndex(x=>x.id===currentSchoolId);
-    if(idx!==-1){
-      schools[idx].name          = document.getElementById('f-name').value;
-      schools[idx].plan          = document.getElementById('f-plan').value;
-      schools[idx].status        = document.getElementById('f-status').value;
-      schools[idx].personType    = selectedPersonType;
-      schools[idx].billingType   = selectedBillingType;
-      schools[idx].email         = document.getElementById('f-email').value;
-      schools[idx].monthlyValue  = Number(document.getElementById('f-value').value)||0;
-      schools[idx].dueDay        = Number(document.getElementById('f-dueday').value)||1;
-    }
-    showToast('✅ Escola atualizada com sucesso!');
-  } else {
-    const newId = 'SCH' + String(schools.length+1).padStart(3,'0');
-    schools.push({
-      id: newId,
-      logo: '🏫', logoColor: '#dbeafe',
-      name: document.getElementById('f-name').value,
-      city: document.getElementById('f-city')||'', state: 'SP',
-      sports: (document.getElementById('f-sports').value||'').split(',').map(s=>s.trim()),
-      plan: document.getElementById('f-plan').value,
-      status: document.getElementById('f-status').value,
-      students: 0, capacity: Number(document.getElementById('f-capacity').value)||100,
-      monthlyValue: Number(document.getElementById('f-value').value)||0,
-      dueDay: Number(document.getElementById('f-dueday').value)||1,
-      nextDueDate: '—', createdAt: new Date().toLocaleDateString('pt-BR'),
-      personType: selectedPersonType,
-      companyName: (document.getElementById('f-company')||{}).value||'',
-      responsibleName: (document.getElementById('f-responsible')||{}).value||'',
-      cpfCnpj: (document.getElementById('f-cpfcnpj')||{}).value||'',
-      email: document.getElementById('f-email').value,
-      phone: (document.getElementById('f-phone')||{}).value||'',
-      mobilePhone: (document.getElementById('f-mobile')||{}).value||'',
-      additionalEmails: '',
-      postalCode: (document.getElementById('f-cep')||{}).value||'',
-      address: (document.getElementById('f-address')||{}).value||'',
-      addressNumber: (document.getElementById('f-number')||{}).value||'',
-      complement: '', province: '',
-      cityName: (document.getElementById('f-city')||{}).value||'',
-      stateName: (document.getElementById('f-state')||{}).value||'SP',
-      municipalInscription: '', stateInscription: '',
-      externalReference: newId, notificationDisabled: false,
-      observations: (document.getElementById('f-obs')||{}).value||'',
-      asaasCustomerId: '',
-      billingType: selectedBillingType,
-      discount: { value: Number((document.getElementById('f-discount')||{}).value)||0, dueDateLimitDays: 0 },
-      interest: { value: 1 }, fine: { value: 2 },
-      paymentStatus: 'trial', paymentHistory: []
-    });
-    showToast('🏫 Nova escola cadastrada com sucesso!');
-  }
-  closePanel();
-  renderTable(schools);
-  updateSidebarCount();
-}
-
-/* ─── DEACTIVATE / ACTIVATE ─── */
+/* ──────────────────────────────────────────────────
+   TOGGLE STATUS
+────────────────────────────────────────────────── */
 function askToggleStatus(id){
   pendingToggleId=id;
-  const s=schools.find(x=>x.id===id);
-  const isActive = s.status!=='inactive';
-  document.getElementById('modal-icon-el').className = isActive ? 'modal-icon' : 'modal-icon activate';
-  document.getElementById('modal-icon-el').textContent = isActive ? '⚠️' : '🟢';
-  document.getElementById('modal-title-el').textContent = isActive ? `Inativar "${s.name}"?` : `Reativar "${s.name}"?`;
-  document.getElementById('modal-text-el').textContent  = isActive
-    ? 'Esta ação irá suspender o acesso da escola à plataforma. As cobranças Asaas serão pausadas. Você poderá reativar a qualquer momento.'
-    : 'A escola voltará a ter acesso à plataforma e as cobranças serão retomadas no Asaas.';
-  document.getElementById('modal-confirm-btn').className = isActive ? 'btn btn-danger' : 'btn btn-success';
-  document.getElementById('modal-confirm-btn').textContent = isActive ? 'Inativar' : 'Reativar';
+  var s=SCHOOLS.find(function(x){return x.id===id;});
+  if(!s) return;
+  var isActive=s.status!=='inactive';
+  document.getElementById('modal-icon-el').className=isActive?'modal-icon':'modal-icon activate';
+  document.getElementById('modal-icon-el').textContent=isActive?'\u26a0\ufe0f':'\ud83d\udfe2';
+  document.getElementById('modal-title-el').textContent=isActive?'Inativar "'+s.nome_fantasia+'"?':'Reativar "'+s.nome_fantasia+'"?';
+  document.getElementById('modal-text-el').textContent=isActive
+    ?'Esta a\u00e7\u00e3o ir\u00e1 suspender o acesso da escola \u00e0 plataforma.'
+    :'A escola voltar\u00e1 a ter acesso \u00e0 plataforma.';
+  document.getElementById('modal-confirm-btn').className=isActive?'btn btn-danger':'btn btn-success';
+  document.getElementById('modal-confirm-btn').textContent=isActive?'Inativar':'Reativar';
   document.getElementById('deactivateModal').classList.add('show');
 }
 
-function confirmToggleStatus(){
-  const s=schools.find(x=>x.id===pendingToggleId);
-  if(s) s.status = s.status==='inactive' ? 'active' : 'inactive';
-  closeModal();
-  closePanel();
-  renderTable(schools);
-  updateSidebarCount();
-  showToast(s.status==='active'?'🟢 Escola reativada!':'🔴 Escola inativada.');
+function confirmToggleStatus(){ showToast('Supabase n\u00e3o conectado','danger'); }
+
+function closeModal(){
+  document.getElementById('deactivateModal').classList.remove('show');
+  pendingToggleId=null;
 }
 
-function closeModal(){ document.getElementById('deactivateModal').classList.remove('show'); pendingToggleId=null; }
+/* ──────────────────────────────────────────────────
+   EXPORT CSV
+────────────────────────────────────────────────── */
+function exportCSV(){
+  var list = FILTERED.length?FILTERED:SCHOOLS;
+  if(!list.length){ showToast('Nenhum dado para exportar',''); return; }
+  var rows=['\uFEFF'+'Nome;Tipo;CPF/CNPJ;Email;Telefone;Cidade;Estado;Plano;Status;Mensalidade;Alunos;Cadastro'];
+  list.forEach(function(s){
+    rows.push([
+      s.nome_fantasia||'',
+      s.person_type||'',
+      s.cpf_cnpj||s.cnpj||'',
+      s.email||'',
+      s.telefone||'',
+      s.cidade||'',
+      s.estado||'',
+      s.plano||'',
+      s.status||'',
+      s.mensalidade||0,
+      s.total_alunos||0,
+      s.created_at?s.created_at.slice(0,10):''
+    ].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(';'));
+  });
+  var blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='escolas.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('\u2705 CSV exportado com '+list.length+' escola'+(list.length!==1?'s':''),'success');
+}
 
-/* ─── SIDEBAR ─── */
+/* ──────────────────────────────────────────────────
+   SIDEBAR
+────────────────────────────────────────────────── */
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
-  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open')?'hidden':'';
+  document.body.style.overflow=document.getElementById('sidebar').classList.contains('open')?'hidden':'';
 }
 function closeSidebar(){
   if(window.innerWidth<1024){
@@ -1531,26 +1151,157 @@ function closeSidebar(){
     document.body.style.overflow='';
   }
 }
-window.addEventListener('resize',()=>{ if(window.innerWidth>=1024){ document.getElementById('overlay').classList.remove('show'); document.body.style.overflow=''; } });
+window.addEventListener('resize',function(){
+  if(window.innerWidth>=1024){
+    document.getElementById('overlay').classList.remove('show');
+    document.body.style.overflow='';
+  }
+});
 
-/* ─── TOAST ─── */
-function showToast(msg){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:fadeInUp .2s ease;';
+/* ──────────────────────────────────────────────────
+   TOAST
+────────────────────────────────────────────────── */
+function showToast(msg, type){
+  var t=document.createElement('div');
+  var bg = type==='success'?'#10b981':type==='danger'?'#ef4444':'#1e293b';
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:fadeInUp .2s ease;max-width:320px;';
   t.textContent=msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+  setTimeout(function(){t.remove();},3500);
 }
-const style=document.createElement('style');
-style.textContent='@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}';
-document.head.appendChild(style);
+var _toastStyle=document.createElement('style');
+_toastStyle.textContent='@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}';
+document.head.appendChild(_toastStyle);
 
-/* ─── UTILS ─── */
-function updateSidebarCount(){ document.getElementById('sb-count').textContent=schools.length; }
-function exportCSV(){ showToast('📊 Exportando CSV…'); }
-
-/* ─── INIT ─── */
-renderTable(schools);
+function setLoading(on){
+  var lbl=document.getElementById('table-count-label');
+  if(lbl) lbl.textContent=on?'Carregando\u2026':'';
+}
 </script>
+
+<!-- ═══ BLOCO 2: Supabase ═══ -->
+<script>
+(function(){
+  var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+  var db = null;
+
+  function initSupabase(){
+    try{
+      if(window.supabase&&window.supabase.createClient){
+        db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+        return true;
+      }
+    }catch(e){ db=null; }
+    return false;
+  }
+
+  /* ── Load all schools ── */
+  function loadSchools(){
+    if(!db){ setLoading(false); return; }
+    setLoading(true);
+    db.from('escolas').select('*').order('created_at',{ascending:false})
+      .then(function(res){
+        setLoading(false);
+        if(res.error){ showToast('Erro ao carregar escolas: '+res.error.message,'danger'); return; }
+        SCHOOLS = res.data||[];
+        FILTERED = SCHOOLS.slice();
+        updateKPIs(SCHOOLS);
+        renderTable(SCHOOLS);
+      });
+  }
+
+  /* ── Save (create or update) ── */
+  saveSchool = function(){
+    if(!db){ showToast('Supabase n\u00e3o conectado','danger'); return; }
+    var name=(document.getElementById('f-name')||{}).value||'';
+    if(!name.trim()){ showToast('Preencha o nome da escola.','danger'); return; }
+
+    var data = {
+      nome_fantasia:       name.trim(),
+      razao_social:        ((document.getElementById('f-company')||{}).value||'').trim()||null,
+      cpf_cnpj:            ((document.getElementById('f-cpfcnpj')||{}).value||'').trim()||null,
+      cnpj:                selectedPersonType==='JURIDICA'?((document.getElementById('f-cpfcnpj')||{}).value||'').trim()||null:null,
+      email:               ((document.getElementById('f-email')||{}).value||'').trim()||null,
+      telefone:            ((document.getElementById('f-phone')||{}).value||'').trim()||null,
+      celular:             ((document.getElementById('f-mobile')||{}).value||'').trim()||null,
+      emails_adicionais:   ((document.getElementById('f-extra-emails')||{}).value||'').trim()||null,
+      modalidades:         ((document.getElementById('f-sports')||{}).value||'').trim()||null,
+      capacidade:          parseInt((document.getElementById('f-capacity')||{}).value||'100')||100,
+      plano:               (document.getElementById('f-plan')||{}).value||'Basic',
+      status:              (document.getElementById('f-status')||{}).value||'trial',
+      person_type:         selectedPersonType,
+      nome_responsavel:    ((document.getElementById('f-responsible')||{}).value||'').trim()||null,
+      inscricao_municipal: ((document.getElementById('f-munic')||{}).value||'').trim()||null,
+      inscricao_estadual:  ((document.getElementById('f-state-insc')||{}).value||'').trim()||null,
+      cep:                 ((document.getElementById('f-cep')||{}).value||'').trim()||null,
+      bairro:              ((document.getElementById('f-province')||{}).value||'').trim()||null,
+      logradouro:          ((document.getElementById('f-address')||{}).value||'').trim()||null,
+      numero:              ((document.getElementById('f-number')||{}).value||'').trim()||null,
+      complemento:         ((document.getElementById('f-complement')||{}).value||'').trim()||null,
+      cidade:              ((document.getElementById('f-city')||{}).value||'').trim()||null,
+      estado:              (document.getElementById('f-state')||{}).value||null,
+      tipo_cobranca:       selectedBillingType,
+      mensalidade:         parseFloat((document.getElementById('f-value')||{}).value||'0')||0,
+      dia_vencimento:      parseInt((document.getElementById('f-dueday')||{}).value||'5')||5,
+      desconto_perc:       parseFloat((document.getElementById('f-discount')||{}).value||'0')||0,
+      desconto_dias:       parseInt((document.getElementById('f-discount-days')||{}).value||'0')||0,
+      juros_perc:          parseFloat((document.getElementById('f-interest')||{}).value||'1')||1,
+      multa_perc:          parseFloat((document.getElementById('f-fine')||{}).value||'2')||2,
+      notif_desabilitada:  !!(document.getElementById('f-notif')||{}).checked,
+      observacoes:         ((document.getElementById('f-obs')||{}).value||'').trim()||null,
+      updated_at:          new Date().toISOString()
+    };
+
+    var promise;
+    if(panelMode==='edit'&&currentSchoolId){
+      promise = db.from('escolas').update(data).eq('id',currentSchoolId);
+    } else {
+      data.status_pagamento = 'trial';
+      data.logo_emoji = '\ud83c\udfeb';
+      data.logo_cor   = '#dbeafe';
+      promise = db.from('escolas').insert(data).select().single();
+    }
+
+    promise.then(function(res){
+      if(res.error){ showToast('Erro ao salvar: '+res.error.message,'danger'); return; }
+      closePanel();
+      showToast(panelMode==='edit'?'\u2705 Escola atualizada!':'\ud83c\udfeb Nova escola cadastrada!','success');
+      loadSchools();
+    });
+  };
+
+  /* ── Toggle status ── */
+  confirmToggleStatus = function(){
+    if(!db||!pendingToggleId){ closeModal(); return; }
+    var s=SCHOOLS.find(function(x){return x.id===pendingToggleId;});
+    if(!s){ closeModal(); return; }
+    var newStatus = s.status==='inactive'?'active':'inactive';
+    db.from('escolas').update({status:newStatus,updated_at:new Date().toISOString()}).eq('id',pendingToggleId)
+      .then(function(res){
+        if(res.error){ showToast('Erro: '+res.error.message,'danger'); closeModal(); return; }
+        closeModal();
+        closePanel();
+        showToast(newStatus==='active'?'\ud83d\udfe2 Escola reativada!':'\ud83d\udd34 Escola inativada.','success');
+        loadSchools();
+      });
+  };
+
+  function run(){
+    if(initSupabase()){
+      loadSchools();
+    } else {
+      showToast('Supabase indispon\u00edvel — exibindo dados vazios.','');
+      setLoading(false);
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',run);
+  } else { run(); }
+})();
+</script>
+<script>window.SUPERADMIN_PAGE = 'schools';</script>
+<script src="superadmin-sidebar.js"></script>
 </body>
 </html>

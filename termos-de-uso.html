@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termos de Uso — Esportes Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #4f46e5;
+      --primary-dark:  #3730a3;
+      --primary-light: #eef2ff;
+      --success:       #10b981;
+      --danger:        #ef4444;
+      --warning:       #f59e0b;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --card:          #ffffff;
+      --bg:            #f8fafc;
+      --sidebar-w:     280px;
+      --radius:        12px;
+      --shadow:        0 1px 3px rgba(0,0,0,.08);
+      --shadow-md:     0 4px 12px rgba(0,0,0,.08);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow);
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .brand-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .brand-sub  { font-size: 10px; color: var(--text-muted); letter-spacing: .6px; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .badge-doc {
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 11px; font-weight: 700;
+    }
+    .back-link {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      text-decoration: none; transition: color .15s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex; max-width: 1200px; margin: 0 auto;
+      padding: 32px 16px;
+      gap: 32px;
+    }
+    @media (min-width: 1024px) { .layout { padding: 40px 32px; } }
+
+    /* ── TOC SIDEBAR ── */
+    .toc {
+      width: var(--sidebar-w); flex-shrink: 0;
+      display: none;
+    }
+    @media (min-width: 1024px) { .toc { display: block; } }
+
+    .toc-inner {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px;
+      position: sticky; top: 80px;
+    }
+    .toc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px; }
+    .toc-item {
+      display: block; padding: 7px 10px;
+      border-radius: 7px; text-decoration: none;
+      font-size: 12.5px; color: var(--text-muted);
+      font-weight: 500; line-height: 1.4;
+      transition: all .15s; border-left: 2px solid transparent;
+      margin-bottom: 2px;
+    }
+    .toc-item:hover { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); }
+    .toc-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; border-left-color: var(--primary); }
+    .toc-num { font-size: 10px; color: var(--text-muted); margin-right: 4px; }
+
+    .toc-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .toc-meta { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; min-width: 0; }
+
+    .doc-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #6366f1 50%, #0ea5e9 100%);
+      border-radius: 16px; padding: 36px 36px 32px;
+      margin-bottom: 28px; color: #fff; position: relative; overflow: hidden;
+    }
+    .doc-header::before {
+      content: '📋';
+      position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+      font-size: 64px; opacity: .15;
+    }
+    .doc-type  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; opacity: .7; margin-bottom: 8px; }
+    .doc-title { font-size: clamp(22px, 3vw, 30px); font-weight: 900; margin-bottom: 10px; line-height: 1.2; }
+    .doc-meta  { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; opacity: .75; }
+    .doc-meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* Section cards */
+    .section {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 28px 30px; margin-bottom: 16px;
+      scroll-margin-top: 80px;
+    }
+    .section-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 12px; font-weight: 800;
+      margin-right: 10px; flex-shrink: 0;
+    }
+    .section-title {
+      display: flex; align-items: center;
+      font-size: 16px; font-weight: 800; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+
+    .section p {
+      font-size: 14px; line-height: 1.75; color: #334155;
+      margin-bottom: 12px;
+    }
+    .section p:last-child { margin-bottom: 0; }
+
+    .section ol, .section ul {
+      padding-left: 20px; margin: 10px 0 12px;
+    }
+    .section li {
+      font-size: 14px; line-height: 1.75; color: #334155;
+      margin-bottom: 6px;
+    }
+    .section li::marker { color: var(--primary); font-weight: 700; }
+
+    /* Sub-sections */
+    .sub-title {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin: 18px 0 8px;
+    }
+
+    /* Highlight boxes */
+    .box {
+      border-radius: 10px; padding: 14px 16px;
+      margin: 14px 0; font-size: 13px; line-height: 1.65;
+      display: flex; gap: 10px;
+    }
+    .box-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .box-text { flex: 1; }
+    .box.info    { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1e40af; }
+    .box.warning { background: #fffbeb; border-left: 3px solid var(--warning); color: #92400e; }
+    .box.danger  { background: #fef2f2; border-left: 3px solid var(--danger); color: #991b1b; }
+    .box.success { background: #f0fdf4; border-left: 3px solid var(--success); color: #14532d; }
+
+    /* Law tag */
+    .law-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 4px;
+      background: #f1f5f9; border: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    .data-table th {
+      background: #f8fafc; padding: 9px 14px;
+      text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text-muted); border-bottom: 2px solid var(--border);
+    }
+    .data-table td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      color: #334155; line-height: 1.5;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Footer */
+    .doc-footer {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px 28px;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; justify-content: space-between;
+      margin-top: 8px;
+    }
+    .doc-footer-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+    .doc-footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .doc-footer-link {
+      font-size: 12.5px; font-weight: 600; color: var(--primary);
+      text-decoration: none; transition: color .15s;
+    }
+    .doc-footer-link:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    /* Print */
+    @media print {
+      .topbar, .toc, .doc-footer { display: none; }
+      .layout { padding: 0; }
+      .section { border: 1px solid #ccc; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <a href="login.html" class="topbar-brand">
+    <div class="logo-mark">🛡️</div>
+    <div>
+      <div class="brand-name">Esportes Academy</div>
+      <div class="brand-sub">PLATAFORMA DE GESTÃO</div>
+    </div>
+  </a>
+  <div class="topbar-actions">
+    <span class="badge-doc">Termos de Uso</span>
+    <a href="login.html" class="back-link">← Voltar ao login</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── TOC ── -->
+  <aside class="toc">
+    <div class="toc-inner">
+      <div class="toc-title">Sumário</div>
+      <a class="toc-item" href="#s1"><span class="toc-num">1.</span> Aceitação dos Termos</a>
+      <a class="toc-item" href="#s2"><span class="toc-num">2.</span> Definições</a>
+      <a class="toc-item" href="#s3"><span class="toc-num">3.</span> Cadastro e Conta</a>
+      <a class="toc-item" href="#s4"><span class="toc-num">4.</span> Licença de Uso</a>
+      <a class="toc-item" href="#s5"><span class="toc-num">5.</span> Responsabilidades</a>
+      <a class="toc-item" href="#s6"><span class="toc-num">6.</span> Condutas Proibidas</a>
+      <a class="toc-item" href="#s7"><span class="toc-num">7.</span> Planos e Pagamentos</a>
+      <a class="toc-item" href="#s8"><span class="toc-num">8.</span> Suspensão e Cancelamento</a>
+      <a class="toc-item" href="#s9"><span class="toc-num">9.</span> Propriedade Intelectual</a>
+      <a class="toc-item" href="#s10"><span class="toc-num">10.</span> Dados Pessoais</a>
+      <a class="toc-item" href="#s11"><span class="toc-num">11.</span> Disponibilidade</a>
+      <a class="toc-item" href="#s12"><span class="toc-num">12.</span> Limitação de Responsabilidade</a>
+      <a class="toc-item" href="#s13"><span class="toc-num">13.</span> Alterações nos Termos</a>
+      <a class="toc-item" href="#s14"><span class="toc-num">14.</span> Disposições Gerais</a>
+      <a class="toc-item" href="#s15"><span class="toc-num">15.</span> Contato</a>
+
+      <div class="toc-divider"></div>
+      <div class="toc-meta">
+        <strong>Versão:</strong> 1.0<br/>
+        <strong>Vigência:</strong> 26/03/2026<br/>
+        <strong>Legislação:</strong> Marco Civil da Internet (Lei 12.965/2014), CDC (Lei 8.078/1990), Código Civil (Lei 10.406/2002)
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT ── -->
+  <main class="content">
+
+    <div class="doc-header">
+      <div class="doc-type">Documento legal</div>
+      <div class="doc-title">Termos de Uso</div>
+      <div class="doc-meta">
+        <span>📅 Última atualização: 26 de março de 2026</span>
+        <span>📄 Versão 1.0</span>
+        <span>🌐 Válido para o Brasil</span>
+      </div>
+    </div>
+
+    <div class="box info">
+      <span class="box-icon">ℹ️</span>
+      <span class="box-text">Leia este documento com atenção antes de utilizar a plataforma. Ao criar uma conta ou acessar qualquer funcionalidade, você declara ter lido, compreendido e concordado integralmente com estes Termos de Uso, nos termos do <strong>art. 8º da Lei nº 12.965/2014</strong> (Marco Civil da Internet).</span>
+    </div>
+
+    <!-- 1 -->
+    <div class="section" id="s1">
+      <div class="section-title"><span class="section-num">1</span>Aceitação dos Termos</div>
+      <p>Estes Termos de Uso ("Termos") constituem um contrato vinculante entre você ("Usuário") e <strong>Esportes Academy Tecnologia Ltda.</strong> ("Empresa", "nós", "nosso"), inscrita no CNPJ sob o nº [CNPJ], com sede em [Endereço Completo], regendo o acesso e uso da plataforma Esportes Academy ("Plataforma" ou "Serviço").</p>
+      <p>Ao clicar em "Concordo", "Aceitar" ou equivalente, ou ao simplesmente utilizar o Serviço, o Usuário manifesta seu consentimento livre, informado e inequívoco com estes Termos, conforme exigido pelo <strong>art. 3º, I e III, do Código Civil Brasileiro</strong> e pelo <span class="law-tag">Marco Civil da Internet — Lei 12.965/2014</span>.</p>
+      <div class="box warning">
+        <span class="box-icon">⚠️</span>
+        <span class="box-text">Se você não concordar com qualquer parte destes Termos, não utilize a Plataforma. Menores de 16 anos necessitam de representação legal para aceitar estes Termos, conforme o <strong>art. 5º do Código Civil</strong>.</span>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="section" id="s2">
+      <div class="section-title"><span class="section-num">2</span>Definições</div>
+      <p>Para os fins destes Termos, os termos a seguir têm os significados indicados:</p>
+      <table class="data-table">
+        <thead><tr><th>Termo</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Plataforma</strong></td><td>Sistema web e móvel Esportes Academy, incluindo todos os módulos, APIs e integrações.</td></tr>
+          <tr><td><strong>Usuário</strong></td><td>Qualquer pessoa física ou jurídica que acesse ou utilize a Plataforma.</td></tr>
+          <tr><td><strong>Tenant / Escola</strong></td><td>Organização cadastrada na Plataforma que contrata o Serviço para gerenciar suas operações.</td></tr>
+          <tr><td><strong>Dados do Usuário</strong></td><td>Informações inseridas pelo Usuário na Plataforma, incluindo dados de atletas, responsáveis e colaboradores.</td></tr>
+          <tr><td><strong>Conta</strong></td><td>Registro individual que permite acesso autenticado à Plataforma.</td></tr>
+          <tr><td><strong>Conteúdo</strong></td><td>Textos, imagens, vídeos e demais materiais inseridos ou disponibilizados na Plataforma.</td></tr>
+          <tr><td><strong>Plano</strong></td><td>Modalidade de contratação do Serviço, com funcionalidades e limites específicos.</td></tr>
+          <tr><td><strong>SaaS</strong></td><td>Software como Serviço (Software as a Service), modelo de licenciamento via internet sem instalação local.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3 -->
+    <div class="section" id="s3">
+      <div class="section-title"><span class="section-num">3</span>Cadastro e Conta de Usuário</div>
+
+      <div class="sub-title">3.1 Requisitos para cadastro</div>
+      <p>Para utilizar a Plataforma, o Usuário deve:</p>
+      <ol>
+        <li>Ser pessoa física maior de 18 anos ou pessoa jurídica devidamente constituída, ou ser menor representado legalmente;</li>
+        <li>Fornecer informações verdadeiras, completas e atualizadas no momento do cadastro;</li>
+        <li>Dispor de capacidade técnica mínima para utilizar serviços de internet;</li>
+        <li>Possuir endereço de e-mail válido e acesso à internet.</li>
+      </ol>
+
+      <div class="sub-title">3.2 Veracidade das informações</div>
+      <p>O Usuário é inteiramente responsável pela veracidade, exatidão e atualização dos dados cadastrais fornecidos. A prestação de informações falsas configura infração aos termos do <strong>art. 299 do Código Penal</strong> (falsidade ideológica) e ao <span class="law-tag">CDC — Lei 8.078/1990</span>.</p>
+
+      <div class="sub-title">3.3 Segurança das credenciais</div>
+      <p>O Usuário é o único responsável pela guarda e confidencialidade de suas credenciais de acesso (e-mail e senha). A Empresa não solicita senhas por e-mail, telefone ou qualquer outro canal. Em caso de acesso não autorizado, o Usuário deve notificar imediatamente pelo canal de suporte disponível.</p>
+
+      <div class="box danger">
+        <span class="box-icon">🔴</span>
+        <span class="box-text">O compartilhamento de credenciais é expressamente proibido. Cada Conta é estritamente pessoal e intransferível. O Usuário responde por todos os atos praticados com suas credenciais.</span>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="section" id="s4">
+      <div class="section-title"><span class="section-num">4</span>Licença de Uso</div>
+      <p>Sujeito ao cumprimento destes Termos e ao pagamento das mensalidades devidas, a Empresa concede ao Usuário uma licença <strong>não exclusiva, intransferível, revogável e limitada</strong> para acessar e utilizar a Plataforma, exclusivamente para fins internos e legítimos de gestão de academias esportivas.</p>
+      <p>Esta licença é outorgada nos termos da <span class="law-tag">Lei de Software — Lei 9.609/1998</span> e da <span class="law-tag">Lei de Direitos Autorais — Lei 9.610/1998</span>, não transferindo ao Usuário qualquer direito de propriedade sobre o software ou seus componentes.</p>
+      <p>São vedados sem prévia autorização escrita da Empresa:</p>
+      <ol>
+        <li>Sublicenciar, revender, distribuir ou transferir o acesso à Plataforma a terceiros;</li>
+        <li>Criar obras derivadas baseadas no software da Plataforma;</li>
+        <li>Realizar engenharia reversa, decompilar ou desmontar qualquer parte da Plataforma;</li>
+        <li>Remover avisos de direitos autorais, marcas ou outros avisos de propriedade.</li>
+      </ol>
+    </div>
+
+    <!-- 5 -->
+    <div class="section" id="s5">
+      <div class="section-title"><span class="section-num">5</span>Responsabilidades das Partes</div>
+
+      <div class="sub-title">5.1 Responsabilidades da Empresa</div>
+      <p>A Empresa compromete-se a:</p>
+      <ul>
+        <li>Disponibilizar a Plataforma com nível de serviço mínimo de <strong>99,5% de uptime</strong> mensal, excluídas manutenções programadas;</li>
+        <li>Realizar backups periódicos dos Dados do Usuário;</li>
+        <li>Implementar medidas técnicas e organizacionais de segurança conforme <span class="law-tag">LGPD — Lei 13.709/2018</span>;</li>
+        <li>Notificar o Usuário com antecedência mínima de 15 dias sobre alterações relevantes nos Termos;</li>
+        <li>Manter canal de atendimento para suporte técnico nos dias úteis.</li>
+      </ul>
+
+      <div class="sub-title">5.2 Responsabilidades do Usuário</div>
+      <p>O Usuário compromete-se a:</p>
+      <ul>
+        <li>Utilizar a Plataforma exclusivamente para fins lícitos e em conformidade com a legislação brasileira;</li>
+        <li>Manter seus dados cadastrais atualizados;</li>
+        <li>Obter os consentimentos legais necessários dos titulares dos dados inseridos na Plataforma, especialmente de menores e seus responsáveis, nos termos do <strong>art. 14 da LGPD</strong>;</li>
+        <li>Garantir que os dados inseridos não violem direitos de terceiros;</li>
+        <li>Comunicar imediatamente à Empresa qualquer falha, vulnerabilidade ou uso indevido que detectar.</li>
+      </ul>
+    </div>
+
+    <!-- 6 -->
+    <div class="section" id="s6">
+      <div class="section-title"><span class="section-num">6</span>Condutas Proibidas</div>
+      <p>É expressamente proibido ao Usuário, sob pena de suspensão imediata, cancelamento da conta e responsabilização civil e criminal:</p>
+      <ol>
+        <li><strong>Conteúdo ilícito:</strong> publicar, transmitir ou armazenar conteúdo que viole a legislação brasileira vigente, incluindo material de abuso sexual infantil (CSAM), nos termos do <span class="law-tag">ECA — Lei 8.069/1990</span>;</li>
+        <li><strong>Invasão e ataques:</strong> tentar acesso não autorizado a sistemas, realizar ataques de negação de serviço (DoS/DDoS) ou explorar vulnerabilidades, conforme tipificado na <span class="law-tag">Lei 12.737/2012</span> (Lei Carolina Dieckmann);</li>
+        <li><strong>Spam e phishing:</strong> usar a Plataforma para enviar comunicações não solicitadas em massa ou para praticar fraudes eletrônicas;</li>
+        <li><strong>Violação de privacidade:</strong> coletar, utilizar ou compartilhar dados pessoais de terceiros sem autorização legal, violando a <span class="law-tag">LGPD — Lei 13.709/2018</span>;</li>
+        <li><strong>Discriminação:</strong> publicar conteúdo que discrimine pessoas por raça, etnia, gênero, religião, origem, condição econômica ou qualquer outra característica protegida pela <span class="law-tag">Constituição Federal, art. 5º</span>;</li>
+        <li><strong>Concorrência desleal:</strong> usar a Plataforma para desenvolver produto ou serviço concorrente, copiar funcionalidades ou estrutura da Plataforma;</li>
+        <li><strong>Manipulação de dados:</strong> inserir dados fraudulentos de atletas, responsáveis ou transações financeiras com intuito de enganar terceiros.</li>
+      </ol>
+    </div>
+
+    <!-- 7 -->
+    <div class="section" id="s7">
+      <div class="section-title"><span class="section-num">7</span>Planos, Preços e Pagamentos</div>
+
+      <div class="sub-title">7.1 Modalidades de contratação</div>
+      <p>A Plataforma é oferecida em diferentes planos de assinatura, com funcionalidades e limites de uso distintos. Os planos vigentes, preços e condições estão descritos na página de planos disponível na Plataforma.</p>
+
+      <div class="sub-title">7.2 Cobrança e renovação</div>
+      <p>As assinaturas são cobradas de forma recorrente (mensal ou anual), conforme o plano escolhido. A renovação é <strong>automática</strong>, salvo cancelamento pelo Usuário com antecedência mínima de 48 (quarenta e oito) horas antes do vencimento, nos termos do <span class="law-tag">CDC — art. 49</span>.</p>
+
+      <div class="sub-title">7.3 Direito de arrependimento</div>
+      <p>Em conformidade com o <strong>art. 49 do Código de Defesa do Consumidor (Lei 8.078/1990)</strong>, o Usuário que contratar a Plataforma por meio eletrônico tem o direito de arrependimento e cancelamento no prazo de <strong>7 (sete) dias corridos</strong> contados da data de contratação, com reembolso integral dos valores pagos.</p>
+
+      <div class="sub-title">7.4 Inadimplência</div>
+      <p>O não pagamento no prazo ensejará:</p>
+      <ol>
+        <li>Notificação por e-mail no 1º dia de atraso;</li>
+        <li>Suspensão do acesso após 15 dias de inadimplência, com dados preservados por 90 dias;</li>
+        <li>Rescisão contratual e exclusão de dados após 90 dias de inadimplência continuada.</li>
+      </ol>
+
+      <div class="sub-title">7.5 Reajuste de preços</div>
+      <p>Os preços poderão ser reajustados anualmente com base no <strong>IPCA (Índice Nacional de Preços ao Consumidor Amplo)</strong> ou índice equivalente, mediante notificação com antecedência mínima de 30 dias.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="section" id="s8">
+      <div class="section-title"><span class="section-num">8</span>Suspensão e Cancelamento</div>
+
+      <div class="sub-title">8.1 Cancelamento pelo Usuário</div>
+      <p>O Usuário pode cancelar sua assinatura a qualquer momento pelo painel de configurações da Plataforma. O acesso é mantido até o fim do período já pago. Não há reembolso proporcional para períodos parciais, exceto no caso do direito de arrependimento previsto no item 7.3.</p>
+
+      <div class="sub-title">8.2 Suspensão pela Empresa</div>
+      <p>A Empresa reserva-se o direito de suspender ou encerrar a Conta do Usuário, a qualquer momento e sem aviso prévio, nas seguintes situações:</p>
+      <ul>
+        <li>Violação de qualquer disposição destes Termos;</li>
+        <li>Prática de atos ilícitos usando a Plataforma;</li>
+        <li>Inadimplência nos termos do item 7.4;</li>
+        <li>Solicitação de autoridade competente.</li>
+      </ul>
+
+      <div class="sub-title">8.3 Exportação de dados</div>
+      <p>Após o cancelamento, o Usuário terá <strong>30 dias</strong> para exportar seus dados em formato estruturado (CSV/JSON). Expirado este prazo, os dados serão definitivamente excluídos, em conformidade com o <strong>art. 16 da LGPD</strong>.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="section" id="s9">
+      <div class="section-title"><span class="section-num">9</span>Propriedade Intelectual</div>
+      <p>A Plataforma, incluindo seu código-fonte, design, interfaces, logotipos, marcas, textos e demais elementos, é protegida pela <span class="law-tag">Lei 9.610/1998</span> (Direitos Autorais) e pela <span class="law-tag">Lei 9.279/1996</span> (Propriedade Industrial), sendo de titularidade exclusiva da Empresa.</p>
+      <p><strong>Dados do Usuário:</strong> os dados inseridos pelo Usuário na Plataforma permanecem de sua propriedade. A Empresa não reivindica propriedade sobre eles, utilizando-os apenas para a prestação do Serviço contratado, nos termos da nossa Política de Privacidade.</p>
+      <p><strong>Feedback:</strong> sugestões e melhorias enviadas pelo Usuário podem ser incorporadas à Plataforma pela Empresa sem obrigação de compensação, salvo acordo escrito em contrário.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="section" id="s10">
+      <div class="section-title"><span class="section-num">10</span>Dados Pessoais</div>
+      <p>O tratamento de dados pessoais realizado pela Empresa obedece integralmente à <span class="law-tag">LGPD — Lei 13.709/2018</span>. Para informações detalhadas sobre como coletamos, usamos, armazenamos e protegemos seus dados, consulte nossa <a href="politica-de-privacidade.html" style="color:var(--primary);font-weight:600">Política de Privacidade</a>.</p>
+      <p>O Usuário que inserir na Plataforma dados pessoais de terceiros (atletas, responsáveis, colaboradores) atua na qualidade de <strong>Controlador de Dados</strong>, nos termos do art. 5º, VI da LGPD, sendo responsável pela base legal que fundamenta o tratamento e pelos consentimentos necessários.</p>
+      <div class="box success">
+        <span class="box-icon">✅</span>
+        <span class="box-text">A Empresa atua como <strong>Operadora de Dados</strong> em relação aos dados dos usuários finais das escolas (atletas e responsáveis), processando-os apenas segundo as instruções dos Controladores (as escolas), conforme o <strong>art. 39 da LGPD</strong>.</span>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="section" id="s11">
+      <div class="section-title"><span class="section-num">11</span>Disponibilidade do Serviço</div>
+      <p>A Empresa envidará seus melhores esforços para manter a Plataforma disponível 24 horas por dia, 7 dias por semana. Entretanto, a disponibilidade pode ser interrompida por:</p>
+      <ul>
+        <li><strong>Manutenção programada:</strong> notificada com antecedência mínima de 48 horas por e-mail e na própria Plataforma;</li>
+        <li><strong>Casos fortuitos ou de força maior:</strong> conforme o <strong>art. 393 do Código Civil</strong>, incluindo falhas de infraestrutura de terceiros, desastres naturais, ataques cibernéticos externos;</li>
+        <li><strong>Determinações legais</strong> de autoridades competentes.</li>
+      </ul>
+      <p>Interrupções não programadas superiores a 8 horas contínuas darão direito ao Usuário a crédito proporcional na próxima fatura, mediante solicitação ao suporte.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="section" id="s12">
+      <div class="section-title"><span class="section-num">12</span>Limitação de Responsabilidade</div>
+      <p>Na máxima extensão permitida pelo <strong>Código de Defesa do Consumidor (Lei 8.078/1990)</strong> e pelo <strong>Código Civil (Lei 10.406/2002)</strong>, a responsabilidade total da Empresa por danos diretos fica limitada ao valor pago pelo Usuário nos <strong>12 meses anteriores</strong> ao evento gerador do dano.</p>
+      <p>A Empresa <strong>não se responsabiliza</strong> por:</p>
+      <ul>
+        <li>Danos indiretos, incidentais, especiais ou consequentes;</li>
+        <li>Perda de lucros, receitas ou oportunidades de negócio;</li>
+        <li>Atos de terceiros, incluindo hackers e outros agentes mal-intencionados;</li>
+        <li>Uso indevido da Plataforma pelo próprio Usuário;</li>
+        <li>Conteúdo inserido por Usuários que viole direitos de terceiros.</li>
+      </ul>
+      <div class="box warning">
+        <span class="box-icon">⚠️</span>
+        <span class="box-text">As limitações acima não se aplicam a danos causados por dolo ou culpa grave da Empresa, nem a direitos irrenunciáveis do consumidor previstos no CDC.</span>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="section" id="s13">
+      <div class="section-title"><span class="section-num">13</span>Alterações nestes Termos</div>
+      <p>A Empresa reserva-se o direito de modificar estes Termos a qualquer tempo. Alterações <strong>materiais</strong> serão comunicadas por e-mail e/ou notificação na Plataforma com antecedência mínima de <strong>15 dias</strong>, conforme o <strong>art. 29 da Lei 12.965/2014</strong> (Marco Civil da Internet).</p>
+      <p>O uso continuado da Plataforma após a data de vigência das novas condições constituirá aceitação das alterações. Caso não concorde, o Usuário poderá cancelar sua conta sem ônus adicionais dentro do prazo de notificação.</p>
+    </div>
+
+    <!-- 14 -->
+    <div class="section" id="s14">
+      <div class="section-title"><span class="section-num">14</span>Disposições Gerais</div>
+
+      <div class="sub-title">14.1 Lei aplicável</div>
+      <p>Estes Termos são regidos e interpretados exclusivamente de acordo com as leis da República Federativa do Brasil, em especial: <span class="law-tag">CC — Lei 10.406/2002</span>, <span class="law-tag">CDC — Lei 8.078/1990</span>, <span class="law-tag">Marco Civil — Lei 12.965/2014</span>, <span class="law-tag">LGPD — Lei 13.709/2018</span>.</p>
+
+      <div class="sub-title">14.2 Foro</div>
+      <p>Fica eleito o foro da comarca de <strong>[Cidade/Estado]</strong>, com exclusão de qualquer outro, por mais privilegiado que seja, para dirimir quaisquer litígios decorrentes destes Termos, ressalvado o direito do consumidor de optar pelo foro de seu domicílio, nos termos do <strong>art. 101, I, do CDC</strong>.</p>
+
+      <div class="sub-title">14.3 Independência das cláusulas</div>
+      <p>A invalidade ou inaplicabilidade de qualquer cláusula não afetará as demais, que permanecerão em pleno vigor, conforme o <strong>art. 184 do Código Civil</strong>.</p>
+
+      <div class="sub-title">14.4 Ausência de renúncia</div>
+      <p>A omissão da Empresa em exercer qualquer direito previsto nestes Termos não constituirá renúncia a tal direito, nem impedirá seu exercício posterior.</p>
+
+      <div class="sub-title">14.5 Cessão</div>
+      <p>O Usuário não pode ceder seus direitos ou obrigações decorrentes destes Termos sem prévia autorização escrita da Empresa. A Empresa pode ceder estes Termos em caso de fusão, aquisição ou reestruturação societária, mediante notificação ao Usuário.</p>
+    </div>
+
+    <!-- 15 -->
+    <div class="section" id="s15">
+      <div class="section-title"><span class="section-num">15</span>Contato</div>
+      <p>Para dúvidas, reclamações ou solicitações relacionadas a estes Termos, entre em contato com nossa equipe:</p>
+      <table class="data-table">
+        <tbody>
+          <tr><td><strong>E-mail geral</strong></td><td>contato@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Encarregado de Dados (DPO)</strong></td><td>privacidade@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Suporte técnico</strong></td><td>suporte@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Endereço</strong></td><td>[Rua, Número, Bairro, Cidade — Estado, CEP]</td></tr>
+          <tr><td><strong>CNPJ</strong></td><td>[XX.XXX.XXX/0001-XX]</td></tr>
+        </tbody>
+      </table>
+      <p>O prazo para resposta é de até <strong>15 dias úteis</strong>, conforme o <strong>art. 20 do Decreto 8.771/2016</strong> que regulamenta o Marco Civil da Internet.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="doc-footer">
+      <div class="doc-footer-text">
+        <strong>Esportes Academy Tecnologia Ltda.</strong> — CNPJ [XX.XXX.XXX/0001-XX]<br/>
+        Documento com vigência a partir de 26 de março de 2026. Versão 1.0.
+      </div>
+      <div class="doc-footer-links">
+        <a href="politica-de-privacidade.html" class="doc-footer-link">Política de Privacidade →</a>
+        <a href="login.html" class="doc-footer-link">← Voltar ao login</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* Active TOC item on scroll */
+  var sections = document.querySelectorAll('.section[id]');
+  var tocLinks = document.querySelectorAll('.toc-item');
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        tocLinks.forEach(function(l) {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px' });
+
+  sections.forEach(function(s) { observer.observe(s); });
+</script>
+</body>
+</html>

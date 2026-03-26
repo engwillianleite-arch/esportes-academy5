@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Esportes Academy — SuperAdmin-usuarios</title>
+  <title>Esportes Academy — SuperAdmin · Usuários</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
   <style>
     /* ═══════════════════════════════════════
        BASE RESET & TOKENS
@@ -12,32 +13,35 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #1a56db;
-      --primary-dark: #1e429f;
-      --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669;
-      --success-light: #d1fae5;
-      --warning: #d97706;
-      --warning-light: #fef3c7;
-      --danger: #dc2626;
-      --danger-light: #fee2e2;
-      --purple: #7c3aed;
-      --purple-light: #ede9fe;
-      --bg: #f1f5f9;
-      --sidebar-w: 260px;
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
-      --card: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --topbar-h: 56px;
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
 
     html { scroll-behavior: smooth; }
@@ -124,33 +128,22 @@
     .nav-item.active { background: var(--primary); }
     .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
 
-    .nav-badge {
-      margin-left: auto;
-      background: var(--primary);
-      color: #fff; font-size: 10px; font-weight: 600;
-      padding: 2px 7px; border-radius: 20px;
-    }
-    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
 
     .sidebar-footer {
       padding: 14px 10px;
       border-top: 1px solid rgba(255,255,255,.07);
       flex-shrink: 0;
     }
-    .user-avatar-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px; border-radius: 8px; cursor: pointer;
-      transition: background .15s;
-    }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed, #1a56db);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0;
-    }
-    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
-    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+    .nav-item .nav-icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.stub { opacity:.45;cursor:default; }
+    .nav-item.stub:hover { background:transparent;color:rgba(255,255,255,.55); }
 
     /* ═══════════════════════════════════════
        MAIN WRAPPER
@@ -509,6 +502,15 @@
       display: flex; justify-content: flex-end; gap: 8px;
     }
 
+    /* ── Perfil cards ── */
+    .perfil-card { padding:14px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;text-align:center;background:var(--bg); }
+    .perfil-card:hover { border-color:var(--primary); background:var(--primary-light); }
+    .perfil-card.selected { border-color:var(--primary); background:var(--primary-light); box-shadow:0 0 0 3px rgba(79,70,229,.15); }
+    .perfil-card.selected div:first-child { transform:scale(1.1); }
+    /* ── Field error ── */
+    .field-error { font-size:11px;color:var(--danger);margin-top:4px;min-height:16px; }
+    .form-input.error { border-color:var(--danger); }
+
     /* ═══════════════════════════════════════
        TOAST
     ═══════════════════════════════════════ */
@@ -538,60 +540,20 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">🛡️</div>
       <div class="brand-text">
         <div class="name">Esportes Academy</div>
-        <div class="sub">PORTAL SUPERADMIN</div>
+        <div class="sub">SUPER ADMIN</div>
       </div>
     </div>
   </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item" href="SuperAdmin-dashboard.html" onclick="closeSidebar()">
-      <span class="icon">🏠</span> Dashboard
-    </a>
-    <a class="nav-item" href="SuperAdmin-schools.html" onclick="closeSidebar()">
-      <span class="icon">🏫</span> Escolas
-      <span class="nav-badge">24</span>
-    </a>
-    <a class="nav-item active" href="SuperAdmin-usuarios.html" onclick="closeSidebar()">
-      <span class="icon">👤</span> Usuários
-    </a>
-
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">💳</span> Cobranças
-    </a>
-    <a class="nav-item" href="SuperAdmin-planos.html" onclick="closeSidebar()">
-      <span class="icon">📦</span> Planos & Licenças
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">📊</span> Relatórios
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🧾</span> Notas Fiscais
-    </a>
-
-    <div class="nav-section-label">Sistema</div>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">⚙️</span> Configurações
-    </a>
-    <a class="nav-item" href="SuperAdmin-notificacoes.html" onclick="closeSidebar()">
-      <span class="icon">🔔</span> Notificações
-      <span class="nav-badge">5</span>
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🛡️</span> Permissões
-    </a>
-  </nav>
-
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
       <div class="user-info">
-        <div class="user-name">Willianm Admin</div>
-        <div class="user-role">Super Administrador</div>
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
       </div>
     </div>
   </div>
@@ -635,32 +597,32 @@
           <span class="kpi-label">Total de Usuários</span>
           <div class="kpi-icon blue">👥</div>
         </div>
-        <div class="kpi-value">1.248</div>
-        <div class="kpi-delta"><span class="up">▲ 12%</span> vs. mês anterior</div>
+        <div class="kpi-value" id="statTotal">—</div>
+        <div class="kpi-delta" id="deltaTotal"><span class="up">▲</span> carregando...</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-header">
           <span class="kpi-label">Admins de Escola</span>
           <div class="kpi-icon blue">🏫</div>
         </div>
-        <div class="kpi-value">48</div>
-        <div class="kpi-delta"><span class="up">▲ 4</span> novos este mês</div>
+        <div class="kpi-value" id="statAdmins">—</div>
+        <div class="kpi-delta" id="deltaAdmins"><span class="up">▲</span> carregando...</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-header">
           <span class="kpi-label">Professores</span>
           <div class="kpi-icon purple">🎓</div>
         </div>
-        <div class="kpi-value">312</div>
-        <div class="kpi-delta"><span class="up">▲ 8%</span> vs. mês anterior</div>
+        <div class="kpi-value" id="statProfessores">—</div>
+        <div class="kpi-delta" id="deltaProfessores"><span class="up">▲</span> carregando...</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-header">
           <span class="kpi-label">Suspensos</span>
           <div class="kpi-icon orange">⚠️</div>
         </div>
-        <div class="kpi-value">7</div>
-        <div class="kpi-delta"><span class="down">▼ 2</span> vs. mês anterior</div>
+        <div class="kpi-value" id="statInativos">—</div>
+        <div class="kpi-delta" id="deltaInativos"><span>—</span> suspensos/inativos</div>
       </div>
     </div>
 
@@ -672,7 +634,7 @@
           <div class="table-subtitle">Gerencie os acessos de todos os portais</div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0;">
-          <button class="btn btn-secondary btn-sm">⬇️ Exportar CSV</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇️ Exportar CSV</button>
         </div>
       </div>
 
@@ -715,16 +677,8 @@
       </div>
 
       <div class="pagination">
-        <div class="pagination-info" id="paginationInfo">Mostrando 1–10 de 1.248 usuários</div>
-        <div class="pagination-btns">
-          <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>‹</button>
-          <button class="page-btn active" id="page1" onclick="goPage(1)">1</button>
-          <button class="page-btn" id="page2" onclick="goPage(2)">2</button>
-          <button class="page-btn" id="page3" onclick="goPage(3)">3</button>
-          <span style="display:flex;align-items:center;color:var(--text-muted);font-size:13px;padding:0 4px;">…</span>
-          <button class="page-btn" onclick="goPage(125)">125</button>
-          <button class="page-btn" id="nextBtn" onclick="changePage(1)">›</button>
-        </div>
+        <div class="pagination-info" id="paginationInfo">Carregando...</div>
+        <div class="pagination-btns" id="paginationBtns"></div>
       </div>
     </div>
 
@@ -733,61 +687,135 @@
 
 <!-- ════════════════ MODAL — Novo / Editar Usuário ════════════════ -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
-  <div class="modal">
+  <div class="modal" style="max-width:520px;width:95%;">
     <div class="modal-header">
       <div class="modal-title" id="modalTitle">Novo Usuário</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
+
+    <!-- STEP INDICATOR -->
+    <div id="modalSteps" style="display:flex;align-items:center;gap:0;padding:0 24px 0;border-bottom:1px solid var(--border);background:var(--bg);">
+      <div class="modal-step active" id="mstep1" style="display:flex;align-items:center;gap:8px;padding:12px 0;font-size:12px;font-weight:600;color:var(--primary);flex:1;">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</div>
+        Dados
+      </div>
+      <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+      <div class="modal-step" id="mstep2" style="display:flex;align-items:center;gap:8px;padding:12px 0;font-size:12px;font-weight:600;color:var(--text-muted);flex:1;">
+        <div id="mstep2dot" style="width:22px;height:22px;border-radius:50%;background:var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</div>
+        Perfil & Acesso
+      </div>
+      <div style="flex:1;height:1px;background:var(--border);margin:0 4px;"></div>
+      <div class="modal-step" id="mstep3" style="display:flex;align-items:center;gap:8px;padding:12px 0;font-size:12px;font-weight:600;color:var(--text-muted);flex:1;">
+        <div id="mstep3dot" style="width:22px;height:22px;border-radius:50%;background:var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</div>
+        Confirmar
+      </div>
+    </div>
+
+    <!-- STEP 1: Dados básicos -->
+    <div class="modal-body" id="modalStep1">
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Nome</label>
-          <input class="form-input" type="text" placeholder="Nome completo" id="inputNome" />
+          <label class="form-label">Nome <span style="color:var(--danger);">*</span></label>
+          <input class="form-input" type="text" placeholder="Ex: João" id="inputNome" oninput="clearFieldError('inputNome')" />
+          <div class="field-error" id="errNome"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Sobrenome</label>
-          <input class="form-input" type="text" placeholder="Sobrenome" id="inputSobrenome" />
+          <input class="form-input" type="text" placeholder="Ex: Silva" id="inputSobrenome" />
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
-        <input class="form-input" type="email" placeholder="usuario@email.com" id="inputEmail" />
+        <label class="form-label">E-mail <span style="color:var(--danger);">*</span></label>
+        <input class="form-input" type="email" placeholder="usuario@email.com" id="inputEmail" oninput="clearFieldError('inputEmail')" />
+        <div class="field-error" id="errEmail"></div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Perfil</label>
-          <select class="form-select" id="inputPerfil" onchange="toggleEscolaField()">
-            <option value="">Selecionar…</option>
-            <option value="super_admin">Super Admin</option>
-            <option value="admin_escola">Admin Escola</option>
-            <option value="professor">Professor</option>
-            <option value="pai">Pai / Responsável</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-select" id="inputStatus">
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
-            <option value="suspenso">Suspenso</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Telefone <span style="font-weight:400;color:var(--text-muted);">(opcional)</span></label>
+        <input class="form-input" type="tel" placeholder="(11) 99999-9999" id="inputTelefone" oninput="maskPhone(this)" />
       </div>
-      <div class="form-group" id="escolaFieldWrap">
-        <label class="form-label">Escola vinculada</label>
-        <select class="form-select" id="inputEscola">
-          <option value="">Selecionar escola…</option>
-          <option>Arena Futebol SP</option>
-          <option>Natação Olímpica RJ</option>
-          <option>Tênis Club BH</option>
-          <option>Artes Marciais POA</option>
-          <option>Vôlei Prainha BSB</option>
-        </select>
+      <div style="background:var(--primary-light);border:1px solid #c7d2fe;border-radius:8px;padding:10px 14px;font-size:12px;color:#3730a3;display:flex;gap:8px;align-items:flex-start;">
+        <span style="flex-shrink:0;">📧</span>
+        <span>Um <strong>convite por e-mail</strong> será enviado automaticamente. O usuário definirá sua própria senha ao aceitar.</span>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveUser()">Salvar Usuário</button>
+
+    <!-- STEP 2: Perfil & Acesso -->
+    <div class="modal-body" id="modalStep2" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Tipo de acesso <span style="color:var(--danger);">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="perfilCards">
+          <div class="perfil-card" data-perfil="super_admin" onclick="selectPerfil('super_admin')">
+            <div style="font-size:20px;margin-bottom:6px;">🛡️</div>
+            <div style="font-size:13px;font-weight:700;">Super Admin</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Acesso total à plataforma</div>
+          </div>
+          <div class="perfil-card" data-perfil="admin_escola" onclick="selectPerfil('admin_escola')">
+            <div style="font-size:20px;margin-bottom:6px;">🏫</div>
+            <div style="font-size:13px;font-weight:700;">Admin Escola</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Gerencia uma escola</div>
+          </div>
+          <div class="perfil-card" data-perfil="professor" onclick="selectPerfil('professor')">
+            <div style="font-size:20px;margin-bottom:6px;">👨‍🏫</div>
+            <div style="font-size:13px;font-weight:700;">Professor</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Turmas e presenças</div>
+          </div>
+          <div class="perfil-card" data-perfil="financeiro" onclick="selectPerfil('financeiro')">
+            <div style="font-size:20px;margin-bottom:6px;">💰</div>
+            <div style="font-size:13px;font-weight:700;">Financeiro</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Cobranças e planos</div>
+          </div>
+        </div>
+        <div class="field-error" id="errPerfil"></div>
+      </div>
+      <!-- Escola (visível para perfis não-super_admin) -->
+      <div class="form-group" id="escolaFieldWrap">
+        <label class="form-label">Escola vinculada <span style="color:var(--danger);">*</span></label>
+        <select class="form-select" id="inputEscola" oninput="clearFieldError('inputEscola')">
+          <option value="">Selecionar escola…</option>
+        </select>
+        <div class="field-error" id="errEscola"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Confirmação -->
+    <div class="modal-body" id="modalStep3" style="display:none;">
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Resumo</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span style="color:var(--text-muted);">Nome</span>
+          <span style="font-weight:600;" id="confirmNome">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span style="color:var(--text-muted);">E-mail</span>
+          <span style="font-weight:600;" id="confirmEmail">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;" id="confirmTelRow">
+          <span style="color:var(--text-muted);">Telefone</span>
+          <span style="font-weight:600;" id="confirmTel">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span style="color:var(--text-muted);">Perfil</span>
+          <span style="font-weight:600;" id="confirmPerfil">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;" id="confirmEscolaRow">
+          <span style="color:var(--text-muted);">Escola</span>
+          <span style="font-weight:600;" id="confirmEscola">—</span>
+        </div>
+      </div>
+      <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;display:flex;gap:8px;align-items:flex-start;">
+        <span>⚡</span>
+        <span>O convite será enviado imediatamente após confirmar. O usuário tem <strong>24h</strong> para aceitar.</span>
+      </div>
+    </div>
+
+    <!-- FOOTER dinâmico -->
+    <div class="modal-footer" id="modalFooter">
+      <button class="btn btn-secondary" onclick="closeModal()" id="btnCancelar">Cancelar</button>
+      <button class="btn btn-secondary" onclick="prevStep()" id="btnVoltar" style="display:none;">← Voltar</button>
+      <button class="btn btn-primary" onclick="nextStep()" id="btnProximo">Próximo →</button>
+      <button class="btn btn-primary" onclick="saveUser()" id="btnSalvar" style="display:none;">
+        <span id="btnSalvarText">✉️ Enviar Convite</span>
+      </button>
     </div>
   </div>
 </div>
@@ -796,7 +824,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ═══ Sidebar ═══ */
+  /*
+   * BLOCO 1 - UI puro (sem dependencia de Supabase)
+   */
+
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('show');
@@ -806,143 +837,566 @@
     document.getElementById('overlay').classList.remove('show');
   }
 
-  /* ═══ Mock Data ═══ */
-  const USERS = [
-    { id:1, nome:'Carlos Mendes',    email:'carlos@arenasp.com.br',    perfil:'admin_escola', escola:'Arena Futebol SP',       status:'ativo',    ultimo:'Hoje, 09:14' },
-    { id:2, nome:'Fernanda Lima',    email:'fernanda@natacaorj.com.br', perfil:'professor',    escola:'Natação Olímpica RJ',    status:'ativo',    ultimo:'Ontem, 18:30' },
-    { id:3, nome:'Ricardo Souza',    email:'ricardo@tenisbh.com.br',    perfil:'admin_escola', escola:'Tênis Club BH',          status:'ativo',    ultimo:'22/03/2026' },
-    { id:4, nome:'Patrícia Gomes',   email:'patricia@marciais.com.br',  perfil:'professor',    escola:'Artes Marciais POA',     status:'inativo',  ultimo:'15/03/2026' },
-    { id:5, nome:'Marcos Oliveira',  email:'marcos@volipraia.com.br',   perfil:'pai',          escola:'Vôlei Prainha BSB',      status:'ativo',    ultimo:'Hoje, 11:52' },
-    { id:6, nome:'Ana Paula Costa',  email:'ana@arenasp.com.br',        perfil:'pai',          escola:'Arena Futebol SP',       status:'ativo',    ultimo:'Hoje, 08:05' },
-    { id:7, nome:'Lucas Ferreira',   email:'lucas@tenisbh.com.br',      perfil:'professor',    escola:'Tênis Club BH',          status:'suspenso', ultimo:'10/03/2026' },
-    { id:8, nome:'Juliana Ramos',    email:'juliana@natacaorj.com.br',  perfil:'pai',          escola:'Natação Olímpica RJ',    status:'ativo',    ultimo:'23/03/2026' },
-    { id:9, nome:'Willianm Admin',   email:'admin@esportesacademy.com', perfil:'super_admin',  escola:'—',                      status:'ativo',    ultimo:'Hoje, 09:00' },
-    { id:10,nome:'Beatriz Alves',    email:'beatriz@marciais.com.br',   perfil:'pai',          escola:'Artes Marciais POA',     status:'ativo',    ultimo:'21/03/2026' },
-  ];
+  var USERS          = [];
+  var FILTERED_USERS = [];
+  var editingUserId  = null;
+  var activeQuery    = '', activeRole = '', activeStatus = '';
+  var currentPage    = 1;
+  var PAGE_SIZE      = 20;
+  var modalStep      = 1;
+  var selectedPerfil = null;
+  var ESCOLAS_LIST   = [];
 
-  const ROLE_LABELS = {
-    super_admin:  { label: 'Super Admin', cls: 'badge-super' },
+  var ROLE_LABELS = {
+    super_admin:  { label: 'Super Admin',  cls: 'badge-super' },
     admin_escola: { label: 'Admin Escola', cls: 'badge-admin' },
+    coordenador:  { label: 'Coordenador',  cls: 'badge-prof'  },
     professor:    { label: 'Professor',    cls: 'badge-prof'  },
-    pai:          { label: 'Pai / Resp.',  cls: 'badge-pai'   },
+    financeiro:   { label: 'Financeiro',   cls: 'badge-pai'   },
+    secretaria:   { label: 'Secretaria',   cls: 'badge-pai'   },
+    saude:        { label: 'Saude',        cls: 'badge-pai'   },
+    marketing:    { label: 'Marketing',    cls: 'badge-pai'   }
   };
-
-  const AV_COLORS = ['c1','c2','c3','c4','c5'];
+  var AV_COLORS = ['c1','c2','c3','c4','c5'];
 
   function initials(nome) {
-    return nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    return (nome||'?').split(' ').slice(0,2).map(function(w){ return w[0]; }).join('').toUpperCase();
   }
 
+  function fmtDate(ts) {
+    if (!ts) return '\u2014';
+    var d = new Date(ts);
+    var today = new Date();
+    var diff = Math.floor((today - d) / 86400000);
+    if (diff === 0) return 'Hoje, ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    if (diff === 1) return 'Ontem';
+    return d.toLocaleDateString('pt-BR');
+  }
+
+  /* ── KPI cards ─────────────────────────────────────────────────────────── */
+  function updateStats() {
+    var total        = USERS.length;
+    var ativos       = USERS.filter(function(u){ return u.status === 'ativo'; }).length;
+    var inativos     = USERS.filter(function(u){ return u.status !== 'ativo'; }).length;
+    var admins       = USERS.filter(function(u){ return u.perfil === 'admin_escola'; }).length;
+    var professores  = USERS.filter(function(u){ return u.perfil === 'professor'; }).length;
+    var superAdmins  = USERS.filter(function(u){ return u.perfil === 'super_admin'; }).length;
+
+    var e = function(id){ return document.getElementById(id); };
+    if (e('statTotal'))       e('statTotal').textContent      = total;
+    if (e('statAdmins'))      e('statAdmins').textContent     = admins;
+    if (e('statProfessores')) e('statProfessores').textContent = professores;
+    if (e('statInativos'))    e('statInativos').textContent   = inativos;
+
+    if (e('deltaTotal'))
+      e('deltaTotal').innerHTML = '<span class="up">' + ativos + ' ativos</span> · ' + superAdmins + ' super admins';
+    if (e('deltaAdmins'))
+      e('deltaAdmins').innerHTML = admins + ' vinculados a escolas';
+    if (e('deltaProfessores'))
+      e('deltaProfessores').innerHTML = professores + ' cadastrados';
+    if (e('deltaInativos'))
+      e('deltaInativos').innerHTML = inativos + ' suspensos/inativos';
+  }
+
+  /* ── Render + Pagination ───────────────────────────────────────────────── */
   function renderRow(u, i) {
-    const role = ROLE_LABELS[u.perfil] || { label: u.perfil, cls: 'badge-admin' };
-    const avColor = AV_COLORS[i % AV_COLORS.length];
-    return `
-      <tr data-name="${u.nome.toLowerCase()}" data-email="${u.email.toLowerCase()}" data-role="${u.perfil}" data-status="${u.status}">
-        <td>
-          <div class="user-cell">
-            <div class="user-av ${avColor}">${initials(u.nome)}</div>
-            <div class="user-name-cell">
-              <div class="name">${u.nome}</div>
-              <div class="email">${u.email}</div>
-            </div>
-          </div>
-        </td>
-        <td><span class="badge ${role.cls}">${role.label}</span></td>
-        <td class="col-escola"><span class="school-tag">${u.escola}</span></td>
-        <td class="col-status"><span class="status-dot ${u.status}">${u.status.charAt(0).toUpperCase()+u.status.slice(1)}</span></td>
-        <td class="col-ultimo"><span class="last-login">${u.ultimo}</span></td>
-        <td style="text-align:right;">
-          <div class="actions-cell" style="justify-content:flex-end;">
-            <button class="action-btn" title="Editar" onclick="editUser(${u.id})">✏️</button>
-            <button class="action-btn" title="Redefinir senha" onclick="showToast('E-mail de redefinição enviado','success')">🔑</button>
-            <button class="action-btn danger" title="Suspender" onclick="showToast('Usuário suspenso','danger')">🚫</button>
-          </div>
-        </td>
-      </tr>`;
+    var role = ROLE_LABELS[u.perfil] || { label: u.perfil || '\u2014', cls: 'badge-admin' };
+    var avColor = AV_COLORS[i % AV_COLORS.length];
+    var st = u.status || 'ativo';
+    var statusLabel = st.charAt(0).toUpperCase() + st.slice(1);
+    var uid    = (u.id||'').replace(/'/g,'');
+    var uemail = (u.email||'').replace(/'/g,'');
+    return '<tr>' +
+      '<td><div class="user-cell">' +
+        '<div class="user-av ' + avColor + '">' + initials(u.nome) + '</div>' +
+        '<div class="user-name-cell">' +
+          '<div class="name">' + (u.nome || '\u2014') + '</div>' +
+          '<div class="email">' + (u.email||'') + '</div>' +
+        '</div></div></td>' +
+      '<td><span class="badge ' + role.cls + '">' + role.label + '</span></td>' +
+      '<td class="col-escola"><span class="school-tag">\u2014</span></td>' +
+      '<td class="col-status"><span class="status-dot ' + st + '">' + statusLabel + '</span></td>' +
+      '<td class="col-ultimo"><span class="last-login">' + fmtDate(u.created_at) + '</span></td>' +
+      '<td style="text-align:right;"><div class="actions-cell" style="justify-content:flex-end;">' +
+        '<button class="action-btn" title="Editar" onclick="editUser(\'' + uid + '\')">\u270f\ufe0f</button>' +
+        '<button class="action-btn" title="Redefinir senha" onclick="resetPassword(\'' + uemail + '\')">\ud83d\udd11</button>' +
+        '<button class="action-btn danger" onclick="toggleStatus(\'' + uid + '\',\'' + st + '\')">' +
+          (st === 'ativo' ? '\ud83d\udeab' : '\u2705') +
+        '</button></div></td></tr>';
   }
 
   function renderTable(data) {
-    document.getElementById('tableBody').innerHTML = data.map((u,i) => renderRow(u,i)).join('');
-  }
-
-  /* ═══ Filters ═══ */
-  let activeQuery = '', activeRole = '', activeStatus = '';
-
-  function applyFilters() {
-    const rows = document.querySelectorAll('#tableBody tr');
-    rows.forEach(r => {
-      const name    = r.dataset.name    || '';
-      const email   = r.dataset.email   || '';
-      const role    = r.dataset.role    || '';
-      const status  = r.dataset.status  || '';
-      const matchQ  = !activeQuery  || name.includes(activeQuery) || email.includes(activeQuery);
-      const matchR  = !activeRole   || role === activeRole;
-      const matchS  = !activeStatus || status === activeStatus;
-      r.style.display = (matchQ && matchR && matchS) ? '' : 'none';
+    FILTERED_USERS = data.filter(function(u) {
+      var matchQ = !activeQuery  || (u.nome||'').toLowerCase().indexOf(activeQuery) >= 0 || (u.email||'').toLowerCase().indexOf(activeQuery) >= 0;
+      var matchR = !activeRole   || u.perfil === activeRole;
+      var matchS = !activeStatus || u.status === activeStatus;
+      return matchQ && matchR && matchS;
     });
+
+    /* reset to page 1 when filter changes */
+    if (currentPage > Math.ceil(FILTERED_USERS.length / PAGE_SIZE) || currentPage < 1) {
+      currentPage = 1;
+    }
+
+    var start  = (currentPage - 1) * PAGE_SIZE;
+    var end    = Math.min(start + PAGE_SIZE, FILTERED_USERS.length);
+    var page   = FILTERED_USERS.slice(start, end);
+
+    var tbody = document.getElementById('tableBody');
+    if (!FILTERED_USERS.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Nenhum usuario encontrado</td></tr>';
+    } else {
+      tbody.innerHTML = page.map(function(u,i){ return renderRow(u, start + i); }).join('');
+    }
+
+    /* pagination info */
+    var info = document.getElementById('paginationInfo');
+    if (info) {
+      if (FILTERED_USERS.length === 0) {
+        info.textContent = 'Nenhum resultado';
+      } else {
+        info.textContent = 'Mostrando ' + (start+1) + '\u2013' + end + ' de ' + FILTERED_USERS.length + ' usuario' + (FILTERED_USERS.length !== 1 ? 's' : '');
+      }
+    }
+
+    renderPagination(FILTERED_USERS.length);
   }
 
-  function filterTable(q)   { activeQuery  = q.toLowerCase(); applyFilters(); }
-  function filterRole(r)    { activeRole   = r;               applyFilters(); }
-  function filterStatus(s)  { activeStatus = s;               applyFilters(); }
+  function renderPagination(total) {
+    var container = document.getElementById('paginationBtns');
+    if (!container) return;
+    var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    var html = '';
 
-  /* ═══ Pagination (visual only) ═══ */
-  let currentPage = 1;
-  function changePage(d) { goPage(currentPage + d); }
+    /* Prev */
+    html += '<button class="page-btn" onclick="changePage(-1)"' + (currentPage === 1 ? ' disabled' : '') + '>\u2039</button>';
+
+    /* Page numbers: show up to 7 buttons with ellipsis */
+    var pages = [];
+    if (totalPages <= 7) {
+      for (var i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      var rangeStart = Math.max(2, currentPage - 1);
+      var rangeEnd   = Math.min(totalPages - 1, currentPage + 1);
+      for (var j = rangeStart; j <= rangeEnd; j++) pages.push(j);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    for (var k = 0; k < pages.length; k++) {
+      var p = pages[k];
+      if (p === '...') {
+        html += '<span style="display:flex;align-items:center;color:var(--text-muted);font-size:13px;padding:0 4px;">\u2026</span>';
+      } else {
+        html += '<button class="page-btn' + (p === currentPage ? ' active' : '') + '" onclick="goPage(' + p + ')">' + p + '</button>';
+      }
+    }
+
+    /* Next */
+    html += '<button class="page-btn" onclick="changePage(1)"' + (currentPage === totalPages ? ' disabled' : '') + '>\u203a</button>';
+
+    container.innerHTML = html;
+  }
+
+  function setLoading(on) {
+    var tb = document.getElementById('tableBody');
+    if (tb && on) tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Carregando...</td></tr>';
+  }
+
+  /* ── Filters ───────────────────────────────────────────────────────────── */
+  function filterTable(q)  { activeQuery  = (q||'').toLowerCase(); currentPage = 1; renderTable(USERS); }
+  function filterRole(r)   { activeRole   = r||'';                  currentPage = 1; renderTable(USERS); }
+  function filterStatus(s) { activeStatus = s||'';                  currentPage = 1; renderTable(USERS); }
+
+  /* ── Pagination controls ───────────────────────────────────────────────── */
+  function changePage(d) {
+    var totalPages = Math.max(1, Math.ceil(FILTERED_USERS.length / PAGE_SIZE));
+    var next = currentPage + d;
+    if (next < 1 || next > totalPages) return;
+    goPage(next);
+  }
   function goPage(p) {
     currentPage = p;
-    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById('page'+p);
-    if (btn) btn.classList.add('active');
-    document.getElementById('prevBtn').disabled = p === 1;
-    showToast(`Página ${p} carregada`);
+    renderTable(USERS);
+    /* scroll table into view */
+    var tc = document.getElementById('usersTable');
+    if (tc) tc.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  /* ═══ Modal ═══ */
-  function openModal(title = 'Novo Usuário') {
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalBackdrop').classList.add('show');
-    toggleEscolaField();
+  /* ── Export CSV ────────────────────────────────────────────────────────── */
+  function exportCSV() {
+    var rows = FILTERED_USERS.length ? FILTERED_USERS : USERS;
+    if (!rows.length) { showToast('Nenhum dado para exportar', ''); return; }
+    var header = ['Nome','E-mail','Perfil','Status','Criado em'];
+    var lines  = [header.join(',')];
+    rows.forEach(function(u) {
+      lines.push([
+        '"' + (u.nome||'').replace(/"/g,'""') + '"',
+        '"' + (u.email||'').replace(/"/g,'""') + '"',
+        '"' + (u.perfil||'').replace(/"/g,'""') + '"',
+        '"' + (u.status||'').replace(/"/g,'""') + '"',
+        '"' + (u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '') + '"'
+      ].join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'usuarios_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV exportado com ' + rows.length + ' registros', 'success');
   }
-  function closeModal() { document.getElementById('modalBackdrop').classList.remove('show'); }
+
+  /* ── Modal ─────────────────────────────────────────────────────────────── */
+  function openModal(title) {
+    title = title || 'Novo Usuario';
+    editingUserId = null;
+    modalStep = 1;
+    selectedPerfil = null;
+    document.getElementById('modalTitle').textContent = title;
+    ['inputNome','inputSobrenome','inputEmail','inputTelefone'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = ''; el.disabled = false; el.classList.remove('error'); }
+    });
+    ['errNome','errEmail','errPerfil','errEscola'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.querySelectorAll('.perfil-card').forEach(function(c){ c.classList.remove('selected'); });
+    var stepsWrap = document.getElementById('modalSteps');
+    if (stepsWrap) stepsWrap.style.display = '';
+    goToStep(1);
+    document.getElementById('modalBackdrop').classList.add('show');
+    if (typeof loadEscolas === 'function') loadEscolas();
+    setTimeout(function(){ var el = document.getElementById('inputNome'); if (el) el.focus(); }, 100);
+  }
+
+  function closeModal() {
+    document.getElementById('modalBackdrop').classList.remove('show');
+    editingUserId = null;
+  }
+
   function handleBackdropClick(e) { if (e.target === e.currentTarget) closeModal(); }
 
-  function toggleEscolaField() {
-    const perfil = document.getElementById('inputPerfil').value;
-    document.getElementById('escolaFieldWrap').style.display =
-      perfil === 'super_admin' ? 'none' : '';
+  function goToStep(step) {
+    modalStep = step;
+    [1,2,3].forEach(function(s) {
+      var body = document.getElementById('modalStep'+s);
+      if (body) body.style.display = s === step ? '' : 'none';
+      var dot = document.getElementById('mstep'+s+'dot');
+      var lbl = document.getElementById('mstep'+s);
+      if (dot && lbl) {
+        if (s < step) {
+          dot.style.background = '#10b981'; dot.style.color = '#fff'; dot.textContent = '\u2713';
+          lbl.style.color = '#10b981';
+        } else if (s === step) {
+          dot.style.background = 'var(--primary)'; dot.style.color = '#fff'; dot.textContent = String(s);
+          lbl.style.color = 'var(--primary)';
+        } else {
+          dot.style.background = 'var(--border)'; dot.style.color = 'var(--text-muted)'; dot.textContent = String(s);
+          lbl.style.color = 'var(--text-muted)';
+        }
+      }
+    });
+    var s1dot = document.querySelector('#mstep1 div');
+    if (s1dot && step > 1) { s1dot.style.background='#10b981'; s1dot.style.color='#fff'; s1dot.textContent='\u2713'; }
+    else if (s1dot) { s1dot.style.background='var(--primary)'; s1dot.style.color='#fff'; s1dot.textContent='1'; }
+    var btnV = document.getElementById('btnVoltar');
+    var btnP = document.getElementById('btnProximo');
+    var btnS = document.getElementById('btnSalvar');
+    if (btnV) btnV.style.display = step > 1 ? '' : 'none';
+    if (btnP) btnP.style.display = step < 3 ? '' : 'none';
+    if (btnS) btnS.style.display = step === 3 ? '' : 'none';
+    if (step === 3) buildConfirmStep();
+  }
+
+  function nextStep() {
+    if (modalStep === 1 && !validateStep1()) return;
+    if (modalStep === 2 && !validateStep2()) return;
+    goToStep(modalStep + 1);
+  }
+  function prevStep() { goToStep(modalStep - 1); }
+
+  function validateStep1() {
+    var ok = true;
+    var nome  = document.getElementById('inputNome').value.trim();
+    var email = document.getElementById('inputEmail').value.trim();
+    if (!nome)  { setFieldError('inputNome',  'errNome',  'Nome e obrigatorio');  ok = false; }
+    if (!email) { setFieldError('inputEmail', 'errEmail', 'E-mail e obrigatorio'); ok = false; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFieldError('inputEmail', 'errEmail', 'E-mail invalido'); ok = false;
+    }
+    return ok;
+  }
+  function validateStep2() {
+    var ok = true;
+    if (!selectedPerfil) {
+      var ep = document.getElementById('errPerfil');
+      if (ep) ep.textContent = 'Selecione um perfil';
+      ok = false;
+    }
+    if (selectedPerfil && selectedPerfil !== 'super_admin') {
+      var escola = document.getElementById('inputEscola').value;
+      if (!escola) { setFieldError('inputEscola', 'errEscola', 'Selecione a escola'); ok = false; }
+    }
+    return ok;
+  }
+  function setFieldError(inputId, errId, msg) {
+    var inp = document.getElementById(inputId);
+    var err = document.getElementById(errId);
+    if (inp) inp.classList.add('error');
+    if (err) err.textContent = msg;
+  }
+  function clearFieldError(inputId) {
+    var inp = document.getElementById(inputId);
+    if (inp) inp.classList.remove('error');
+    var errId = 'err' + inputId.replace('input','');
+    var err = document.getElementById(errId);
+    if (err) err.textContent = '';
+  }
+
+  function selectPerfil(perfil) {
+    selectedPerfil = perfil;
+    document.querySelectorAll('.perfil-card').forEach(function(c){
+      c.classList.toggle('selected', c.dataset.perfil === perfil);
+    });
+    var ep = document.getElementById('errPerfil');
+    if (ep) ep.textContent = '';
+    var wrap = document.getElementById('escolaFieldWrap');
+    if (wrap) wrap.style.display = perfil === 'super_admin' ? 'none' : '';
+  }
+
+  function toggleEscolaField() {}
+
+  function buildConfirmStep() {
+    var nome      = document.getElementById('inputNome').value.trim();
+    var sobrenome = document.getElementById('inputSobrenome').value.trim();
+    var email     = document.getElementById('inputEmail').value.trim();
+    var tel       = document.getElementById('inputTelefone').value.trim();
+    var escolaId  = document.getElementById('inputEscola').value;
+    var escolaNome = '\u2014';
+    for (var i = 0; i < ESCOLAS_LIST.length; i++) {
+      if (ESCOLAS_LIST[i].id === escolaId) { escolaNome = ESCOLAS_LIST[i].nome_fantasia; break; }
+    }
+    var PERFIL_LABELS = {
+      super_admin: 'Super Admin', admin_escola: 'Admin Escola',
+      professor: 'Professor', financeiro: 'Financeiro'
+    };
+    var cn = document.getElementById('confirmNome');
+    var ce = document.getElementById('confirmEmail');
+    var cp = document.getElementById('confirmPerfil');
+    if (cn) cn.textContent  = sobrenome ? nome + ' ' + sobrenome : nome;
+    if (ce) ce.textContent  = email;
+    if (cp) cp.textContent  = PERFIL_LABELS[selectedPerfil] || selectedPerfil || '\u2014';
+    var telRow = document.getElementById('confirmTelRow');
+    if (telRow) telRow.style.display = tel ? '' : 'none';
+    var ct = document.getElementById('confirmTel');
+    if (ct) ct.textContent = tel || '';
+    var escRow = document.getElementById('confirmEscolaRow');
+    if (escRow) escRow.style.display = selectedPerfil !== 'super_admin' ? '' : 'none';
+    var cesc = document.getElementById('confirmEscola');
+    if (cesc) cesc.textContent = escolaNome;
   }
 
   function editUser(id) {
-    const u = USERS.find(x => x.id === id);
+    var u = null;
+    for (var i = 0; i < USERS.length; i++) { if (USERS[i].id === id) { u = USERS[i]; break; } }
     if (!u) return;
-    document.getElementById('inputNome').value     = u.nome.split(' ')[0];
-    document.getElementById('inputSobrenome').value= u.nome.split(' ').slice(1).join(' ');
-    document.getElementById('inputEmail').value    = u.email;
-    document.getElementById('inputPerfil').value   = u.perfil;
-    document.getElementById('inputStatus').value   = u.status;
-    openModal('Editar Usuário');
+    editingUserId = id;
+    var stepsWrap = document.getElementById('modalSteps');
+    if (stepsWrap) stepsWrap.style.display = 'none';
+    document.getElementById('modalTitle').textContent = 'Editar Usuario';
+    modalStep = 1;
+    goToStep(1);
+    var ms2 = document.getElementById('modalStep2'); if (ms2) ms2.style.display = 'none';
+    var ms3 = document.getElementById('modalStep3'); if (ms3) ms3.style.display = 'none';
+    var bp  = document.getElementById('btnProximo'); if (bp)  bp.style.display  = 'none';
+    var bs  = document.getElementById('btnSalvar');  if (bs)  bs.style.display  = '';
+    var bst = document.getElementById('btnSalvarText'); if (bst) bst.textContent = 'Salvar Alteracoes';
+    var partes = (u.nome || '').split(' ');
+    document.getElementById('inputNome').value      = partes[0] || '';
+    document.getElementById('inputSobrenome').value = partes.slice(1).join(' ');
+    document.getElementById('inputEmail').value     = u.email;
+    document.getElementById('inputEmail').disabled  = true;
+    document.getElementById('inputTelefone').value  = u.telefone || '';
+    selectedPerfil = u.perfil || 'usuario';
+    document.getElementById('modalBackdrop').classList.add('show');
   }
 
-  function saveUser() {
-    const nome = document.getElementById('inputNome').value.trim();
-    const email = document.getElementById('inputEmail').value.trim();
-    if (!nome || !email) { showToast('Preencha nome e e-mail','danger'); return; }
-    closeModal();
-    showToast('Usuário salvo com sucesso','success');
+  function maskPhone(el) {
+    var v = el.value.replace(/\D/g,'').slice(0,11);
+    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
+    el.value = v;
   }
 
-  /* ═══ Toast ═══ */
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = (type === 'success' ? '✅ ' : type === 'danger' ? '⚠️ ' : 'ℹ️ ') + msg;
+  function showToast(msg, type) {
+    type = type || '';
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = (type === 'success' ? '\u2705 ' : type === 'danger' ? '\u26a0\ufe0f ' : '\u2139\ufe0f ') + msg;
     t.className = 'toast show' + (type ? ' ' + type : '');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 4000);
   }
 
-  /* ═══ Init ═══ */
-  renderTable(USERS);
+  /* Stubs sobrescritos pelo Bloco 2 */
+  function loadUsers()          { setLoading(false); }
+  function loadEscolas()        {}
+  function saveUser()           { showToast('Supabase nao conectado', 'danger'); }
+  function toggleStatus(id,st)  { showToast('Supabase nao conectado', 'danger'); }
+  function resetPassword(email) { showToast('Supabase nao conectado', 'danger'); }
 </script>
+
+<script>
+  /* BLOCO 2 - Integracao Supabase */
+  (function() {
+    var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
+    var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+    var db = null;
+
+    function initSupabase() {
+      try {
+        var sdk = window.supabase;
+        if (!sdk || typeof sdk.createClient !== 'function') {
+          console.warn('[Supabase] SDK nao encontrado em window.supabase');
+          return false;
+        }
+        db = sdk.createClient(SUPA_URL, SUPA_KEY, {
+          auth: { autoRefreshToken: false, persistSession: false }
+        });
+        console.log('[Supabase] Inicializado com sucesso');
+        return true;
+      } catch(e) {
+        console.warn('[Supabase] Falha ao inicializar:', e);
+        return false;
+      }
+    }
+
+    loadUsers = async function() {
+      if (!db) { showToast('Supabase nao conectado', 'danger'); return; }
+      setLoading(true);
+      try {
+        var res = await db.from('profiles').select('*').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        USERS = res.data || [];
+        renderTable(USERS);
+        updateStats();
+      } catch(e) {
+        showToast('Erro ao carregar usuarios: ' + e.message, 'danger');
+      }
+      setLoading(false);
+    };
+
+    loadEscolas = async function() {
+      if (!db) return;
+      try {
+        var res = await db.from('escolas').select('id, nome_fantasia').eq('status','ativa').order('nome_fantasia');
+        ESCOLAS_LIST = res.data || [];
+        var sel = document.getElementById('inputEscola');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Selecionar escola...</option>' +
+          ESCOLAS_LIST.map(function(e){ return '<option value="' + e.id + '">' + e.nome_fantasia + '</option>'; }).join('');
+      } catch(e) {
+        console.warn('loadEscolas error', e);
+      }
+    };
+
+    saveUser = async function() {
+      if (!db) { showToast('Supabase nao conectado', 'danger'); return; }
+      var nome      = document.getElementById('inputNome').value.trim();
+      var sobrenome = document.getElementById('inputSobrenome').value.trim();
+      var email     = document.getElementById('inputEmail').value.trim();
+      var tel       = document.getElementById('inputTelefone').value.trim();
+      var nomeCompleto = sobrenome ? nome + ' ' + sobrenome : nome;
+      var btnText = document.getElementById('btnSalvarText');
+      var btnSave = document.getElementById('btnSalvar');
+      if (btnSave) btnSave.disabled = true;
+      if (btnText) btnText.textContent = 'Processando...';
+      try {
+        if (editingUserId) {
+          var upd = await db.from('profiles').update({
+            nome: nomeCompleto, telefone: tel || null,
+            updated_at: new Date().toISOString()
+          }).eq('id', editingUserId);
+          if (upd.error) throw upd.error;
+          showToast('Usuario atualizado com sucesso', 'success');
+        } else {
+          var escolaId = document.getElementById('inputEscola').value || null;
+          var plataformaPerfil = selectedPerfil === 'super_admin' ? 'super_admin' : 'usuario';
+          var inv = await db.auth.admin.inviteUserByEmail(email, {
+            data: { nome: nomeCompleto, perfil: plataformaPerfil }
+          });
+          if (inv.error) throw inv.error;
+          var newUserId = inv.data && inv.data.user ? inv.data.user.id : null;
+          if (newUserId) {
+            await db.from('profiles').update({
+              nome: nomeCompleto, telefone: tel || null,
+              perfil: plataformaPerfil, updated_at: new Date().toISOString()
+            }).eq('id', newUserId);
+            if (escolaId && selectedPerfil !== 'super_admin') {
+              await db.from('escola_usuarios').insert({
+                user_id: newUserId, escola_id: escolaId,
+                perfil: selectedPerfil, status: 'pendente'
+              });
+            }
+          }
+          showToast('Convite enviado para ' + email, 'success');
+        }
+        closeModal();
+        var sw = document.getElementById('modalSteps');
+        if (sw) sw.style.display = '';
+        await loadUsers();
+      } catch(err) {
+        showToast('Erro: ' + (err.message || String(err)), 'danger');
+      } finally {
+        if (btnSave) btnSave.disabled = false;
+        if (btnText) btnText.textContent = 'Enviar Convite';
+        var emailEl = document.getElementById('inputEmail');
+        if (emailEl) emailEl.disabled = false;
+      }
+    };
+
+    toggleStatus = async function(id, currentStatus) {
+      if (!db) { showToast('Supabase nao conectado', 'danger'); return; }
+      var novoStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
+      var res = await db.from('profiles').update({
+        status: novoStatus, updated_at: new Date().toISOString()
+      }).eq('id', id);
+      if (res.error) { showToast('Erro: ' + res.error.message, 'danger'); return; }
+      showToast('Usuario ' + (novoStatus === 'ativo' ? 'reativado' : 'desativado'), 'success');
+      await loadUsers();
+    };
+
+    resetPassword = async function(email) {
+      if (!db) { showToast('Supabase nao conectado', 'danger'); return; }
+      var res = await db.auth.resetPasswordForEmail(email);
+      if (res.error) { showToast('Erro: ' + res.error.message, 'danger'); return; }
+      showToast('E-mail de redefinicao enviado para ' + email, 'success');
+    };
+
+    function run() {
+      if (initSupabase()) {
+        loadUsers();
+      } else {
+        showToast('Supabase SDK nao carregou', 'danger');
+        setLoading(false);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run);
+    } else {
+      run();
+    }
+  })();
+</script>
+<script>window.SUPERADMIN_PAGE = 'usuarios';</script>
+<script src="superadmin-sidebar.js"></script>
 </body>
 </html>

@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esportes Academy — Escola · Atletas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #20C997;
+      --primary-dark:  #17a57a;
+      --primary-light: #e6faf4;
+      --secondary:     #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:        #FFA552;
+      --accent-light:  #fff4e8;
+      --success:       #20C997;
+      --success-light: #e6faf4;
+      --warning:       #FFA552;
+      --warning-light: #fff4e8;
+      --danger:        #ef4444;
+      --danger-light:  #fee2e2;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --bg:            #F7F9FA;
+      --card:          #ffffff;
+      --text:          #1B1B1B;
+      --text-muted:    #6b7280;
+      --border:        #e5e7eb;
+      --sidebar-w:     268px;
+      --sidebar-bg:    #0d2112;
+      --sidebar-hover: #162e1c;
+      --shadow:        0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:     0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:     0 10px 24px -3px rgba(0,0,0,.12);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --topbar-h:      60px;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    /* ── OVERLAY ── */
+    .overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width:var(--sidebar-w);height:100dvh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .brand { display:flex;align-items:center;gap:10px; }
+    .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+    .school-chip { margin:10px 12px 0;padding:8px 10px;background:rgba(32,201,151,.1);border:1px solid rgba(32,201,151,.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px; }
+    .school-chip .sc-ava { width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .sc-name { color:rgba(255,255,255,.85);font-size:11px;font-weight:600; }
+    .sc-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .sidebar-nav { padding:8px 10px;flex:1; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+    .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .sidebar-footer { padding:10px 10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+
+    /* ── MAIN ── */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* ── TOPBAR ── */
+    .topbar { background:var(--card);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow); }
+    @media(min-width:640px)  { .topbar { padding:0 22px; } }
+    @media(min-width:1024px) { .topbar { padding:0 28px; } }
+    .hamburger { width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);border:none;background:var(--bg);cursor:pointer;font-size:17px;flex-shrink:0; }
+    @media(min-width:1024px){ .hamburger { display:none; } }
+    .topbar-title { flex:1;min-width:0; }
+    .page-title  { font-size:15px;font-weight:700; }
+    .breadcrumb  { font-size:11px;color:var(--text-muted);display:none; }
+    @media(min-width:640px){ .page-title { font-size:16px; } .breadcrumb { display:block; } }
+    .topbar-right { display:flex;align-items:center;gap:8px;flex-shrink:0; }
+    .icon-btn { width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:15px;position:relative;transition:all .15s; }
+    .icon-btn:hover { background:var(--primary-light);border-color:var(--primary); }
+    .notif-dot { position:absolute;top:5px;right:6px;width:7px;height:7px;background:var(--accent);border-radius:50%;border:1.5px solid var(--card); }
+
+    /* ── BUTTONS ── */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;white-space:nowrap; }
+    .btn-primary  { background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(32,201,151,.3); }
+    .btn-primary:hover { background:var(--primary-dark);transform:translateY(-1px); }
+    .btn-secondary{ background:var(--card);color:var(--text);border:1.5px solid var(--border); }
+    .btn-secondary:hover { background:var(--bg); }
+    .btn-danger   { background:var(--danger);color:#fff; }
+    .btn-ghost    { background:transparent;color:var(--text-muted);border:none; }
+    .btn-ghost:hover { background:var(--bg);color:var(--text); }
+    .btn-sm { padding:5px 11px;font-size:12px; }
+    .btn-xs { padding:3px 8px;font-size:11px; }
+
+    /* ── PAGE ── */
+    .page-content { padding:20px 16px 40px;flex:1; }
+    @media(min-width:640px)  { .page-content { padding:22px 20px 48px; } }
+    @media(min-width:1024px) { .page-content { padding:26px 28px 56px; } }
+
+    /* ── STATS ROW ── */
+    .stats-row { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px; }
+    @media(min-width:480px) { .stats-row { grid-template-columns:repeat(4,1fr); } }
+    .stat-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;display:flex;align-items:center;gap:12px;transition:box-shadow .2s; }
+    .stat-card:hover { box-shadow:var(--shadow-md); }
+    .stat-icon { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0; }
+    .stat-icon.green  { background:var(--success-light); }
+    .stat-icon.orange { background:var(--accent-light); }
+    .stat-icon.gray   { background:var(--bg); }
+    .stat-icon.red    { background:var(--danger-light); }
+    .stat-val  { font-size:22px;font-weight:800;line-height:1; }
+    .stat-label{ font-size:11px;color:var(--text-muted);margin-top:2px; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
+    .search-input-wrap { display:flex;align-items:center;gap:7px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;flex:1;min-width:200px;max-width:360px;transition:border-color .15s; }
+    .search-input-wrap:focus-within { border-color:var(--primary); }
+    .search-input-wrap input { border:none;background:transparent;font-size:13px;color:var(--text);outline:none;width:100%; }
+    .search-input-wrap input::placeholder { color:var(--text-muted); }
+    .filter-select { padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:12.5px;color:var(--text);cursor:pointer;outline:none;transition:border-color .15s; }
+    .filter-select:focus { border-color:var(--primary); }
+    .filter-tag { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text-muted);transition:all .15s;white-space:nowrap; }
+    .filter-tag.active { border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark); }
+    .filter-tag:hover { border-color:var(--primary);color:var(--primary-dark); }
+    .toolbar-right { margin-left:auto;display:flex;gap:8px;flex-shrink:0; }
+
+    /* ── TABLE ── */
+    .table-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden; }
+    .table-scroll { overflow-x:auto;-webkit-overflow-scrolling:touch; }
+    table.athletes { width:100%;border-collapse:collapse;font-size:13px; }
+    table.athletes thead th { text-align:left;padding:10px 14px;color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--border);white-space:nowrap;background:var(--bg); }
+    table.athletes thead th:first-child { padding-left:18px; }
+    table.athletes tbody tr { transition:background .12s;cursor:pointer; }
+    table.athletes tbody tr:hover { background:#f0fdf9; }
+    table.athletes tbody tr.selected { background:var(--primary-light); }
+    table.athletes tbody td { padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle; }
+    table.athletes tbody td:first-child { padding-left:18px; }
+    table.athletes tbody tr:last-child td { border-bottom:none; }
+
+    /* athlete cell */
+    .athlete-cell { display:flex;align-items:center;gap:10px; }
+    .athlete-photo { width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff; }
+    .athlete-name  { font-weight:600;font-size:13px;line-height:1.2; }
+    .athlete-cpf   { font-size:11px;color:var(--text-muted);font-family:monospace; }
+
+    /* badges */
+    .badge { display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap; }
+    .badge-success { background:var(--success-light);color:var(--primary-dark); }
+    .badge-warning { background:var(--warning-light);color:#b45309; }
+    .badge-danger  { background:var(--danger-light); color:var(--danger); }
+    .badge-gray    { background:var(--bg);           color:var(--text-muted); }
+    .badge-info    { background:var(--secondary-light);color:#0369a1; }
+    .badge-purple  { background:var(--purple-light); color:#6d28d9; }
+
+    /* responsible cell */
+    .resp-cell { display:flex;flex-direction:column;gap:1px; }
+    .resp-name { font-size:12.5px;font-weight:500; }
+    .resp-type { font-size:10.5px;color:var(--text-muted); }
+    .resp-fin-badge { font-size:10px;font-weight:600;color:var(--primary-dark);background:var(--primary-light);padding:1px 5px;border-radius:4px;display:inline-block;margin-top:2px; }
+
+    /* action btns */
+    .row-actions { display:flex;gap:4px;opacity:0;transition:opacity .15s; }
+    tr:hover .row-actions { opacity:1; }
+
+    /* pagination */
+    .pagination { display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px; }
+    .pagination-info { font-size:12px;color:var(--text-muted); }
+    .pagination-btns { display:flex;gap:4px; }
+    .pg-btn { width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1.5px solid var(--border);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s; }
+    .pg-btn:hover { border-color:var(--primary);color:var(--primary); }
+    .pg-btn.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel {
+      position:fixed;top:0;right:-440px;width:440px;height:100dvh;
+      background:var(--card);box-shadow:-8px 0 40px rgba(0,0,0,.12);
+      z-index:200;transition:right .3s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    .detail-panel.open { right:0; }
+    @media(max-width:480px){ .detail-panel { width:100vw;right:-100vw; } }
+
+    .panel-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0; }
+    .panel-close { width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:var(--bg);border-radius:var(--radius-sm);cursor:pointer;font-size:16px;margin-left:auto;transition:background .15s; }
+    .panel-close:hover { background:var(--danger-light);color:var(--danger); }
+    .panel-body  { flex:1;overflow-y:auto;padding:0; }
+    .panel-footer{ padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0; }
+
+    /* profile header */
+    .profile-header { padding:20px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;position:relative;overflow:hidden; }
+    .profile-header::after { content:'⚽';position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.1; }
+    .profile-top { display:flex;align-items:flex-start;gap:14px; }
+    .profile-photo-lg { width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0; }
+    .profile-name-lg { font-size:17px;font-weight:800;line-height:1.2; }
+    .profile-cpf-lg  { font-size:11.5px;opacity:.75;margin-top:2px;font-family:monospace; }
+    .profile-tags { display:flex;gap:6px;margin-top:8px;flex-wrap:wrap; }
+    .profile-tag { padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.2);color:#fff; }
+
+    /* panel tabs */
+    .panel-tabs { display:flex;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0; }
+    .panel-tab { flex:1;padding:10px 4px;font-size:12px;font-weight:600;color:var(--text-muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s; }
+    .panel-tab.active { color:var(--primary);border-bottom-color:var(--primary); }
+    .panel-tab:hover { color:var(--text); }
+
+    /* panel sections */
+    .panel-section { padding:16px 20px;border-bottom:1px solid var(--border); }
+    .panel-section:last-child { border-bottom:none; }
+    .ps-title { font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px; }
+
+    /* info rows */
+    .info-row { display:flex;align-items:flex-start;justify-content:space-between;padding:5px 0;gap:12px; }
+    .info-label { font-size:12px;color:var(--text-muted);flex-shrink:0;min-width:110px; }
+    .info-value { font-size:12.5px;font-weight:500;text-align:right; }
+
+    /* contract period picker */
+    .tipo-periodo-opt { border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s; }
+    .tipo-periodo-opt:hover { border-color:var(--primary); }
+    .tipo-periodo-opt.active { border-color:var(--primary);background:var(--primary-light); }
+    .tipo-periodo-opt.active div { color:var(--primary-dark) !important; }
+
+    /* responsible cards */
+    .resp-card { padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:7px;display:flex;align-items:center;gap:10px; }
+    .resp-card:last-child { margin-bottom:0; }
+    .resp-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--secondary),var(--purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0; }
+    .resp-details { flex:1;min-width:0; }
+    .resp-card-name { font-size:13px;font-weight:600; }
+    .resp-card-info { font-size:11px;color:var(--text-muted); }
+    .resp-fin-chip  { font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--primary-light);color:var(--primary-dark);flex-shrink:0; }
+
+    /* history timeline */
+    .history-item { display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border); }
+    .history-item:last-child { border-bottom:none; }
+    .history-line { display:flex;flex-direction:column;align-items:center;gap:0; }
+    .history-dot  { width:10px;height:10px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:3px; }
+    .history-line-bar { width:2px;background:var(--border);flex:1;margin-top:3px; }
+    .history-content { flex:1;min-width:0; }
+    .history-school { font-size:13px;font-weight:600; }
+    .history-period { font-size:11.5px;color:var(--text-muted); }
+    .history-details{ margin-top:5px;display:flex;gap:6px;flex-wrap:wrap; }
+    .history-tag { font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--bg);color:var(--text-muted);font-weight:500; }
+    .history-current{ background:var(--primary-light);color:var(--primary-dark); }
+
+    /* attendance mini */
+    .freq-bar-row { margin-top:6px; }
+    .freq-bar-bg  { height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:4px; }
+    .freq-bar-fill{ height:100%;border-radius:99px;background:var(--primary); }
+
+    /* ── NEW ATHLETE DRAWER ── */
+    .drawer {
+      position:fixed;top:0;right:-520px;width:520px;height:100dvh;
+      background:var(--card);box-shadow:-8px 0 40px rgba(0,0,0,.14);
+      z-index:300;transition:right .3s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    .drawer.open { right:0; }
+    @media(max-width:560px){ .drawer { width:100vw;right:-100vw; } }
+
+    .drawer-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0; }
+    .drawer-title  { font-size:15px;font-weight:700;flex:1; }
+    .drawer-body   { flex:1;overflow-y:auto;padding:20px; }
+    .drawer-footer { padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0; }
+
+    /* stepper */
+    .stepper { display:flex;align-items:center;gap:0;margin-bottom:24px; }
+    .step { display:flex;align-items:center;gap:8px;flex:1; }
+    .step-num { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s; }
+    .step-num.done    { background:var(--primary);color:#fff; }
+    .step-num.active  { background:var(--primary);color:#fff;box-shadow:0 0 0 3px var(--primary-light); }
+    .step-num.pending { background:var(--bg);color:var(--text-muted);border:1.5px solid var(--border); }
+    .step-label { font-size:11px;font-weight:600;color:var(--text-muted); }
+    .step.active .step-label { color:var(--text); }
+    .step-bar { flex:1;height:2px;background:var(--border);margin:0 4px; }
+    .step-bar.done { background:var(--primary); }
+
+    /* form */
+    .form-section-title { font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border); }
+    .form-row { display:grid;gap:12px;margin-bottom:14px; }
+    .form-row.cols-2 { grid-template-columns:1fr 1fr; }
+    .form-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+    @media(max-width:480px){ .form-row.cols-2,.form-row.cols-3 { grid-template-columns:1fr; } }
+    .field { display:flex;flex-direction:column;gap:5px; }
+    .field label { font-size:12px;font-weight:600;color:var(--text); }
+    .field label .req { color:var(--danger);margin-left:2px; }
+    .field input,.field select,.field textarea { padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text);background:var(--card);outline:none;font-family:'Inter',sans-serif;transition:border-color .15s; }
+    .field input:focus,.field select:focus,.field textarea:focus { border-color:var(--primary); }
+    .field input::placeholder { color:var(--text-muted); }
+    .field .hint { font-size:11px;color:var(--text-muted); }
+    .field .error-msg { font-size:11px;color:var(--danger);display:none; }
+    .field.has-error input { border-color:var(--danger); }
+    .field.has-error .error-msg { display:block; }
+
+    /* cpf lookup result */
+    .cpf-result { padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:14px;display:none; }
+    .cpf-result.found-other    { background:#fef3c7;border:1.5px solid #f59e0b; }
+    .cpf-result.found-same     { background:var(--danger-light);border:1.5px solid var(--danger); }
+    .cpf-result.not-found      { background:var(--success-light);border:1.5px solid var(--primary); }
+    .cpf-result.show { display:flex;align-items:flex-start;gap:10px; }
+    .cpf-result-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+    .cpf-result-text .cr-title { font-size:12.5px;font-weight:700; }
+    .cpf-result-text .cr-sub   { font-size:11.5px;color:var(--text-muted);margin-top:2px; }
+
+    /* responsible form card */
+    .resp-form-card { background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;position:relative; }
+    .resp-form-card .remove-resp { position:absolute;top:10px;right:10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;transition:color .15s; }
+    .resp-form-card .remove-resp:hover { color:var(--danger); }
+    .fin-toggle { display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s; }
+    .fin-toggle.active { border-color:var(--primary);background:var(--primary-light); }
+    .fin-toggle-dot { width:14px;height:14px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .15s; }
+    .fin-toggle.active .fin-toggle-dot { background:var(--primary);border-color:var(--primary); }
+    .fin-toggle-label { font-size:12px;font-weight:600;color:var(--text-muted); }
+    .fin-toggle.active .fin-toggle-label { color:var(--primary-dark); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align:center;padding:48px 20px;color:var(--text-muted); }
+    .empty-state .ei { font-size:40px;margin-bottom:10px; }
+    .empty-state p { font-size:13px; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;align-items:center;justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:400px;width:calc(100% - 32px); }
+    .modal-title { font-size:15px;font-weight:700;margin-bottom:8px; }
+    .modal-body  { font-size:13px;color:var(--text-muted);line-height:1.6; }
+    .modal-actions { display:flex;gap:8px;justify-content:flex-end;margin-top:18px; }
+
+    /* divider */
+    .divider { height:1px;background:var(--border);margin:14px 0; }
+
+    /* hidden */
+    .hidden { display:none!important; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closePanels()"></div>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
+      </div>
+    </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">🏫</div>
+      <div>
+        <div class="sc-name">Academia Atlética SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">⇅</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')">☰</button>
+    <div class="topbar-title">
+      <div class="page-title">Atletas</div>
+      <div class="breadcrumb">Arena Futebol Kids · 142 atletas ativos</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" title="Notificações">🔔<span class="notif-dot"></span></div>
+      <div class="user-ava" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">CF</div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon green">👥</div><div><div class="stat-val" style="color:var(--primary)">142</div><div class="stat-label">Ativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⏸️</div><div><div class="stat-val" style="color:var(--accent)">12</div><div class="stat-label">Inativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon gray">🚫</div><div><div class="stat-val" style="color:var(--text-muted)">3</div><div class="stat-label">Suspensos</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-val" style="color:var(--danger)">19</div><div class="stat-label">Inadimplentes</div></div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-input-wrap">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar por nome, CPF ou responsável…" oninput="filterTable()"/>
+      </div>
+
+      <select class="filter-select" id="filterStatus" onchange="filterTable()">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
+        <option value="suspenso">Suspenso</option>
+      </select>
+
+      <select class="filter-select" id="filterTurma" onchange="filterTable()">
+        <option value="">Todas as turmas</option>
+        <option value="Futebol Sub-12 A">Futebol Sub-12 A</option>
+        <option value="Natação Iniciante">Natação Iniciante</option>
+        <option value="Jiu-Jitsu Kids">Jiu-Jitsu Kids</option>
+        <option value="Vôlei Teen">Vôlei Teen</option>
+        <option value="Atletismo Sub-10">Atletismo Sub-10</option>
+      </select>
+
+      <span class="filter-tag" id="tagInadimplente" onclick="toggleTag('inadimplente')">⚠️ Inadimplentes</span>
+      <span class="filter-tag" id="tagSemTurma"     onclick="toggleTag('semturma')">🔴 Sem turma</span>
+
+      <div class="toolbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📊 Exportar</button>
+        <button class="btn btn-primary"           onclick="openDrawer()">+ Novo Atleta</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="athletes" id="athletesTable">
+          <thead>
+            <tr>
+              <th>Atleta</th>
+              <th>Nascimento / Idade</th>
+              <th>Turma</th>
+              <th>Responsável Financeiro</th>
+              <th>Status</th>
+              <th>Financeiro</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="athletesTbody">
+            <!-- rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="pagination-info" id="paginationInfo">Exibindo 1–10 de 157</div>
+        <div class="pagination-btns">
+          <div class="pg-btn">‹</div>
+          <div class="pg-btn active">1</div>
+          <div class="pg-btn">2</div>
+          <div class="pg-btn">3</div>
+          <div class="pg-btn">›</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════ DETAIL PANEL ════════════════ -->
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <span style="font-size:14px;font-weight:700;">Perfil do Atleta</span>
+    <button class="panel-close" onclick="closeDetailPanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"><!-- JS --></div>
+  <div class="panel-footer">
+    <button class="btn btn-secondary btn-sm" onclick="closeDetailPanel()">Fechar</button>
+    <button class="btn btn-secondary btn-sm">🩺 Ficha Saúde</button>
+    <button class="btn btn-primary btn-sm" onclick="openEditDrawer()">✏️ Editar</button>
+  </div>
+</div>
+
+<!-- ════════════════ NEW ATHLETE DRAWER ════════════════ -->
+<div class="drawer" id="athleteDrawer">
+  <div class="drawer-header">
+    <button class="btn btn-ghost btn-sm" onclick="closeDrawer()">✕</button>
+    <div class="drawer-title" id="drawerTitle">Novo Atleta</div>
+    <div style="font-size:11px;color:var(--text-muted);" id="drawerStep">Passo 1 de 3</div>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step active" id="step1">
+        <div class="step-num active" id="sn1">1</div>
+        <div class="step-label">Identificação</div>
+      </div>
+      <div class="step-bar" id="sb1"></div>
+      <div class="step active" id="step2">
+        <div class="step-num pending" id="sn2">2</div>
+        <div class="step-label">Responsáveis</div>
+      </div>
+      <div class="step-bar" id="sb2"></div>
+      <div class="step" id="step3">
+        <div class="step-num pending" id="sn3">3</div>
+        <div class="step-label">Matrícula</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Identificação -->
+    <div id="formStep1">
+      <div class="form-section-title">🔍 Busca por CPF</div>
+      <div class="form-row">
+        <div class="field">
+          <label>CPF do Atleta <span class="req">*</span></label>
+          <input type="text" id="cpfInput" placeholder="000.000.000-00" maxlength="14" oninput="formatCPF(this)" onblur="lookupCPF(this.value)"/>
+          <span class="hint">O CPF é o identificador global do atleta na plataforma.</span>
+        </div>
+      </div>
+
+      <!-- CPF result banner -->
+      <div class="cpf-result" id="cpfResult"></div>
+
+      <!-- Form (hidden until CPF validated) -->
+      <div id="athleteFormFields" class="hidden">
+        <div class="form-section-title">👤 Dados Pessoais</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Nome Completo <span class="req">*</span></label>
+            <input type="text" id="fNome" placeholder="Nome completo do atleta"/>
+          </div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="field">
+            <label>Data de Nascimento <span class="req">*</span></label>
+            <input type="date" id="fNasc"/>
+          </div>
+          <div class="field">
+            <label>Sexo</label>
+            <select id="fSexo"><option value="">Selecione</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select>
+          </div>
+          <div class="field">
+            <label>Telefone do Atleta</label>
+            <input type="text" id="fTel" placeholder="(11) 99999-9999"/>
+          </div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="field">
+            <label>RG (opcional)</label>
+            <input type="text" id="fRG" placeholder="00.000.000-0"/>
+          </div>
+          <div class="field">
+            <label>Plano de Saúde</label>
+            <input type="text" id="fPlanoSaude" placeholder="Unimed, Amil…"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Observações</label>
+            <textarea id="fObs" rows="2" placeholder="Alergias, limitações ou informações importantes…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Responsáveis -->
+    <div id="formStep2" class="hidden">
+      <div class="form-section-title">👨‍👧 Responsáveis</div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">Adicione pelo menos <strong>1 responsável financeiro</strong>. O responsável financeiro receberá as cobranças e notificações de pagamento.</p>
+
+      <div id="respCards">
+        <!-- rendered by JS -->
+      </div>
+
+      <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="addResponsavel()">+ Adicionar Responsável</button>
+
+      <div id="respError" class="hidden" style="margin-top:10px;padding:10px 12px;background:var(--danger-light);border-radius:var(--radius-sm);font-size:12px;color:var(--danger);font-weight:600;">
+        ⚠️ Pelo menos 1 responsável deve ser marcado como Responsável Financeiro.
+      </div>
+    </div>
+
+    <!-- STEP 3: Matrícula -->
+    <div id="formStep3" class="hidden">
+      <div class="form-section-title">📋 Plano de Pagamento</div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          Usar um plano cadastrado
+          <span id="planoBadge" style="display:none;background:var(--primary-light);color:var(--primary-dark);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid var(--primary);">pré-preenchido</span>
+        </label>
+        <select id="fPlano" onchange="onPlanoChange()" style="border:2px solid var(--border);">
+          <option value="">— Preencher manualmente —</option>
+          <option value="1">Mensalidade Padrão · R$ 320 · Mensal · Pix · Dia 5</option>
+          <option value="2">Mensalidade Premium · R$ 420 · Mensal · Qualquer · Dia 10</option>
+          <option value="3">Plano Semestral · R$ 320 · Semestral · 10% desc. · Boleto · Dia 5</option>
+          <option value="4">Plano Anual · R$ 320 · Anual · 20% desc. · Pix · Dia 5</option>
+          <option value="5">Natação · R$ 380 · Mensal · Qualquer · Dia 15</option>
+          <option value="6">Ginástica Rítmica · R$ 290 · Mensal · Pix · Dia 10</option>
+        </select>
+        <span class="hint">Ao selecionar um plano, os campos abaixo são pré-preenchidos automaticamente. Você pode ajustar depois.</span>
+      </div>
+
+      <div class="form-section-title">🗂️ Turma e Período</div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Turma</label>
+          <select id="fTurma" onchange="onTurmaChange()">
+            <option value="">— Sem turma por enquanto —</option>
+            <option value="fut12a" data-valor="320">Futebol Sub-12 A · Seg/Qua/Sex 09h · R$ 320</option>
+            <option value="nat"    data-valor="380">Natação Iniciante · Ter/Qui 10h · R$ 380</option>
+            <option value="jiu"    data-valor="340">Jiu-Jitsu Kids · Seg/Qua 14h · R$ 340</option>
+            <option value="vol"    data-valor="360">Vôlei Teen · Ter/Qui 15h · R$ 360</option>
+            <option value="atl"    data-valor="300">Atletismo Sub-10 · Sex 07h · R$ 300</option>
+          </select>
+          <span class="hint">Turmas com capacidade disponível. O valor é pré-preenchido automaticamente.</span>
+        </div>
+      </div>
+
+      <!-- Tipo de período -->
+      <div class="form-section-title" style="margin-top:16px;">📅 Tipo de Contrato</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;" id="tipo-periodo-grid">
+        <div class="tipo-periodo-opt active" data-tipo="mensal" onclick="selectTipoPeriodo('mensal',this)">
+          <div style="font-size:18px;margin-bottom:4px;">🔄</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Mensal</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Recorrente</div>
+        </div>
+        <div class="tipo-periodo-opt" data-tipo="trimestral" onclick="selectTipoPeriodo('trimestral',this)">
+          <div style="font-size:18px;margin-bottom:4px;">🗓️</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Trimestral</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">3 meses / 3 parcelas</div>
+        </div>
+        <div class="tipo-periodo-opt" data-tipo="semestral" onclick="selectTipoPeriodo('semestral',this)">
+          <div style="font-size:18px;margin-bottom:4px;">📆</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Semestral</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">6 meses / 6 parcelas</div>
+        </div>
+        <div class="tipo-periodo-opt" data-tipo="anual" onclick="selectTipoPeriodo('anual',this)">
+          <div style="font-size:18px;margin-bottom:4px;">🏅</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Anual</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">12 meses / 12 parcelas</div>
+        </div>
+        <div class="tipo-periodo-opt" data-tipo="personalizado" onclick="selectTipoPeriodo('personalizado',this)">
+          <div style="font-size:18px;margin-bottom:4px;">✏️</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Personalizado</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">Data fim manual</div>
+        </div>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Data de Início <span class="req">*</span></label>
+          <input type="date" id="fDataInicio" value="2026-03-24" onchange="calcDataFim()"/>
+        </div>
+        <div class="field" id="fDataFimField">
+          <label id="fDataFimLabel">Data de Término</label>
+          <input type="date" id="fDataFim" readonly style="background:#f9fafb;color:var(--text-muted);"/>
+          <span class="hint" id="fDataFimHint">Calculada automaticamente.</span>
+        </div>
+      </div>
+
+      <!-- Plano de pagamento -->
+      <div class="form-section-title" style="margin-top:4px;">💳 Plano de Pagamento</div>
+
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Valor por cobrança <span class="req">*</span></label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-muted);font-weight:600;pointer-events:none;">R$</span>
+            <input type="number" id="fValor" value="320" step="0.01" min="0" style="padding-left:28px;" oninput="calcValorLiquido()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Dia de vencimento</label>
+          <select id="fDiaVenc">
+            <option value="1">Dia 1</option>
+            <option value="5" selected>Dia 5</option>
+            <option value="10">Dia 10</option>
+            <option value="15">Dia 15</option>
+            <option value="20">Dia 20</option>
+            <option value="25">Dia 25</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Desconto (%)</label>
+          <div style="position:relative;">
+            <input type="number" id="fDesconto" value="0" step="1" min="0" max="100" style="padding-right:28px;" oninput="calcValorLiquido()"/>
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-muted);">%</span>
+          </div>
+        </div>
+        <div class="field" id="fMotivoField" style="display:none;">
+          <label>Motivo do desconto</label>
+          <select id="fMotivo">
+            <option value="bolsa">Bolsa</option>
+            <option value="irmao">Desconto irmão/irmã</option>
+            <option value="funcionario">Funcionário</option>
+            <option value="convenio">Convênio</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Valor líquido calculado -->
+      <div id="valor-liquido-row" style="display:flex;align-items:center;justify-content:space-between;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;">
+        <span style="font-size:13px;font-weight:600;color:var(--primary-dark);">💰 Valor líquido por cobrança</span>
+        <span id="fValorLiquido" style="font-size:18px;font-weight:800;color:var(--primary-dark);">R$ 320,00</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Forma de pagamento preferencial</label>
+          <select id="fFormaPgto">
+            <option value="qualquer">Qualquer (o responsável escolhe)</option>
+            <option value="pix">PIX</option>
+            <option value="boleto">Boleto bancário</option>
+            <option value="cartao">Cartão de crédito</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Gerar cobranças auto -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:16px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Gerar cobranças automaticamente</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">Cobranças serão criadas conforme o plano e enviadas ao responsável financeiro</div>
+        </div>
+        <button type="button" id="toggleGerarAuto" onclick="toggleGerarAutoBtn()" style="width:44px;height:24px;border-radius:12px;background:var(--primary);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;">
+          <span style="position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:23px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span>
+        </button>
+      </div>
+
+      <!-- Summary -->
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border);">
+        <div style="font-size:11.5px;font-weight:700;margin-bottom:10px;color:var(--text);">📋 Resumo do Cadastro</div>
+        <div id="formSummary" style="font-size:12px;color:var(--text-muted);line-height:1.9;">
+          — preencha os passos anteriores —
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /drawer-body -->
+
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" id="btnBack" onclick="stepBack()" style="display:none;">← Voltar</button>
+    <button class="btn btn-primary"  id="btnNext" onclick="stepNext()">Próximo →</button>
+  </div>
+</div>
+
+<!-- ════════════════ JS ════════════════ -->
+<script>
+/* ── DATA ── */
+const ATHLETES = [
+  { id:1,  nome:'João Victor Silva',   cpf:'123.456.789-01', nasc:'2014-03-10', turma:'Futebol Sub-12 A',  resp:'Paulo Silva',      respTipo:'Pai',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#20C997', initials:'JV', escolas:['Arena Futebol Kids'] },
+  { id:2,  nome:'Ana Paula Pereira',   cpf:'234.567.890-12', nasc:'2015-07-22', turma:'Natação Iniciante', resp:'Carla Pereira',    respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#5BC0EB', initials:'AP', escolas:['Arena Futebol Kids','Centro Natação Elite'] },
+  { id:3,  nome:'Lucas Matos',         cpf:'345.678.901-23', nasc:'2014-11-05', turma:'Jiu-Jitsu Kids',   resp:'Roberto Matos',   respTipo:'Pai',  financeiro:true,  status:'ativo',    fin:'vencendo',  foto:'#FFA552', initials:'LM', escolas:['Arena Futebol Kids'] },
+  { id:4,  nome:'Maria Costa',         cpf:'456.789.012-34', nasc:'2013-01-30', turma:'Vôlei Teen',       resp:'Sandra Costa',    respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'vencida',   foto:'#8b5cf6', initials:'MC', escolas:['Arena Futebol Kids'] },
+  { id:5,  nome:'Pedro Alves',         cpf:'567.890.123-45', nasc:'2016-08-14', turma:'Futebol Sub-12 A', resp:'Marcos Alves',    respTipo:'Pai',  financeiro:true,  status:'ativo',    fin:'vencida',   foto:'#ef4444', initials:'PA', escolas:['Arena Futebol Kids','Academia Vôlei Pro'] },
+  { id:6,  nome:'Isabela Rocha',       cpf:'678.901.234-56', nasc:'2015-04-19', turma:'Natação Iniciante',resp:'Fernanda Rocha',  respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#14b8a6', initials:'IR', escolas:['Arena Futebol Kids'] },
+  { id:7,  nome:'Gustavo Lima',        cpf:'789.012.345-67', nasc:'2014-09-03', turma:'Atletismo Sub-10', resp:'Carlos Lima',     respTipo:'Pai',  financeiro:true,  status:'inativo',  fin:'cancelada', foto:'#6b7280', initials:'GL', escolas:['Arena Futebol Kids'] },
+  { id:8,  nome:'Beatriz Ferreira',    cpf:'890.123.456-78', nasc:'2015-12-11', turma:'Jiu-Jitsu Kids',   resp:'Ana Ferreira',    respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#f59e0b', initials:'BF', escolas:['Arena Futebol Kids'] },
+  { id:9,  nome:'Rafael Souza',        cpf:'901.234.567-89', nasc:'2013-06-28', turma:'Futebol Sub-12 A', resp:'José Souza',      respTipo:'Pai',  financeiro:true,  status:'suspenso', fin:'vencida',   foto:'#dc2626', initials:'RS', escolas:['Arena Futebol Kids'] },
+  { id:10, nome:'Larissa Oliveira',    cpf:'012.345.678-90', nasc:'2016-02-07', turma:'Vôlei Teen',       resp:'Marta Oliveira',  respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#7c3aed', initials:'LO', escolas:['Arena Futebol Kids','Centro Natação Elite'] },
+  { id:11, nome:'Felipe Nascimento',   cpf:'111.222.333-44', nasc:'2014-10-15', turma:'Atletismo Sub-10', resp:'Sônia Nascimento',respTipo:'Mãe',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#0ea5e9', initials:'FN', escolas:['Arena Futebol Kids'] },
+  { id:12, nome:'Camila Santos',       cpf:'222.333.444-55', nasc:'2015-05-20', turma:'',                 resp:'Lucas Santos',    respTipo:'Pai',  financeiro:true,  status:'ativo',    fin:'em_dia',    foto:'#10b981', initials:'CS', escolas:['Arena Futebol Kids'] },
+];
+
+const MATRICULAS = {
+  1:  { tipo_periodo:'mensal',    data_inicio:'01/01/2026', data_fim:null,         valor:320, desconto_pct:0,  desconto_motivo:null,       valor_liquido:320, dia_vencimento:5,  forma_pagamento:'pix',     gerar_auto:true,  status:'ativa' },
+  2:  { tipo_periodo:'semestral', data_inicio:'01/01/2026', data_fim:'30/06/2026', valor:380, desconto_pct:0,  desconto_motivo:null,       valor_liquido:380, dia_vencimento:5,  forma_pagamento:'qualquer',gerar_auto:true,  status:'ativa' },
+  3:  { tipo_periodo:'mensal',    data_inicio:'15/02/2026', data_fim:null,         valor:340, desconto_pct:10, desconto_motivo:'bolsa',     valor_liquido:306, dia_vencimento:15, forma_pagamento:'boleto',  gerar_auto:true,  status:'ativa' },
+  4:  { tipo_periodo:'mensal',    data_inicio:'01/03/2026', data_fim:null,         valor:360, desconto_pct:0,  desconto_motivo:null,       valor_liquido:360, dia_vencimento:5,  forma_pagamento:'cartao',  gerar_auto:true,  status:'ativa' },
+  5:  { tipo_periodo:'anual',     data_inicio:'01/01/2026', data_fim:'31/12/2026', valor:320, desconto_pct:15, desconto_motivo:'irmao',    valor_liquido:272, dia_vencimento:10, forma_pagamento:'pix',     gerar_auto:true,  status:'ativa' },
+  6:  { tipo_periodo:'mensal',    data_inicio:'01/02/2026', data_fim:null,         valor:380, desconto_pct:0,  desconto_motivo:null,       valor_liquido:380, dia_vencimento:5,  forma_pagamento:'boleto',  gerar_auto:true,  status:'ativa' },
+  7:  { tipo_periodo:'mensal',    data_inicio:'10/01/2026', data_fim:null,         valor:300, desconto_pct:0,  desconto_motivo:null,       valor_liquido:300, dia_vencimento:10, forma_pagamento:'pix',     gerar_auto:false, status:'suspensa' },
+  8:  { tipo_periodo:'trimestral',data_inicio:'01/02/2026', data_fim:'30/04/2026', valor:340, desconto_pct:0,  desconto_motivo:null,       valor_liquido:340, dia_vencimento:5,  forma_pagamento:'cartao',  gerar_auto:true,  status:'ativa' },
+  9:  { tipo_periodo:'mensal',    data_inicio:'01/06/2025', data_fim:null,         valor:320, desconto_pct:0,  desconto_motivo:null,       valor_liquido:320, dia_vencimento:5,  forma_pagamento:'boleto',  gerar_auto:true,  status:'suspensa' },
+  10: { tipo_periodo:'semestral', data_inicio:'01/01/2026', data_fim:'30/06/2026', valor:360, desconto_pct:20, desconto_motivo:'convenio', valor_liquido:288, dia_vencimento:20, forma_pagamento:'pix',     gerar_auto:true,  status:'ativa' },
+  11: { tipo_periodo:'mensal',    data_inicio:'01/03/2026', data_fim:null,         valor:300, desconto_pct:0,  desconto_motivo:null,       valor_liquido:300, dia_vencimento:5,  forma_pagamento:'qualquer',gerar_auto:true,  status:'ativa' },
+  12: { tipo_periodo:'mensal',    data_inicio:'01/03/2026', data_fim:null,         valor:320, desconto_pct:0,  desconto_motivo:null,       valor_liquido:320, dia_vencimento:5,  forma_pagamento:'pix',     gerar_auto:true,  status:'ativa' },
+};
+
+let gerarAutoOn = true;
+let tipoPeriodoSelecionado = 'mensal';
+let selectedPlanoId = null;
+
+// Mock payment plans (same as Escola-planos-pagamento.html)
+const PLANOS_PAG = [
+  { id:1, nome:'Mensalidade Padrão',    frequencia:'mensal',     valor:320, desconto_pct:0,  desconto_motivo:'',        dia_vencimento:5,  forma_pagamento:'pix'     },
+  { id:2, nome:'Mensalidade Premium',   frequencia:'mensal',     valor:420, desconto_pct:0,  desconto_motivo:'',        dia_vencimento:10, forma_pagamento:'qualquer' },
+  { id:3, nome:'Plano Semestral',       frequencia:'semestral',  valor:320, desconto_pct:10, desconto_motivo:'bolsa',   dia_vencimento:5,  forma_pagamento:'boleto'   },
+  { id:4, nome:'Plano Anual',           frequencia:'anual',      valor:320, desconto_pct:20, desconto_motivo:'convenio',dia_vencimento:5,  forma_pagamento:'pix'      },
+  { id:5, nome:'Natação',               frequencia:'mensal',     valor:380, desconto_pct:0,  desconto_motivo:'',        dia_vencimento:15, forma_pagamento:'qualquer' },
+  { id:6, nome:'Ginástica Rítmica',     frequencia:'mensal',     valor:290, desconto_pct:0,  desconto_motivo:'',        dia_vencimento:10, forma_pagamento:'pix'      },
+];
+
+let filters = { search:'', status:'', turma:'', inadimplente:false, semturma:false };
+let selectedId = null;
+let currentStep = 1;
+let respCount = 1;
+let totalResps = 0;
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const tbody = document.getElementById('athletesTbody');
+  const filtered = ATHLETES.filter(a => {
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      if (!a.nome.toLowerCase().includes(q) && !a.cpf.includes(q) && !a.resp.toLowerCase().includes(q)) return false;
+    }
+    if (filters.status && a.status !== filters.status) return false;
+    if (filters.turma  && a.turma !== filters.turma)   return false;
+    if (filters.inadimplente && a.fin === 'em_dia')     return false;
+    if (filters.semturma && a.turma !== '')              return false;
+    return true;
+  });
+
+  document.getElementById('paginationInfo').textContent = `Exibindo 1–${Math.min(filtered.length,10)} de ${filtered.length}`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="ei">🔍</div><p>Nenhum atleta encontrado com os filtros aplicados.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.slice(0,10).map(a => {
+    const finBadge = {
+      em_dia:    `<span class="badge badge-success">✓ Em dia</span>`,
+      vencendo:  `<span class="badge badge-warning">⏰ Vencendo</span>`,
+      vencida:   `<span class="badge badge-danger">✕ Vencida</span>`,
+      cancelada: `<span class="badge badge-gray">— Inativo</span>`,
+    }[a.fin] || '';
+
+    const statusBadge = {
+      ativo:    `<span class="badge badge-success">Ativo</span>`,
+      inativo:  `<span class="badge badge-gray">Inativo</span>`,
+      suspenso: `<span class="badge badge-danger">Suspenso</span>`,
+    }[a.status] || '';
+
+    const multiSchool = a.escolas.length > 1
+      ? `<span class="badge badge-info" style="margin-top:3px;display:inline-flex;">🌐 Multi-escola</span>`
+      : '';
+
+    const age = calcAge(a.nasc);
+    const nasc = formatDate(a.nasc);
+
+    return `<tr onclick="openDetailPanel(${a.id})" class="${selectedId===a.id?'selected':''}">
+      <td>
+        <div class="athlete-cell">
+          <div class="athlete-photo" style="background:${a.foto}">${a.initials}</div>
+          <div>
+            <div class="athlete-name">${a.nome}</div>
+            <div class="athlete-cpf">${a.cpf}</div>
+            ${multiSchool}
+          </div>
+        </div>
+      </td>
+      <td style="font-size:12.5px;">${nasc}<br/><span style="color:var(--text-muted);font-size:11.5px;">${age} anos</span></td>
+      <td style="font-size:12.5px;">${a.turma || '<span style="color:var(--text-muted)">— Sem turma</span>'}</td>
+      <td>
+        <div class="resp-cell">
+          <div class="resp-name">${a.resp}</div>
+          <div class="resp-type">${a.respTipo}</div>
+          <span class="resp-fin-badge">💰 Financeiro</span>
+        </div>
+      </td>
+      <td>${statusBadge}</td>
+      <td>${finBadge}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openDetailPanel(${a.id})">Ver</button>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();">✏️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function calcAge(nasc) {
+  const today = new Date('2026-03-24');
+  const b = new Date(nasc);
+  let age = today.getFullYear() - b.getFullYear();
+  if (today.getMonth() < b.getMonth() || (today.getMonth() === b.getMonth() && today.getDate() < b.getDate())) age--;
+  return age;
+}
+
+function formatDate(d) {
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function filterTable() {
+  filters.search = document.getElementById('searchInput').value;
+  filters.status = document.getElementById('filterStatus').value;
+  filters.turma  = document.getElementById('filterTurma').value;
+  renderTable();
+}
+
+function toggleTag(tag) {
+  if (tag === 'inadimplente') {
+    filters.inadimplente = !filters.inadimplente;
+    document.getElementById('tagInadimplente').classList.toggle('active', filters.inadimplente);
+  } else {
+    filters.semturma = !filters.semturma;
+    document.getElementById('tagSemTurma').classList.toggle('active', filters.semturma);
+  }
+  renderTable();
+}
+
+/* ── DETAIL PANEL ── */
+function openDetailPanel(id) {
+  selectedId = id;
+  const a = ATHLETES.find(x => x.id === id);
+  if (!a) return;
+
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('detailPanel').classList.add('open');
+
+  const age = calcAge(a.nasc);
+  const multiHistory = a.escolas.length > 1
+    ? a.escolas.filter(e => e !== 'Arena Futebol Kids').map(e =>
+        `<div class="history-item">
+          <div class="history-line"><div class="history-dot" style="background:var(--secondary)"></div><div class="history-line-bar"></div></div>
+          <div class="history-content">
+            <div class="history-school">🏫 ${e}</div>
+            <div class="history-period">Jan 2024 – Mar 2025 · Encerrada</div>
+            <div class="history-details">
+              <span class="history-tag">Futebol</span>
+              <span class="history-tag">32 aulas</span>
+              <span class="history-tag">84% freq.</span>
+            </div>
+          </div>
+        </div>`).join('')
+    : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0;">Apenas esta escola.</div>`;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-top">
+        <div class="profile-photo-lg" style="background:${a.foto}">${a.initials}</div>
+        <div>
+          <div class="profile-name-lg">${a.nome}</div>
+          <div class="profile-cpf-lg">CPF: ${a.cpf}</div>
+          <div class="profile-tags">
+            <span class="profile-tag">${age} anos</span>
+            <span class="profile-tag">${a.status === 'ativo' ? '✓ Ativo' : a.status}</span>
+            ${a.escolas.length > 1 ? '<span class="profile-tag">🌐 Multi-escola</span>' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;border-bottom:1px solid var(--border);background:var(--card);">
+      <button class="panel-tab active" onclick="switchTab(this,'tab-dados')">Dados</button>
+      <button class="panel-tab"        onclick="switchTab(this,'tab-resp')">Responsáveis</button>
+      <button class="panel-tab"        onclick="switchTab(this,'tab-freq')">Frequência</button>
+      <button class="panel-tab"        onclick="switchTab(this,'tab-hist')">Histórico</button>
+    </div>
+
+    <!-- TAB: Dados -->
+    <div id="tab-dados">
+      <div class="panel-section">
+        <div class="ps-title">Informações Pessoais</div>
+        <div class="info-row"><span class="info-label">Nome completo</span><span class="info-value">${a.nome}</span></div>
+        <div class="info-row"><span class="info-label">CPF</span><span class="info-value" style="font-family:monospace">${a.cpf}</span></div>
+        <div class="info-row"><span class="info-label">Data de nascimento</span><span class="info-value">${formatDate(a.nasc)} (${age} anos)</span></div>
+        <div class="info-row"><span class="info-label">Status</span><span class="info-value">${a.status}</span></div>
+      </div>
+      <div class="panel-section">
+        <div class="ps-title" style="display:flex;align-items:center;justify-content:space-between;">
+          Matrícula nesta Escola
+          ${(()=>{ const m=MATRICULAS[a.id]; const s=m?.status||'ativa'; const bg=s==='ativa'?'var(--success-light)':s==='suspensa'?'var(--warning-light)':'var(--danger-light)'; const co=s==='ativa'?'var(--primary-dark)':s==='suspensa'?'#c05500':'var(--danger)'; return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${bg};color:${co};">${s}</span>`; })()}
+        </div>
+        <div class="info-row"><span class="info-label">Turma</span><span class="info-value">${a.turma || '— Sem turma'}</span></div>
+        <div class="info-row"><span class="info-label">Tipo de contrato</span><span class="info-value">${{mensal:'🔄 Mensal recorrente',trimestral:'🗓️ Trimestral',semestral:'📆 Semestral',anual:'🏅 Anual',personalizado:'✏️ Personalizado'}[MATRICULAS[a.id]?.tipo_periodo||'mensal']}</span></div>
+        <div class="info-row"><span class="info-label">Período</span><span class="info-value">${MATRICULAS[a.id]?.data_inicio||'—'} ${MATRICULAS[a.id]?.data_fim ? '→ '+MATRICULAS[a.id].data_fim : '→ em aberto'}</span></div>
+        <div class="info-row"><span class="info-label">Valor base</span><span class="info-value">R$ ${MATRICULAS[a.id]?.valor?.toFixed(2)||'—'}</span></div>
+        ${MATRICULAS[a.id]?.desconto_pct > 0 ? `<div class="info-row"><span class="info-label">Desconto</span><span class="info-value" style="color:var(--success);">${MATRICULAS[a.id].desconto_pct}% · ${MATRICULAS[a.id].desconto_motivo}</span></div>` : ''}
+        <div class="info-row"><span class="info-label">Valor líquido</span><span class="info-value" style="font-weight:700;color:var(--primary);">R$ ${MATRICULAS[a.id]?.valor_liquido?.toFixed(2)||'—'}/mês</span></div>
+        <div class="info-row"><span class="info-label">Vencimento</span><span class="info-value">Todo dia ${MATRICULAS[a.id]?.dia_vencimento||5}</span></div>
+        <div class="info-row"><span class="info-label">Pagamento</span><span class="info-value">${{qualquer:'Qualquer meio',pix:'PIX',boleto:'Boleto',cartao:'Cartão'}[MATRICULAS[a.id]?.forma_pagamento||'qualquer']}</span></div>
+        <div class="info-row"><span class="info-label">Cobrança auto</span><span class="info-value">${MATRICULAS[a.id]?.gerar_auto!==false?'✅ Ativa':'❌ Desativada'}</span></div>
+        <div class="info-row"><span class="info-label">Situação financeira</span><span class="info-value">${{em_dia:'✓ Em dia',vencendo:'⏰ Vencendo',vencida:'⚠️ Vencida',cancelada:'Inativo'}[a.fin]}</span></div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="alert('Editar matrícula...')">✏️ Editar</button>
+          <button class="btn btn-outline btn-sm" onclick="alert('Suspender matrícula...')" style="color:var(--accent);">⏸ Suspender</button>
+          <button class="btn btn-outline btn-sm" onclick="alert('Encerrar matrícula...')" style="color:var(--danger);">✕ Encerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Responsáveis -->
+    <div id="tab-resp" class="hidden">
+      <div class="panel-section">
+        <div class="ps-title">Responsáveis Vinculados</div>
+        <div class="resp-card">
+          <div class="resp-ava">${a.resp.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <div class="resp-details">
+            <div class="resp-card-name">${a.resp}</div>
+            <div class="resp-card-info">${a.respTipo} · (11) 99123-4567 · paulo@email.com</div>
+          </div>
+          <span class="resp-fin-chip">💰 Financeiro</span>
+        </div>
+        <div class="resp-card">
+          <div class="resp-ava" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">MJ</div>
+          <div class="resp-details">
+            <div class="resp-card-name">Maria José ${a.resp.split(' ').pop()}</div>
+            <div class="resp-card-info">Mãe · (11) 98765-4321</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;margin-top:8px;">+ Vincular Responsável</button>
+      </div>
+    </div>
+
+    <!-- TAB: Frequência -->
+    <div id="tab-freq" class="hidden">
+      <div class="panel-section">
+        <div class="ps-title">Frequência — Março 2026</div>
+        <div class="freq-bar-row">
+          <div style="display:flex;justify-content:space-between;font-size:12px;"><span>Geral</span><strong style="color:var(--primary)">82%</strong></div>
+          <div class="freq-bar-bg"><div class="freq-bar-fill" style="width:82%"></div></div>
+        </div>
+        <div style="margin-top:12px;">
+          <table style="width:100%;font-size:12px;border-collapse:collapse;">
+            <tr style="color:var(--text-muted);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">
+              <td style="padding:4px 0">Mês</td><td style="padding:4px 0;text-align:right">Presenças</td><td style="padding:4px 0;text-align:right">%</td>
+            </tr>
+            ${[['Mar/2026','9/11','82%'],['Fev/2026','8/10','80%'],['Jan/2026','11/13','85%'],['Dez/2025','7/9','78%']].map(([m,p,pct])=>
+              `<tr style="border-top:1px solid var(--border);">
+                <td style="padding:7px 0">${m}</td>
+                <td style="padding:7px 0;text-align:right;color:var(--text-muted)">${p}</td>
+                <td style="padding:7px 0;text-align:right;font-weight:700;color:var(--primary)">${pct}</td>
+              </tr>`).join('')}
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Histórico Global -->
+    <div id="tab-hist" class="hidden">
+      <div class="panel-section">
+        <div class="ps-title">Histórico de Escolas</div>
+        <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">Dados de outras escolas são somente leitura e não incluem informações financeiras ou de saúde.</p>
+
+        <div class="history-item">
+          <div class="history-line"><div class="history-dot"></div><div class="history-line-bar"></div></div>
+          <div class="history-content">
+            <div class="history-school">🏫 Arena Futebol Kids</div>
+            <div class="history-period">Jan 2025 – hoje · <span style="color:var(--primary);font-weight:600;">Ativa</span></div>
+            <div class="history-details">
+              <span class="history-tag history-current">Atual</span>
+              <span class="history-tag">${a.turma || 'Sem turma'}</span>
+              <span class="history-tag">82% freq.</span>
+            </div>
+          </div>
+        </div>
+
+        ${multiHistory}
+
+      </div>
+    </div>
+  `;
+
+  renderTable(); // re-render to highlight selected row
+}
+
+function switchTab(btn, tabId) {
+  btn.closest('div').querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['tab-dados','tab-resp','tab-freq','tab-hist'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', id !== tabId);
+  });
+}
+
+function closeDetailPanel() {
+  selectedId = null;
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  renderTable();
+}
+
+/* ── DRAWER (New Athlete) ── */
+function openDrawer() {
+  currentStep = 1;
+  respCount = 1;
+  totalResps = 0;
+  document.getElementById('athleteDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  showStep(1);
+  renderRespCards();
+}
+
+function closeDrawer() {
+  document.getElementById('athleteDrawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function openEditDrawer() {
+  closeDetailPanel();
+  document.getElementById('drawerTitle').textContent = 'Editar Atleta';
+  document.getElementById('athleteDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  showStep(1);
+}
+
+function showStep(n) {
+  currentStep = n;
+  ['formStep1','formStep2','formStep3'].forEach((id,i) => {
+    document.getElementById(id).classList.toggle('hidden', i+1 !== n);
+  });
+  document.getElementById('drawerStep').textContent = `Passo ${n} de 3`;
+  document.getElementById('btnBack').style.display = n > 1 ? 'flex' : 'none';
+  document.getElementById('btnNext').textContent   = n < 3 ? 'Próximo →' : '✓ Salvar Atleta';
+
+  // update stepper
+  [1,2,3].forEach(i => {
+    const sn = document.getElementById(`sn${i}`);
+    sn.className = `step-num ${i < n ? 'done' : i === n ? 'active' : 'pending'}`;
+    sn.textContent = i < n ? '✓' : i;
+    if (i < 3) document.getElementById(`sb${i}`).className = `step-bar ${i < n ? 'done' : ''}`;
+  });
+
+  if (n === 3) updateSummary();
+}
+
+function stepNext() {
+  if (currentStep === 1) {
+    const cpf = document.getElementById('cpfInput').value;
+    if (cpf.length < 14) { alert('Informe um CPF válido.'); return; }
+    const fields = document.getElementById('athleteFormFields');
+    if (fields.classList.contains('hidden')) { alert('Aguarde a validação do CPF.'); return; }
+  }
+  if (currentStep === 2) {
+    const cards = document.querySelectorAll('.resp-form-card');
+    let hasFin = false;
+    cards.forEach(c => { if (c.querySelector('.fin-toggle.active')) hasFin = true; });
+    if (!hasFin) { document.getElementById('respError').classList.remove('hidden'); return; }
+    document.getElementById('respError').classList.add('hidden');
+  }
+  if (currentStep < 3) showStep(currentStep + 1);
+  else { alert('✅ Atleta cadastrado com sucesso!'); closeDrawer(); }
+}
+
+function stepBack() { if (currentStep > 1) showStep(currentStep - 1); }
+
+/* CPF */
+function formatCPF(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value = v;
+}
+
+function lookupCPF(val) {
+  if (val.length < 14) return;
+  const res = document.getElementById('cpfResult');
+  const fields = document.getElementById('athleteFormFields');
+
+  // Simulate lookup
+  if (val === '234.567.890-12') {
+    // found in another school
+    res.className = 'cpf-result found-other show';
+    res.innerHTML = `<div class="cpf-result-icon">ℹ️</div>
+      <div class="cpf-result-text">
+        <div class="cr-title">Atleta encontrado na plataforma</div>
+        <div class="cr-sub"><strong>Ana Paula Pereira</strong> já está cadastrada no <strong>Centro Natação Elite</strong>. Os dados pessoais serão reaproveitados. Você só precisa adicionar o responsável e a turma desta escola.</div>
+      </div>`;
+    fields.classList.remove('hidden');
+    document.getElementById('fNome').value  = 'Ana Paula Pereira';
+    document.getElementById('fNasc').value  = '2015-07-22';
+    document.getElementById('fSexo').value  = 'Feminino';
+  } else if (val === '456.789.012-34') {
+    // already in same school
+    res.className = 'cpf-result found-same show';
+    res.innerHTML = `<div class="cpf-result-icon">⚠️</div>
+      <div class="cpf-result-text">
+        <div class="cr-title">Atleta já matriculado nesta escola</div>
+        <div class="cr-sub"><strong>Maria Costa</strong> já possui matrícula ativa na Arena Futebol Kids.</div>
+      </div>`;
+    fields.classList.add('hidden');
+  } else {
+    // new athlete
+    res.className = 'cpf-result not-found show';
+    res.innerHTML = `<div class="cpf-result-icon">✅</div>
+      <div class="cpf-result-text">
+        <div class="cr-title">CPF não encontrado — novo cadastro</div>
+        <div class="cr-sub">Preencha os dados abaixo para criar o perfil global do atleta.</div>
+      </div>`;
+    fields.classList.remove('hidden');
+  }
+}
+
+/* Responsible cards */
+let respData = [{ nome:'', tipo:'pai', email:'', tel:'', fin:true }];
+
+function renderRespCards() {
+  const container = document.getElementById('respCards');
+  container.innerHTML = respData.map((r, i) => `
+    <div class="resp-form-card">
+      ${respData.length > 1 ? `<button class="remove-resp" onclick="removeResp(${i})">✕</button>` : ''}
+      <div class="form-row cols-2" style="margin-bottom:10px;">
+        <div class="field">
+          <label>Nome <span class="req">*</span></label>
+          <input type="text" value="${r.nome}" placeholder="Nome completo" oninput="respData[${i}].nome=this.value"/>
+        </div>
+        <div class="field">
+          <label>Parentesco <span class="req">*</span></label>
+          <select onchange="respData[${i}].tipo=this.value">
+            <option value="pai"       ${r.tipo==='pai'?'selected':''}>Pai</option>
+            <option value="mae"       ${r.tipo==='mae'?'selected':''}>Mãe</option>
+            <option value="avo"       ${r.tipo==='avo'?'selected':''}>Avô/Avó</option>
+            <option value="responsavel" ${r.tipo==='responsavel'?'selected':''}>Responsável Legal</option>
+            <option value="outro"     ${r.tipo==='outro'?'selected':''}>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row cols-2" style="margin-bottom:10px;">
+        <div class="field">
+          <label>E-mail <span class="req">*</span></label>
+          <input type="email" value="${r.email}" placeholder="email@exemplo.com" oninput="respData[${i}].email=this.value"/>
+        </div>
+        <div class="field">
+          <label>Telefone <span class="req">*</span></label>
+          <input type="text" value="${r.tel}" placeholder="(11) 99999-9999" oninput="respData[${i}].tel=this.value"/>
+        </div>
+      </div>
+      <div class="fin-toggle ${r.fin?'active':''}" onclick="toggleFin(${i})" id="fin-toggle-${i}">
+        <div class="fin-toggle-dot"></div>
+        <div class="fin-toggle-label">💰 Responsável Financeiro — receberá cobranças e notificações</div>
+      </div>
+    </div>`).join('');
+}
+
+function addResponsavel() {
+  respData.push({ nome:'', tipo:'mae', email:'', tel:'', fin:false });
+  renderRespCards();
+}
+
+function removeResp(i) {
+  respData.splice(i, 1);
+  renderRespCards();
+}
+
+function toggleFin(i) {
+  respData[i].fin = !respData[i].fin;
+  renderRespCards();
+}
+
+function updateSummary() {
+  const nome   = document.getElementById('fNome')?.value || '—';
+  const nasc   = document.getElementById('fNasc')?.value ? formatDate(document.getElementById('fNasc').value) : '—';
+  const turmaEl = document.getElementById('fTurma');
+  const turma  = turmaEl?.selectedOptions[0]?.text?.split('·')[0]?.trim() || '— Sem turma';
+  const finResp = respData.find(r => r.fin);
+  const valor  = document.getElementById('fValor')?.value || '0';
+  const desc   = document.getElementById('fDesconto')?.value || '0';
+  const liquido = (parseFloat(valor) * (1 - parseFloat(desc)/100)).toFixed(2);
+  const diaVenc = document.getElementById('fDiaVenc')?.value || '5';
+  const forma  = {qualquer:'Qualquer meio',pix:'PIX',boleto:'Boleto',cartao:'Cartão'}[document.getElementById('fFormaPgto')?.value||'qualquer'];
+  const inicio = document.getElementById('fDataInicio')?.value ? formatDate(document.getElementById('fDataInicio').value) : '—';
+  const fim    = document.getElementById('fDataFim')?.value ? formatDate(document.getElementById('fDataFim').value) : 'Em aberto';
+  const tipoLabel = {mensal:'Mensal recorrente',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual',personalizado:'Personalizado'}[tipoPeriodoSelecionado];
+  document.getElementById('formSummary').innerHTML = `
+    <div>👤 <strong>Atleta:</strong> ${nome} · ${nasc}</div>
+    <div>💰 <strong>Resp. financeiro:</strong> ${finResp?.nome || '—'}</div>
+    <div>🏃 <strong>Turma:</strong> ${turma}</div>
+    <div>📅 <strong>Contrato:</strong> ${tipoLabel} · ${inicio} → ${fim}</div>
+    <div>💳 <strong>Valor líquido:</strong> R$ ${liquido}/mês${parseFloat(desc)>0?' ('+desc+'% desc.)':''} · Dia ${diaVenc}</div>
+    <div>🔑 <strong>Pagamento:</strong> ${forma} · Cobrança auto: ${gerarAutoOn?'✅':'❌'}</div>
+  `;
+}
+
+function selectTipoPeriodo(tipo, el) {
+  tipoPeriodoSelecionado = tipo;
+  document.querySelectorAll('.tipo-periodo-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  calcDataFim();
+}
+
+function calcDataFim() {
+  const inicio = document.getElementById('fDataInicio')?.value;
+  if(!inicio) return;
+  const d = new Date(inicio);
+  const fimEl  = document.getElementById('fDataFim');
+  const hintEl = document.getElementById('fDataFimHint');
+  const labelEl= document.getElementById('fDataFimLabel');
+  const meses = { trimestral:3, semestral:6, anual:12 };
+  if(tipoPeriodoSelecionado === 'mensal') {
+    if(fimEl) { fimEl.value=''; fimEl.readOnly=true; fimEl.style.background='#f9fafb'; }
+    if(hintEl) hintEl.textContent='Contrato recorrente sem data de encerramento.';
+    if(labelEl) labelEl.textContent='Data de Término (opcional)';
+  } else if(tipoPeriodoSelecionado === 'personalizado') {
+    if(fimEl) { fimEl.value=''; fimEl.readOnly=false; fimEl.style.background=''; }
+    if(hintEl) hintEl.textContent='Informe a data de encerramento do contrato.';
+    if(labelEl) labelEl.textContent='Data de Término *';
+  } else {
+    const mesesQtd = meses[tipoPeriodoSelecionado] || 0;
+    d.setMonth(d.getMonth() + mesesQtd);
+    d.setDate(d.getDate() - 1);
+    const fim = d.toISOString().split('T')[0];
+    if(fimEl) { fimEl.value=fim; fimEl.readOnly=true; fimEl.style.background='#f9fafb'; }
+    if(hintEl) hintEl.textContent=`Calculada: ${mesesQtd} meses a partir do início.`;
+    if(labelEl) labelEl.textContent='Data de Término (automática)';
+  }
+  updateSummary();
+}
+
+function calcValorLiquido() {
+  const val  = parseFloat(document.getElementById('fValor')?.value)||0;
+  const desc = parseFloat(document.getElementById('fDesconto')?.value)||0;
+  const liq  = val * (1 - desc/100);
+  const el = document.getElementById('fValorLiquido');
+  if(el) el.textContent = 'R$ ' + liq.toFixed(2);
+  const motivoField = document.getElementById('fMotivoField');
+  if(motivoField) motivoField.style.display = desc > 0 ? 'block' : 'none';
+  updateSummary();
+}
+
+function onTurmaChange() {
+  const sel = document.getElementById('fTurma');
+  const opt = sel?.selectedOptions[0];
+  const val = opt?.getAttribute('data-valor');
+  // Only auto-fill valor from turma if no plan is selected
+  if(val && !selectedPlanoId) {
+    const el = document.getElementById('fValor');
+    if(el) { el.value = val; calcValorLiquido(); }
+  }
+  updateSummary();
+}
+
+function onPlanoChange() {
+  const sel = document.getElementById('fPlano');
+  const id = sel ? parseInt(sel.value) : null;
+  selectedPlanoId = id || null;
+
+  // Reset plan badge
+  const badge = document.getElementById('planoBadge');
+  if(badge) badge.style.display = selectedPlanoId ? 'inline-flex' : 'none';
+
+  if(!selectedPlanoId) { updateSummary(); return; }
+
+  const plano = PLANOS_PAG.find(p => p.id === selectedPlanoId);
+  if(!plano) return;
+
+  // Pre-fill fields from plan
+  const fValor = document.getElementById('fValor');
+  const fDiaVenc = document.getElementById('fDiaVenc');
+  const fDesconto = document.getElementById('fDesconto');
+  const fMotivo = document.getElementById('fMotivo');
+  const fFormaPgto = document.getElementById('fFormaPgto');
+
+  if(fValor) fValor.value = plano.valor;
+  if(fDiaVenc) fDiaVenc.value = plano.dia_vencimento;
+  if(fDesconto) fDesconto.value = plano.desconto_pct;
+  if(fMotivo) fMotivo.value = plano.desconto_motivo;
+  if(fFormaPgto) fFormaPgto.value = plano.forma_pagamento;
+
+  // Map frequencia → tipoPeriodo and update grid
+  const freqMap = { mensal:'mensal', trimestral:'trimestral', semestral:'semestral', anual:'anual' };
+  const tipo = freqMap[plano.frequencia] || 'mensal';
+  document.querySelectorAll('.tipo-periodo-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.tipo === tipo);
+  });
+  tipoPeriodoSelecionado = tipo;
+  calcDataFim();
+  calcValorLiquido();
+  updateSummary();
+}
+
+function toggleGerarAutoBtn() {
+  gerarAutoOn = !gerarAutoOn;
+  const btn = document.getElementById('toggleGerarAuto');
+  if(btn) {
+    btn.style.background = gerarAutoOn ? 'var(--primary)' : 'var(--border)';
+    const thumb = btn.querySelector('span');
+    if(thumb) thumb.style.left = gerarAutoOn ? '23px' : '3px';
+  }
+  updateSummary();
+}
+
+function exportCSV() { alert('CSV exportado com sucesso!'); }
+
+function closePanels() {
+  closeDetailPanel();
+  closeDrawer();
+}
+
+/* ── INIT ── */
+renderTable();
+</script>
+<script>window.ESCOLA_PAGE = 'atletas';</script>
+<script src="escola-sidebar.js"></script>
+</body>
+</html>

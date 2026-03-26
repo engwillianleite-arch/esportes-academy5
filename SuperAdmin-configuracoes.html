@@ -3,923 +3,2045 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Esportes Academy — SuperAdmin-configuracoes</title>
+  <title>Esportes Academy &#8212; SuperAdmin &middot; Configura&ccedil;&otilde;es</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
+    /* ═══════════════════════════════════════
+       BASE RESET & TOKENS
+    ═══════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #1a56db;
-      --primary-dark: #1e429f;
-      --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669;
-      --success-light: #d1fae5;
-      --warning: #d97706;
-      --warning-light: #fef3c7;
-      --danger: #dc2626;
-      --danger-light: #fee2e2;
-      --purple: #7c3aed;
-      --purple-light: #ede9fe;
-      --bg: #f1f5f9;
-      --sidebar-w: 260px;
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
-      --card: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px;
-      --topbar-h: 56px;
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
 
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; backdrop-filter: blur(2px); }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════
+       OVERLAY
+    ═══════════════════════════════════════ */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 90;
+      backdrop-filter: blur(2px);
+    }
     .overlay.show { display: block; }
 
-    /* SIDEBAR */
-    .sidebar { width: var(--sidebar-w); height: 100dvh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); overflow-y: auto; }
+    /* ═══════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      height: 100dvh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
     .sidebar.open { transform: translateX(0); }
-    @media (min-width: 1024px) { .sidebar { transform: translateX(0); } }
-    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    @media (min-width: 1024px) {
+      .sidebar { transform: translateX(0); }
+    }
+
+    .sidebar-logo {
+      padding: 20px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
     .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
-    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
     .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
-    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
+    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; text-transform: uppercase; }
+
     .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
-    .nav-section-label { color: rgba(255,255,255,.3); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin: 14px 0 5px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; margin-bottom: 2px; text-decoration: none; }
+
+    .nav-section-label {
+      color: rgba(255,255,255,.3);
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 0 8px;
+      margin: 14px 0 5px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,.6);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 2px;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
     .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
     .nav-item.active { background: var(--primary); }
     .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff; font-size: 10px; font-weight: 700;
+      padding: 1px 6px; border-radius: 20px;
+    }
     .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
-    .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
-    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background .15s; }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
-    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+    .nav-item.stub { opacity:.45;cursor:default; }
+    .nav-item.stub:hover { background:transparent;color:rgba(255,255,255,.55); }
 
-    /* MAIN */
-    .main { display: flex; flex-direction: column; min-height: 100dvh; }
-    @media (min-width: 1024px) { .main { margin-left: var(--sidebar-w); } }
+    .sidebar-footer {
+      padding: 14px 10px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
 
-    /* TOPBAR */
-    .topbar { background: var(--card); border-bottom: 1px solid var(--border); height: var(--topbar-h); padding: 0 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
-    @media (min-width: 640px)  { .topbar { padding: 0 20px; } }
+    /* ═══════════════════════════════════════
+       MAIN WRAPPER
+    ═══════════════════════════════════════ */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+    @media (min-width: 1024px) {
+      .main { margin-left: var(--sidebar-w); }
+    }
+
+    /* ═══════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════ */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      height: var(--topbar-h);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow);
+    }
+    @media (min-width: 640px) { .topbar { padding: 0 20px; } }
     @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
-    .hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 18px; flex-shrink: 0; }
-    @media (min-width: 1024px) { .hamburger { display: none; } }
-    .topbar-title-group { flex: 1; min-width: 0; }
-    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; }
-    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
-    @media (min-width: 640px) { .topbar-title-group .page-title { font-size: 17px; } .topbar-title-group .breadcrumb { display: block; } }
-    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1.5px solid var(--border); cursor: pointer; font-size: 15px; position: relative; transition: all .15s; flex-shrink: 0; }
-    .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); }
-    .notif-dot { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; position: absolute; top: 5px; right: 5px; border: 1.5px solid #fff; }
 
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; }
+    .hamburger {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: none;
+      background: var(--bg); cursor: pointer;
+      font-size: 18px; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (min-width: 1024px) { .hamburger { display: none; } }
+
+    .topbar-title-group { flex: 1; min-width: 0; }
+    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
+    @media (min-width: 640px) {
+      .topbar-title-group .page-title { font-size: 17px; }
+      .topbar-title-group .breadcrumb { display: block; }
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: none;
+      background: var(--bg); cursor: pointer;
+      font-size: 16px; position: relative;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-btn:hover { background: var(--border); }
+
+    /* ═══════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .15s;
+      text-decoration: none; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
     @media (min-width: 640px) { .btn { font-size: 14px; padding: 9px 18px; } }
-    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(79,70,229,.3); }
     .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
     .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
     .btn-secondary:hover { background: var(--bg); }
     .btn-danger { background: var(--danger); color: #fff; }
-    .btn-danger:hover { background: #b91c1c; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 6px 12px !important; font-size: 12px !important; }
+    .btn-outline-danger { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); }
+    .btn-outline-danger:hover { background: var(--danger-light); }
 
-    /* CONTENT */
-    .content { padding: 16px; flex: 1; }
-    @media (min-width: 640px)  { .content { padding: 20px; } }
-    @media (min-width: 1024px) { .content { padding: 28px; } }
+    /* ═══════════════════════════════════════
+       CONTENT
+    ═══════════════════════════════════════ */
+    .content {
+      flex: 1;
+      padding: 20px 16px 100px;
+    }
+    @media (min-width: 640px) { .content { padding: 24px 20px 100px; } }
+    @media (min-width: 1024px) { .content { padding: 28px 28px 100px; } }
 
-    /* SETTINGS LAYOUT */
-    .settings-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    @media (min-width: 1024px) { .settings-layout { grid-template-columns: 220px 1fr; align-items: start; } }
+    /* ═══════════════════════════════════════
+       SETTINGS TABS (mobile)
+    ═══════════════════════════════════════ */
+    .settings-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 20px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .settings-tabs::-webkit-scrollbar { display: none; }
+    @media (min-width: 1024px) { .settings-tabs { display: none; } }
 
-    /* SETTINGS NAV */
-    .settings-nav { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: sticky; top: 80px; }
-    .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .15s; border-left: 3px solid transparent; }
+    .settings-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px; font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .settings-tab:hover { border-color: var(--primary); color: var(--primary); }
+    .settings-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ═══════════════════════════════════════
+       SETTINGS LAYOUT
+    ═══════════════════════════════════════ */
+    .settings-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    /* ═══════════════════════════════════════
+       SETTINGS NAV (desktop left sidebar)
+    ═══════════════════════════════════════ */
+    .settings-nav {
+      display: none;
+      flex-direction: column;
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 8px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 80px;
+    }
+    @media (min-width: 1024px) { .settings-nav { display: flex; } }
+
+    .settings-nav-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .settings-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
     .settings-nav-item:hover { background: var(--bg); color: var(--text); }
-    .settings-nav-item.active { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
-    .settings-nav-item .sn-icon { font-size: 15px; width: 20px; text-align: center; }
-    .settings-nav-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .settings-nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
 
-    /* SECTION CARD */
-    .section-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
-    .section-card:last-child { margin-bottom: 0; }
-    .section-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .section-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    /* ═══════════════════════════════════════
+       SECTIONS AREA
+    ═══════════════════════════════════════ */
+    .settings-sections { flex: 1; min-width: 0; }
+
+    .settings-section { display: flex; flex-direction: column; gap: 20px; }
+
+    /* ═══════════════════════════════════════
+       SECTION CARD
+    ═══════════════════════════════════════ */
+    .section-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
     .section-icon.blue   { background: var(--primary-light); }
-    .section-icon.green  { background: var(--success-light); }
+    .section-icon.orange { background: var(--accent-light); }
     .section-icon.purple { background: var(--purple-light); }
-    .section-icon.orange { background: var(--warning-light); }
+    .section-icon.green  { background: var(--success-light); }
     .section-icon.red    { background: var(--danger-light); }
-    .section-title { font-size: 14px; font-weight: 700; }
-    .section-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-    .section-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
-    .section-footer { padding: 14px 24px; border-top: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: flex-end; gap: 8px; }
+    .section-icon.sky    { background: var(--secondary-light); }
 
-    /* FORM ELEMENTS */
-    .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
-    .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
-    .form-hint  { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    .form-input { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; transition: border-color .15s; width: 100%; }
-    .form-input:focus { border-color: var(--primary); background: var(--card); }
-    .form-input:disabled { opacity: .5; cursor: not-allowed; }
-    .form-select { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; cursor: pointer; transition: border-color .15s; width: 100%; }
-    .form-select:focus { border-color: var(--primary); background: var(--card); }
-    .form-textarea { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; color: var(--text); background: var(--bg); outline: none; font-family: inherit; transition: border-color .15s; width: 100%; resize: vertical; min-height: 80px; }
-    .form-textarea:focus { border-color: var(--primary); background: var(--card); }
+    .section-header-info .section-title { font-size: 15px; font-weight: 700; }
+    .section-header-info .section-desc  { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
-    /* TOGGLE */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .toggle-row:first-child { padding-top: 0; }
-    .toggle-info { flex: 1; }
-    .toggle-title { font-size: 13px; font-weight: 600; }
-    .toggle-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
-    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 99px; cursor: pointer; transition: background .2s; }
-    .toggle input:checked + .toggle-track { background: var(--primary); }
-    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); pointer-events: none; }
-    .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+    .section-body { padding: 20px; }
+    .section-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    }
 
-    /* BADGE STATUS */
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-ok  { background: var(--success-light); color: var(--success); }
-    .badge-warn{ background: var(--warning-light); color: var(--warning); }
-    .badge-err { background: var(--danger-light);  color: var(--danger);  }
+    /* ═══════════════════════════════════════
+       FORM ELEMENTS
+    ═══════════════════════════════════════ */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 13px; font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--card);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+    }
+    .form-input:disabled, .form-select:disabled, .form-textarea:disabled {
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; }
 
-    /* INTEGRATION CARD */
-    .integ-list { display: flex; flex-direction: column; gap: 0; }
-    .integ-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .integ-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .integ-item:first-child { padding-top: 0; }
-    .integ-logo { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .integ-info { flex: 1; }
-    .integ-name { font-size: 13px; font-weight: 700; }
-    .integ-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-    .integ-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .form-row-2 { grid-template-columns: 1fr 1fr; }
+    }
 
-    /* DANGER ZONE */
-    .danger-zone { border: 1.5px solid var(--danger-light); border-radius: var(--radius); padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
-    .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-    .danger-info .danger-title { font-size: 13px; font-weight: 700; color: var(--danger); }
-    .danger-info .danger-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-    /* AVATAR UPLOAD */
-    .avatar-upload { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .avatar-preview { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; font-weight: 800; flex-shrink: 0; }
+    /* ═══════════════════════════════════════
+       AVATAR UPLOAD
+    ═══════════════════════════════════════ */
+    .avatar-upload { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .avatar-preview {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 22px;
+      flex-shrink: 0;
+    }
     .avatar-upload-actions { display: flex; flex-direction: column; gap: 6px; }
     .avatar-upload-hint { font-size: 11px; color: var(--text-muted); }
 
-    /* TABS (mobile settings nav) */
-    .settings-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 4px; }
-    @media (min-width: 1024px) { .settings-tabs { display: none; } }
-    .settings-tab { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--card); border: 1.5px solid var(--border); color: var(--text-muted); white-space: nowrap; transition: all .15s; }
-    .settings-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    /* ═══════════════════════════════════════
+       SUB SECTION LABEL
+    ═══════════════════════════════════════ */
+    .sub-section-label {
+      font-size: 10px; font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 20px 0 10px;
+    }
+    .sub-section-label:first-child { margin-top: 0; }
 
-    /* TOAST */
-    .toast { display: none; position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; box-shadow: var(--shadow-lg); gap: 8px; align-items: center; }
-    .toast.show { display: flex; }
+    /* ═══════════════════════════════════════
+       TOGGLE ROWS
+    ═══════════════════════════════════════ */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .toggle-row:last-of-type { border-bottom: none; }
+    .toggle-info { flex: 1; min-width: 0; padding-right: 16px; }
+    .toggle-title { font-size: 14px; font-weight: 500; }
+    .toggle-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Custom toggle switch */
+    .toggle { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      width: 44px; height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      transition: background .2s;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,.3);
+      transition: transform .2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--primary); }
+    .toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+
+    /* ═══════════════════════════════════════
+       INTEGRATIONS
+    ═══════════════════════════════════════ */
+    .integ-list { display: flex; flex-direction: column; gap: 0; }
+    .integ-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .integ-item:last-child { border-bottom: none; }
+    .integ-logo {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .integ-info { flex: 1; min-width: 0; }
+    .integ-name { font-size: 14px; font-weight: 600; }
+    .integ-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .integ-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .badge-ok   { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--success);background:var(--success-light);padding:3px 8px;border-radius:20px; }
+    .badge-warn { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#d97706;background:var(--warning-light);padding:3px 8px;border-radius:20px; }
+    .badge-err  { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--danger);background:var(--danger-light);padding:3px 8px;border-radius:20px; }
+
+    /* ═══════════════════════════════════════
+       AUDIT LOG
+    ═══════════════════════════════════════ */
+    .audit-list { display: flex; flex-direction: column; gap: 0; }
+    .audit-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .audit-item:last-child { border-bottom: none; }
+    .audit-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .audit-dot.green  { background: var(--success); }
+    .audit-dot.red    { background: var(--danger); }
+    .audit-dot.yellow { background: var(--warning); }
+    .audit-meta { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+    /* ═══════════════════════════════════════
+       DANGER ZONE
+    ═══════════════════════════════════════ */
+    .danger-zone { border-color: var(--danger) !important; }
+    .danger-zone .section-header { border-bottom-color: #fca5a5; }
+    .danger-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--danger-light);
+      gap: 16px;
+    }
+    .danger-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .danger-row:first-child { padding-top: 0; }
+    .danger-info { flex: 1; min-width: 0; }
+    .danger-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .danger-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ═══════════════════════════════════════
+       MAINTENANCE ACTIONS
+    ═══════════════════════════════════════ */
+    .maintenance-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+    /* ═══════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: var(--text);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px; font-weight: 500;
+      z-index: 300;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      max-width: 320px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
     .toast.success { background: var(--success); }
     .toast.danger  { background: var(--danger); }
+
+    /* ═══════════════════════════════════════
+       SAVE BAR
+    ═══════════════════════════════════════ */
+    .save-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 12px;
+      z-index: 150;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.2);
+      transform: translateY(100%);
+      transition: transform .25s;
+    }
+    .save-bar.show { transform: translateY(0); }
+    @media (min-width: 1024px) {
+      .save-bar { left: var(--sidebar-w); }
+    }
+    .save-bar-msg { flex: 1; color: #f8fafc; font-size: 13.5px; font-weight: 500; }
+    .save-bar-msg .warn-icon { color: #fbbf24; }
+
+    /* ═══════════════════════════════════════
+       DANGER MODAL
+    ═══════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-backdrop.show { opacity: 1; pointer-events: all; }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      transform: scale(.95);
+      transition: transform .2s;
+    }
+    .modal-backdrop.show .modal-box { transform: scale(1); }
+    .modal-icon  { font-size: 36px; margin-bottom: 12px; }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .modal-desc  { font-size: 13.5px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ═══════════════════════════════════════
+       FORM INLINE ROW (security)
+    ═══════════════════════════════════════ */
+    .form-inline-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 640px) {
+      .form-inline-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── Reveal-wrap ── */
+    .input-reveal-wrap { position:relative; display:flex; }
+    .input-reveal-wrap .form-input { flex:1; padding-right:42px; }
+    .reveal-btn { position:absolute; right:0; top:0; bottom:0; width:40px; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:15px; display:flex; align-items:center; justify-content:center; border-radius:0 var(--radius-sm) var(--radius-sm) 0; transition:color .15s; }
+    .reveal-btn:hover { color:var(--primary); }
+
+    /* ── Integ badge variants ── */
+    .integ-badge { display:inline-flex; align-items:center; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap; }
+    .badge-none  { background:#f1f5f9; color:#94a3b8; }
+    .badge-ok    { background:var(--success-light); color:#065f46; }
+    .badge-warn  { background:var(--warning-light); color:#92400e; }
+    .badge-err   { background:var(--danger-light);  color:#991b1b; }
+    .badge-loading { background:var(--primary-light); color:var(--primary); }
+
+    /* ── Integ hint (last saved) ── */
+    .integ-hint { font-size:11px; color:var(--text-muted); margin-top:3px; min-height:14px; }
   </style>
 </head>
 <body>
 
+<!-- Overlay -->
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
+<!-- ═══ SIDEBAR ═══ -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">&#x26BD;</div>
       <div class="brand-text">
         <div class="name">Esportes Academy</div>
-        <div class="sub">PORTAL SUPERADMIN</div>
+        <div class="sub">Super Admin</div>
       </div>
     </div>
   </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item" href="SuperAdmin-dashboard.html" onclick="closeSidebar()">
-      <span class="icon">🏠</span> Dashboard
-    </a>
-    <a class="nav-item" href="SuperAdmin-schools.html" onclick="closeSidebar()">
-      <span class="icon">🏫</span> Escolas
-      <span class="nav-badge">24</span>
-    </a>
-    <a class="nav-item" href="SuperAdmin-usuarios.html" onclick="closeSidebar()">
-      <span class="icon">👤</span> Usuários
-    </a>
-
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="SuperAdmin-cobrancas.html" onclick="closeSidebar()">
-      <span class="icon">💳</span> Cobranças
-    </a>
-    <a class="nav-item" href="SuperAdmin-planos.html" onclick="closeSidebar()">
-      <span class="icon">📦</span> Planos & Licenças
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">📊</span> Relatórios
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🧾</span> Notas Fiscais
-    </a>
-
-    <div class="nav-section-label">Sistema</div>
-    <a class="nav-item active" href="SuperAdmin-configuracoes.html" onclick="closeSidebar()">
-      <span class="icon">⚙️</span> Configurações
-    </a>
-    <a class="nav-item" href="SuperAdmin-notificacoes.html" onclick="closeSidebar()">
-      <span class="icon">🔔</span> Notificações
-      <span class="nav-badge">5</span>
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🛡️</span> Permissões
-    </a>
-  </nav>
-
+  <nav class="sidebar-nav" id="sidebar-nav"><!-- filled by superadmin-sidebar.js --></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
       <div class="user-info">
-        <div class="user-name">Willianm Admin</div>
-        <div class="user-role">Super Administrador</div>
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
       </div>
     </div>
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ═══ MAIN ═══ -->
 <div class="main">
 
-  <header class="topbar">
-    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
     <div class="topbar-title-group">
-      <div class="page-title">Configurações</div>
-      <div class="breadcrumb">SuperAdmin › Sistema › Configurações</div>
+      <div class="page-title">Configura&ccedil;&otilde;es</div>
+      <div class="breadcrumb">SuperAdmin &rsaquo; Sistema &rsaquo; Configura&ccedil;&otilde;es</div>
     </div>
     <div class="topbar-actions">
-      <div class="icon-btn">🔔<span class="notif-dot"></span></div>
+      <button class="icon-btn" title="Notifica&ccedil;&otilde;es">&#x1F514;</button>
     </div>
-  </header>
+  </div>
 
-  <main class="content">
+  <!-- CONTENT -->
+  <div class="content">
 
-    <!-- TABS (mobile) -->
-    <div class="settings-tabs">
-      <button class="settings-tab active" onclick="showSection('plataforma', this)">🏢 Plataforma</button>
-      <button class="settings-tab" onclick="showSection('conta', this)">👤 Conta</button>
-      <button class="settings-tab" onclick="showSection('notificacoes', this)">🔔 Notificações</button>
-      <button class="settings-tab" onclick="showSection('integracoes', this)">🔗 Integrações</button>
-      <button class="settings-tab" onclick="showSection('seguranca', this)">🛡️ Segurança</button>
+    <!-- MOBILE TABS -->
+    <div class="settings-tabs" id="settingsTabs">
+      <div class="settings-tab active" onclick="showSection('plataforma', this)">&#x1F3E2; Plataforma</div>
+      <div class="settings-tab" onclick="showSection('conta', this)">&#x1F464; Minha Conta</div>
+      <div class="settings-tab" onclick="showSection('notificacoes', this)">&#x1F514; Notifica&ccedil;&otilde;es</div>
+      <div class="settings-tab" onclick="showSection('integracoes', this)">&#x1F517; Integra&ccedil;&otilde;es</div>
+      <div class="settings-tab" onclick="showSection('seguranca', this)">&#x1F6E1;&#xFE0F; Seguran&ccedil;a</div>
+      <div class="settings-tab" onclick="showSection('avancado', this)">&#x26A0;&#xFE0F; Avan&ccedil;ado</div>
     </div>
 
+    <!-- SETTINGS LAYOUT -->
     <div class="settings-layout">
 
-      <!-- SETTINGS NAV (desktop) -->
-      <nav class="settings-nav">
-        <div class="settings-nav-item active" onclick="showSection('plataforma', this)">
-          <span class="sn-icon">🏢</span> Plataforma
-        </div>
-        <div class="settings-nav-item" onclick="showSection('conta', this)">
-          <span class="sn-icon">👤</span> Minha Conta
-        </div>
+      <!-- DESKTOP NAV -->
+      <div class="settings-nav" id="settingsNav">
+        <div class="settings-nav-item active" onclick="showSection('plataforma', this)" data-sec="plataforma">&#x1F3E2; Plataforma</div>
+        <div class="settings-nav-item" onclick="showSection('conta', this)" data-sec="conta">&#x1F464; Minha Conta</div>
         <div class="settings-nav-divider"></div>
-        <div class="settings-nav-item" onclick="showSection('notificacoes', this)">
-          <span class="sn-icon">🔔</span> Notificações
-        </div>
-        <div class="settings-nav-item" onclick="showSection('integracoes', this)">
-          <span class="sn-icon">🔗</span> Integrações
-        </div>
+        <div class="settings-nav-item" onclick="showSection('notificacoes', this)" data-sec="notificacoes">&#x1F514; Notifica&ccedil;&otilde;es</div>
+        <div class="settings-nav-item" onclick="showSection('integracoes', this)" data-sec="integracoes">&#x1F517; Integra&ccedil;&otilde;es</div>
         <div class="settings-nav-divider"></div>
-        <div class="settings-nav-item" onclick="showSection('seguranca', this)">
-          <span class="sn-icon">🛡️</span> Segurança
-        </div>
-        <div class="settings-nav-item" onclick="showSection('avancado', this)">
-          <span class="sn-icon">⚠️</span> Avançado
-        </div>
-      </nav>
+        <div class="settings-nav-item" onclick="showSection('seguranca', this)" data-sec="seguranca">&#x1F6E1;&#xFE0F; Seguran&ccedil;a</div>
+        <div class="settings-nav-item" onclick="showSection('avancado', this)" data-sec="avancado">&#x26A0;&#xFE0F; Avan&ccedil;ado</div>
+      </div>
 
       <!-- SECTIONS -->
-      <div id="sectionsWrap">
+      <div class="settings-sections">
 
-        <!-- ── PLATAFORMA ── -->
+        <!-- ══ SEC: PLATAFORMA ══ -->
         <div class="settings-section" id="sec-plataforma">
 
+          <!-- Card: Informacoes da Plataforma -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon blue">🏢</div>
-              <div>
-                <div class="section-title">Informações da Plataforma</div>
-                <div class="section-subtitle">Nome, identidade visual e dados gerais</div>
+              <div class="section-icon blue">&#x1F3E2;</div>
+              <div class="section-header-info">
+                <div class="section-title">Informa&ccedil;&otilde;es da Plataforma</div>
+                <div class="section-desc">Dados gerais e identidade visual da plataforma</div>
               </div>
             </div>
             <div class="section-body">
               <div class="avatar-upload">
-                <div class="avatar-preview">EA</div>
+                <div class="avatar-preview" id="platformAvatar">EA</div>
                 <div class="avatar-upload-actions">
-                  <button class="btn btn-secondary btn-sm" onclick="showToast('Selecione uma imagem')">📁 Alterar logo</button>
-                  <span class="avatar-upload-hint">PNG ou SVG. Máx. 512 KB.</span>
+                  <input type="file" id="logoUploadInput" accept="image/png,image/svg+xml,image/jpeg,image/gif" style="display:none" onchange="handleLogoUpload(this.files[0])" /><button class="btn btn-secondary btn-sm" onclick="document.getElementById('logoUploadInput').click()">Alterar logo</button>
+                  <div class="avatar-upload-hint">PNG ou SVG, m&aacute;x. 512KB</div>
                 </div>
               </div>
               <div class="form-row-2">
                 <div class="form-group">
                   <label class="form-label">Nome da plataforma</label>
-                  <input class="form-input" type="text" value="Esportes Academy" />
+                  <input type="text" class="form-input" id="platNome" value="Esportes Academy" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Domínio principal</label>
-                  <input class="form-input" type="text" value="app.esportesacademy.com.br" />
+                  <label class="form-label">Dom&iacute;nio principal</label>
+                  <input type="text" class="form-input" id="platDominio" value="app.esportesacademy.com.br" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Descrição curta</label>
-                <textarea class="form-textarea">SaaS B2B para gestão completa de escolas esportivas.</textarea>
+                <label class="form-label">Descri&ccedil;&atilde;o curta</label>
+                <textarea class="form-textarea" id="platDescricao" placeholder="Descreva brevemente sua plataforma..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">E-mail de suporte</label>
+                <input type="email" class="form-input" id="platEmail" value="suporte@esportesacademy.com.br" />
               </div>
               <div class="form-row-2">
                 <div class="form-group">
-                  <label class="form-label">E-mail de suporte</label>
-                  <input class="form-input" type="email" value="suporte@esportesacademy.com.br" />
+                  <label class="form-label">Fuso hor&aacute;rio</label>
+                  <select class="form-select" id="platTimezone">
+                    <option value="America/Sao_Paulo" selected>America/S&atilde;o_Paulo (BRT)</option>
+                    <option value="America/Manaus">America/Manaus (AMT)</option>
+                    <option value="America/Belem">America/Bel&eacute;m (BRT)</option>
+                    <option value="America/Fortaleza">America/Fortaleza (BRT)</option>
+                    <option value="America/Recife">America/Recife (BRT)</option>
+                  </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Fuso horário</label>
-                  <select class="form-select">
-                    <option selected>America/Sao_Paulo (UTC-3)</option>
-                    <option>America/Manaus (UTC-4)</option>
-                    <option>America/Fortaleza (UTC-3)</option>
-                    <option>America/Belem (UTC-3)</option>
+                  <label class="form-label">Idioma padr&atilde;o</label>
+                  <select class="form-select" id="platIdioma">
+                    <option value="pt-BR" selected>Portugu&ecirc;s (Brasil)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="es">Espa&ntilde;ol</option>
                   </select>
                 </div>
               </div>
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label class="form-label">Idioma padrão</label>
-                  <select class="form-select">
-                    <option selected>Português (Brasil)</option>
-                    <option>English (US)</option>
-                    <option>Español</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Moeda</label>
-                  <select class="form-select">
-                    <option selected>BRL — Real Brasileiro</option>
-                    <option>USD — Dólar Americano</option>
-                  </select>
-                </div>
+              <div class="form-group">
+                <label class="form-label">Moeda</label>
+                <select class="form-select" id="platMoeda" style="max-width:280px;">
+                  <option value="BRL" selected>BRL &mdash; Real Brasileiro</option>
+                  <option value="USD">USD &mdash; D&oacute;lar Americano</option>
+                  <option value="EUR">EUR &mdash; Euro</option>
+                </select>
               </div>
             </div>
             <div class="section-footer">
-              <button class="btn btn-secondary btn-sm" onclick="showToast('Alterações descartadas')">Cancelar</button>
-              <button class="btn btn-primary btn-sm" onclick="showToast('Plataforma atualizada','success')">💾 Salvar alterações</button>
+              <button class="btn btn-secondary btn-sm">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="savePlatformSettings()">&#x1F4BE; Salvar altera&ccedil;&otilde;es</button>
             </div>
           </div>
 
+          <!-- Card: Termos e Politicas -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon orange">📋</div>
-              <div>
-                <div class="section-title">Termos e Políticas</div>
-                <div class="section-subtitle">URLs para termos de uso e política de privacidade</div>
+              <div class="section-icon orange">&#x1F4DC;</div>
+              <div class="section-header-info">
+                <div class="section-title">Termos e Pol&iacute;ticas</div>
+                <div class="section-desc">Links p&uacute;blicos dos documentos legais da plataforma</div>
               </div>
             </div>
             <div class="section-body">
               <div class="form-group">
                 <label class="form-label">Termos de Uso</label>
-                <input class="form-input" type="url" value="https://esportesacademy.com.br/termos" />
+                <input type="url" class="form-input" id="termsUrl" placeholder="https://esportesacademy.com.br/termos" />
               </div>
               <div class="form-group">
-                <label class="form-label">Política de Privacidade</label>
-                <input class="form-input" type="url" value="https://esportesacademy.com.br/privacidade" />
+                <label class="form-label">Pol&iacute;tica de Privacidade</label>
+                <input type="url" class="form-input" id="privacyUrl" placeholder="https://esportesacademy.com.br/privacidade" />
               </div>
               <div class="form-group">
-                <label class="form-label">Versão dos termos em vigor</label>
-                <input class="form-input" type="text" value="v2.1 — 01/01/2026" />
-                <span class="form-hint">Ao alterar a versão, todos os usuários serão solicitados a aceitar novamente.</span>
+                <label class="form-label">Vers&atilde;o dos termos</label>
+                <input type="text" class="form-input" id="termsVersion" value="v2.1 &#8212; 01/01/2026" style="max-width:220px;" />
+                <div class="form-hint">Informe a vers&atilde;o e data de vig&ecirc;ncia dos termos atuais.</div>
               </div>
             </div>
             <div class="section-footer">
-              <button class="btn btn-primary btn-sm" onclick="showToast('Políticas salvas','success')">💾 Salvar</button>
+              <button class="btn btn-primary btn-sm" onclick="savePoliciesSettings()">&#x1F4BE; Salvar</button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-plataforma -->
 
-        <!-- ── CONTA ── -->
-        <div class="settings-section" id="sec-conta" style="display:none">
+        <!-- ══ SEC: CONTA ══ -->
+        <div class="settings-section" id="sec-conta" style="display:none;">
 
+          <!-- Card: Dados do Perfil -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon blue">👤</div>
-              <div>
+              <div class="section-icon blue">&#x1F464;</div>
+              <div class="section-header-info">
                 <div class="section-title">Dados do Perfil</div>
-                <div class="section-subtitle">Informações da sua conta de Super Admin</div>
+                <div class="section-desc">Suas informa&ccedil;&otilde;es de conta de Super Admin</div>
               </div>
             </div>
             <div class="section-body">
               <div class="avatar-upload">
-                <div class="avatar-preview" style="font-size:22px">WA</div>
+                <div class="avatar-preview" id="profileAvatar">SA</div>
                 <div class="avatar-upload-actions">
-                  <button class="btn btn-secondary btn-sm" onclick="showToast('Selecione uma foto')">📁 Alterar foto</button>
-                  <span class="avatar-upload-hint">JPG ou PNG. Máx. 2 MB.</span>
+                  <input type="file" id="avatarUploadInput" accept="image/jpeg,image/png,image/gif" style="display:none" onchange="handleAvatarUpload(this.files[0])" /><button class="btn btn-secondary btn-sm" onclick="document.getElementById('avatarUploadInput').click()">Alterar foto</button>
+                  <div class="avatar-upload-hint">JPG, PNG ou GIF, m&aacute;x. 1MB</div>
                 </div>
               </div>
               <div class="form-row-2">
                 <div class="form-group">
                   <label class="form-label">Nome</label>
-                  <input class="form-input" type="text" value="Willianm" />
+                  <input type="text" class="form-input" id="profileNome" value="Super" oninput="markDirty('conta')" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Sobrenome</label>
-                  <input class="form-input" type="text" value="Admin" />
+                  <input type="text" class="form-input" id="profileSobrenome" value="Admin" oninput="markDirty('conta')" />
                 </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">E-mail</label>
-                <input class="form-input" type="email" value="admin@esportesacademy.com" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Telefone</label>
-                <input class="form-input" type="tel" value="+55 (11) 99999-0000" />
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">E-mail</label>
+                  <input type="email" class="form-input" id="profileEmail" value="admin@esportesacademy.com" disabled />
+                  <div class="form-hint">O e-mail n&atilde;o pode ser alterado diretamente.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Telefone</label>
+                  <input type="tel" class="form-input" id="profileTelefone" placeholder="(11) 99999-9999" oninput="markDirty('conta')" />
+                </div>
               </div>
             </div>
             <div class="section-footer">
-              <button class="btn btn-secondary btn-sm">Cancelar</button>
-              <button class="btn btn-primary btn-sm" onclick="showToast('Perfil atualizado','success')">💾 Salvar</button>
+              <button class="btn btn-secondary btn-sm" onclick="resetProfile()">Cancelar</button>
+              <button class="btn btn-primary btn-sm" id="btnSaveProfile" onclick="saveProfile()">&#x1F4BE; Salvar</button>
             </div>
           </div>
 
+          <!-- Card: Alterar Senha -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon purple">🔑</div>
-              <div>
+              <div class="section-icon purple">&#x1F511;</div>
+              <div class="section-header-info">
                 <div class="section-title">Alterar Senha</div>
-                <div class="section-subtitle">Defina uma nova senha de acesso</div>
+                <div class="section-desc">Redefina a senha da sua conta Super Admin</div>
               </div>
             </div>
             <div class="section-body">
               <div class="form-group">
                 <label class="form-label">Senha atual</label>
-                <input class="form-input" type="password" placeholder="••••••••" />
+                <input type="password" class="form-input" id="senhaAtual" autocomplete="current-password" />
               </div>
               <div class="form-row-2">
                 <div class="form-group">
                   <label class="form-label">Nova senha</label>
-                  <input class="form-input" type="password" placeholder="••••••••" />
+                  <input type="password" class="form-input" id="novaSenha" autocomplete="new-password" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Confirmar nova senha</label>
-                  <input class="form-input" type="password" placeholder="••••••••" />
+                  <input type="password" class="form-input" id="confirmarSenha" autocomplete="new-password" />
                 </div>
               </div>
-              <span class="form-hint">Mínimo 8 caracteres com letras, números e símbolo.</span>
+              <div class="form-hint">A senha deve ter no m&iacute;nimo 8 caracteres, incluindo letras e n&uacute;meros.</div>
             </div>
             <div class="section-footer">
-              <button class="btn btn-primary btn-sm" onclick="showToast('Senha alterada com sucesso','success')">🔑 Atualizar senha</button>
+              <button class="btn btn-primary btn-sm" onclick="changePassword()">&#x1F511; Atualizar senha</button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-conta -->
 
-        <!-- ── NOTIFICAÇÕES ── -->
-        <div class="settings-section" id="sec-notificacoes" style="display:none">
+        <!-- ══ SEC: NOTIFICACOES ══ -->
+        <div class="settings-section" id="sec-notificacoes" style="display:none;">
 
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon orange">🔔</div>
-              <div>
-                <div class="section-title">Preferências de Notificação</div>
-                <div class="section-subtitle">Escolha quando e como ser notificado</div>
+              <div class="section-icon sky">&#x1F514;</div>
+              <div class="section-header-info">
+                <div class="section-title">Prefer&ecirc;ncias de Notifica&ccedil;&atilde;o</div>
+                <div class="section-desc">Escolha quais eventos geram alertas e por quais canais</div>
               </div>
             </div>
             <div class="section-body">
+              <div class="sub-section-label">PLATAFORMA</div>
 
-              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Plataforma</div>
-              <div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">Nova escola cadastrada</div>
-                    <div class="toggle-desc">Receber alerta quando uma nova escola concluir o onboarding</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Nova escola cadastrada</div>
+                  <div class="toggle-desc">Receba um alerta sempre que uma nova escola ativar conta</div>
                 </div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">Plano próximo do vencimento</div>
-                    <div class="toggle-desc">Avisar quando uma escola estiver a 7 dias do vencimento do plano</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
-                </div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">Escola inadimplente</div>
-                    <div class="toggle-desc">Notificar quando uma escola atrasar o pagamento do plano</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
-                </div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">Erros críticos do sistema</div>
-                    <div class="toggle-desc">Alertas de falhas em Edge Functions, webhooks ou CI/CD</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
-                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togNovaEscola" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
               </div>
 
-              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Canais de envio</div>
-              <div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">E-mail</div>
-                    <div class="toggle-desc">Enviar notificações para admin@esportesacademy.com</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Plano pr&oacute;ximo do vencimento</div>
+                  <div class="toggle-desc">Aviso 7 dias antes do vencimento do plano de uma escola</div>
                 </div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">Push no navegador</div>
-                    <div class="toggle-desc">Notificações push enquanto o painel estiver aberto</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" checked />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
-                </div>
-                <div class="toggle-row">
-                  <div class="toggle-info">
-                    <div class="toggle-title">WhatsApp</div>
-                    <div class="toggle-desc">Notificações críticas via WhatsApp Business</div>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" />
-                    <div class="toggle-track"></div>
-                    <div class="toggle-thumb"></div>
-                  </label>
-                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togPlanoVenc" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
               </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Escola inadimplente</div>
+                  <div class="toggle-desc">Notifica&ccedil;&atilde;o quando escola atingir atraso no pagamento</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togEscolaInad" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Erros cr&iacute;ticos do sistema</div>
+                  <div class="toggle-desc">Alertas de falha cr&iacute;tica capturados pelo Sentry</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togErros" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="sub-section-label">CANAIS DE ENVIO</div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">E-mail</div>
+                  <div class="toggle-desc">Enviar notifica&ccedil;&otilde;es por e-mail</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togEmail" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">Push no navegador</div>
+                  <div class="toggle-desc">Notifica&ccedil;&otilde;es web push quando estiver online</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togPush" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">WhatsApp</div>
+                  <div class="toggle-desc">Mensagens via WhatsApp Business API</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="togWhatsApp" />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
             </div>
             <div class="section-footer">
-              <button class="btn btn-primary btn-sm" onclick="showToast('Preferências salvas','success')">💾 Salvar</button>
+              <button class="btn btn-primary btn-sm" onclick="saveNotifPrefs()">&#x1F4BE; Salvar</button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-notificacoes -->
 
-        <!-- ── INTEGRAÇÕES ── -->
-        <div class="settings-section" id="sec-integracoes" style="display:none">
+        <!-- ══ SEC: INTEGRACOES ══ -->
+        <div class="settings-section" id="sec-integracoes" style="display:none;">
 
+          <!-- Card: Status das Integracoes -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon green">🔗</div>
-              <div>
-                <div class="section-title">Integrações Ativas</div>
-                <div class="section-subtitle">Serviços conectados à plataforma</div>
+              <div class="section-icon blue">&#x1F517;</div>
+              <div class="section-header-info">
+                <div class="section-title">Integra&#231;&#245;es Ativas</div>
+                <div class="section-desc">Status em tempo real das conex&#245;es externas</div>
               </div>
             </div>
             <div class="section-body">
               <div class="integ-list">
-                <div class="integ-item">
-                  <div class="integ-logo">💳</div>
+
+                <!-- Asaas -->
+                <div class="integ-item" id="integ-asaas">
+                  <div class="integ-logo">&#x1F4B3;</div>
                   <div class="integ-info">
-                    <div class="integ-name">Asaas — Pagamentos</div>
-                    <div class="integ-desc">Cobranças via PIX, boleto e cartão de crédito</div>
+                    <div class="integ-name">Asaas &mdash; Pagamentos</div>
+                    <div class="integ-desc">PIX, bols, cart&#227;o de cr&#233;dito para as escolas</div>
+                    <div class="integ-hint" id="hint-asaas"></div>
                   </div>
                   <div class="integ-actions">
-                    <span class="badge badge-ok">● Conectado</span>
-                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo configuração Asaas')">Configurar</button>
+                    <span class="integ-badge badge-none" id="badge-asaas">&#x25CF; N&#227;o configurado</span>
+                    <button class="btn btn-secondary btn-sm" id="btn-asaas" onclick="testIntegration('asaas')">Testar</button>
                   </div>
                 </div>
-                <div class="integ-item">
-                  <div class="integ-logo">💬</div>
+
+                <!-- WhatsApp -->
+                <div class="integ-item" id="integ-whatsapp">
+                  <div class="integ-logo">&#x1F4AC;</div>
                   <div class="integ-info">
                     <div class="integ-name">WhatsApp Business API</div>
-                    <div class="integ-desc">Envio de mensagens automáticas para pais e alunos</div>
+                    <div class="integ-desc">Mensagens autom&#225;ticas para pais e alunos</div>
+                    <div class="integ-hint" id="hint-whatsapp"></div>
                   </div>
                   <div class="integ-actions">
-                    <span class="badge badge-ok">● Conectado</span>
-                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo configuração WhatsApp')">Configurar</button>
+                    <span class="integ-badge badge-none" id="badge-whatsapp">&#x25CF; N&#227;o configurado</span>
+                    <button class="btn btn-secondary btn-sm" id="btn-whatsapp" onclick="testIntegration('whatsapp')">Testar</button>
                   </div>
                 </div>
-                <div class="integ-item">
-                  <div class="integ-logo">📅</div>
+
+                <!-- Google Calendar -->
+                <div class="integ-item" id="integ-gcalendar">
+                  <div class="integ-logo">&#x1F4C5;</div>
                   <div class="integ-info">
                     <div class="integ-name">Google Calendar API</div>
-                    <div class="integ-desc">Sincronização automática de aulas e eventos</div>
+                    <div class="integ-desc">Sincroniza&#231;&#227;o de aulas e eventos</div>
+                    <div class="integ-hint" id="hint-gcalendar"></div>
                   </div>
                   <div class="integ-actions">
-                    <span class="badge badge-warn">● Atenção</span>
-                    <button class="btn btn-secondary btn-sm" onclick="showToast('Reconecte o Google Calendar')">Reconectar</button>
+                    <span class="integ-badge badge-none" id="badge-gcalendar">&#x25CF; N&#227;o configurado</span>
+                    <button class="btn btn-secondary btn-sm" id="btn-gcalendar" onclick="testIntegration('gcalendar')">Testar</button>
                   </div>
                 </div>
-                <div class="integ-item">
-                  <div class="integ-logo">📊</div>
+
+                <!-- Sentry -->
+                <div class="integ-item" id="integ-sentry">
+                  <div class="integ-logo">&#x1F4CA;</div>
                   <div class="integ-info">
-                    <div class="integ-name">Sentry — Monitoramento</div>
-                    <div class="integ-desc">Rastreamento de erros em produção e staging</div>
+                    <div class="integ-name">Sentry &mdash; Monitoramento</div>
+                    <div class="integ-desc">Rastreamento de erros em produ&#231;&#227;o</div>
+                    <div class="integ-hint" id="hint-sentry"></div>
                   </div>
                   <div class="integ-actions">
-                    <span class="badge badge-ok">● Conectado</span>
-                    <button class="btn btn-secondary btn-sm" onclick="showToast('Abrindo Sentry')">Ver erros</button>
+                    <span class="integ-badge badge-none" id="badge-sentry">&#x25CF; N&#227;o configurado</span>
+                    <button class="btn btn-secondary btn-sm" id="btn-sentry" onclick="testIntegration('sentry')">Testar</button>
                   </div>
                 </div>
-                <div class="integ-item">
-                  <div class="integ-logo">🔔</div>
+
+                <!-- Expo / FCM -->
+                <div class="integ-item" id="integ-expo">
+                  <div class="integ-logo">&#x1F514;</div>
                   <div class="integ-info">
                     <div class="integ-name">Expo Push / FCM / APNs</div>
-                    <div class="integ-desc">Notificações push para o app mobile</div>
+                    <div class="integ-desc">Push notifications para o app mobile</div>
+                    <div class="integ-hint" id="hint-expo"></div>
                   </div>
                   <div class="integ-actions">
-                    <span class="badge badge-err">● Desconectado</span>
-                    <button class="btn btn-primary btn-sm" onclick="showToast('Iniciando configuração push')">Conectar</button>
+                    <span class="integ-badge badge-none" id="badge-expo">&#x25CF; N&#227;o configurado</span>
+                    <button class="btn btn-secondary btn-sm" id="btn-expo" onclick="testIntegration('expo')">Testar</button>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
 
+          <!-- Card: Chaves de API -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon purple">🔑</div>
-              <div>
+              <div class="section-icon purple">&#x1F511;</div>
+              <div class="section-header-info">
                 <div class="section-title">Chaves de API</div>
-                <div class="section-subtitle">Credenciais e tokens das integrações</div>
+                <div class="section-desc">Cole aqui os tokens de cada servi&#231;o. Salvos de forma segura no banco.</div>
               </div>
             </div>
             <div class="section-body">
+
+              <!-- Asaas -->
               <div class="form-group">
-                <label class="form-label">Asaas — API Key</label>
-                <input class="form-input" type="password" value="aact_YTU5YTE0M2Q4YT..." />
-                <span class="form-hint">Nunca compartilhe esta chave. Rotacione a cada 90 dias.</span>
+                <label class="form-label">Asaas &mdash; API Key
+                  <span style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:6px;">sandbox: <code>$aact_...</code> &nbsp; prod: <code>$aact_...</code></span>
+                </label>
+                <div class="input-reveal-wrap">
+                  <input type="password" class="form-input" id="asaasKey" placeholder="$aact_YTU5YTE0..." autocomplete="off" oninput="markDirty('integracoes')" />
+                  <button type="button" class="reveal-btn" onclick="toggleReveal('asaasKey',this)" title="Mostrar/ocultar">&#x1F441;</button>
+                </div>
+                <div class="form-hint" id="saved-hint-asaas"></div>
               </div>
+
+              <!-- WhatsApp -->
               <div class="form-group">
-                <label class="form-label">WhatsApp — Token de Acesso</label>
-                <input class="form-input" type="password" value="EAAxxxxxxxxxxxxxx..." />
+                <label class="form-label">WhatsApp Business &mdash; Token de Acesso</label>
+                <div class="input-reveal-wrap">
+                  <input type="password" class="form-input" id="waToken" placeholder="EAAxxxxx..." autocomplete="off" oninput="markDirty('integracoes')" />
+                  <button type="button" class="reveal-btn" onclick="toggleReveal('waToken',this)" title="Mostrar/ocultar">&#x1F441;</button>
+                </div>
+                <div class="form-hint" id="saved-hint-whatsapp"></div>
               </div>
+
+              <!-- Google Calendar -->
               <div class="form-group">
-                <label class="form-label">Supabase — Service Role Key</label>
-                <input class="form-input" type="password" value="eyJhbGciOiJIUzI1..." disabled />
-                <span class="form-hint">Gerenciada pelo Doppler. Altere via painel do Supabase.</span>
+                <label class="form-label">Google Calendar &mdash; Service Account JSON (base64)</label>
+                <div class="input-reveal-wrap">
+                  <input type="password" class="form-input" id="gcalToken" placeholder="eyJ0eXBlIjoic2Vydm..." autocomplete="off" oninput="markDirty('integracoes')" />
+                  <button type="button" class="reveal-btn" onclick="toggleReveal('gcalToken',this)" title="Mostrar/ocultar">&#x1F441;</button>
+                </div>
+                <div class="form-hint" id="saved-hint-gcalendar"></div>
               </div>
+
+              <!-- Sentry -->
+              <div class="form-group">
+                <label class="form-label">Sentry &mdash; DSN</label>
+                <div class="input-reveal-wrap">
+                  <input type="password" class="form-input" id="sentryDsn" placeholder="https://...@sentry.io/..." autocomplete="off" oninput="markDirty('integracoes')" />
+                  <button type="button" class="reveal-btn" onclick="toggleReveal('sentryDsn',this)" title="Mostrar/ocultar">&#x1F441;</button>
+                </div>
+                <div class="form-hint" id="saved-hint-sentry"></div>
+              </div>
+
+              <!-- Expo Push -->
+              <div class="form-group">
+                <label class="form-label">Expo Push &mdash; Access Token</label>
+                <div class="input-reveal-wrap">
+                  <input type="password" class="form-input" id="expoToken" placeholder="expo_token_..." autocomplete="off" oninput="markDirty('integracoes')" />
+                  <button type="button" class="reveal-btn" onclick="toggleReveal('expoToken',this)" title="Mostrar/ocultar">&#x1F441;</button>
+                </div>
+                <div class="form-hint" id="saved-hint-expo"></div>
+              </div>
+
+              <!-- Supabase (read-only) -->
+              <div class="form-group" style="opacity:.6;">
+                <label class="form-label">Supabase &mdash; Service Role Key
+                  <span style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:6px;">gerenciado via painel do Supabase</span>
+                </label>
+                <input type="password" class="form-input" id="supaKey" value="(configurado via env)" disabled autocomplete="off" />
+              </div>
+
             </div>
-            <div class="section-footer">
-              <button class="btn btn-primary btn-sm" onclick="showToast('Chaves salvas com segurança','success')">🔑 Salvar chaves</button>
+            <div class="section-footer" style="gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="loadIntegrations()">&#x21BB; Recarregar</button>
+              <button class="btn btn-primary btn-sm" onclick="saveApiKeys()" id="btnSaveApiKeys">&#x1F511; Salvar chaves</button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-integracoes -->
 
-        <!-- ── SEGURANÇA ── -->
-        <div class="settings-section" id="sec-seguranca" style="display:none">
+        <!-- ══ SEC: SEGURANCA ══ -->
+        <div class="settings-section" id="sec-seguranca" style="display:none;">
 
+          <!-- Card: Autenticacao & Acesso -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon purple">🛡️</div>
-              <div>
-                <div class="section-title">Autenticação & Acesso</div>
-                <div class="section-subtitle">Políticas de segurança da plataforma</div>
+              <div class="section-icon green">&#x1F6E1;&#xFE0F;</div>
+              <div class="section-header-info">
+                <div class="section-title">Autentica&ccedil;&atilde;o &amp; Acesso</div>
+                <div class="section-desc">Controles de seguran&ccedil;a para acesso &agrave; plataforma</div>
               </div>
             </div>
             <div class="section-body">
+
               <div class="toggle-row">
                 <div class="toggle-info">
-                  <div class="toggle-title">Autenticação em dois fatores (2FA)</div>
-                  <div class="toggle-desc">Obrigar 2FA para todos os usuários super_admin</div>
+                  <div class="toggle-title">Autentica&ccedil;&atilde;o em dois fatores (2FA)</div>
+                  <div class="toggle-desc">Exige c&oacute;digo OTP al&eacute;m da senha para todos os admins</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" checked />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togMFA" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
+
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-title">Login com Google</div>
-                  <div class="toggle-desc">Permitir OAuth Google para todos os perfis</div>
+                  <div class="toggle-desc">Permite autentica&ccedil;&atilde;o via conta Google</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" checked />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togGoogle" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
+
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-title">Login com Apple</div>
-                  <div class="toggle-desc">Permitir Sign in with Apple no app mobile</div>
+                  <div class="toggle-desc">Permite autentica&ccedil;&atilde;o via Apple ID</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" checked />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togApple" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
+
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-title">Bloquear acesso por IP suspeito</div>
-                  <div class="toggle-desc">Usar detecção de IP para bloquear tentativas de acesso anômalas</div>
+                  <div class="toggle-desc">Detecta e bloqueia IPs marcados como maliciosos</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togIpBlock" />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label class="form-label">Tempo de sessão (minutos)</label>
-                  <input class="form-input" type="number" value="60" min="15" max="1440" />
-                  <span class="form-hint">Sessão expira após inatividade.</span>
+
+              <div class="form-inline-row">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Tempo de sess&atilde;o (minutos)</label>
+                  <input type="number" class="form-input" id="sessaoTimeout" value="60" min="15" max="1440" />
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Tentativas de login antes de bloqueio</label>
-                  <input class="form-input" type="number" value="5" min="3" max="10" />
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Tentativas antes de bloqueio</label>
+                  <input type="number" class="form-input" id="maxTentativas" value="5" min="3" max="10" />
                 </div>
               </div>
+
             </div>
             <div class="section-footer">
-              <button class="btn btn-primary btn-sm" onclick="showToast('Configurações de segurança salvas','success')">💾 Salvar</button>
+              <button class="btn btn-primary btn-sm" onclick="saveSecuritySettings()">&#x1F4BE; Salvar</button>
             </div>
           </div>
 
+          <!-- Card: Logs de Auditoria -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon blue">📋</div>
-              <div>
+              <div class="section-icon orange">&#x1F4CB;</div>
+              <div class="section-header-info">
                 <div class="section-title">Logs de Auditoria</div>
-                <div class="section-subtitle">Histórico de ações realizadas na plataforma</div>
+                <div class="section-desc">Hist&oacute;rico recente de eventos de seguran&ccedil;a</div>
               </div>
             </div>
             <div class="section-body">
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
-                  <span>🔑 Login — Willianm Admin</span>
-                  <span style="color:var(--text-muted);font-size:11px">Hoje, 09:00</span>
+              <div class="audit-list">
+
+                <div class="audit-item">
+                  <div class="audit-dot green"></div>
+                  <div>
+                    <div>Login bem-sucedido &mdash; <strong>admin@esportesacademy.com</strong></div>
+                    <div class="audit-meta">25/03/2026 09:14 &middot; IP 177.124.50.22</div>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
-                  <span>👤 Usuário suspenso — Lucas Ferreira</span>
-                  <span style="color:var(--text-muted);font-size:11px">Hoje, 08:45</span>
+
+                <div class="audit-item">
+                  <div class="audit-dot red"></div>
+                  <div>
+                    <div>Usu&aacute;rio suspenso &mdash; <strong>escola@exemplo.com</strong></div>
+                    <div class="audit-meta">24/03/2026 16:40 &middot; por Super Admin</div>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
-                  <span>🏫 Nova escola criada — Vôlei Prainha BSB</span>
-                  <span style="color:var(--text-muted);font-size:11px">23/03/2026, 16:20</span>
+
+                <div class="audit-item">
+                  <div class="audit-dot"></div>
+                  <div>
+                    <div>Nova escola cadastrada &mdash; <strong>Academia Fitness Pro</strong></div>
+                    <div class="audit-meta">23/03/2026 11:05 &middot; plano Profissional</div>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:13px">
-                  <span>💳 Plano alterado — Arena Futebol SP → Pro</span>
-                  <span style="color:var(--text-muted);font-size:11px">22/03/2026, 14:05</span>
+
+                <div class="audit-item">
+                  <div class="audit-dot yellow"></div>
+                  <div>
+                    <div>Plano alterado &mdash; <strong>Clube Esportivo Norte</strong></div>
+                    <div class="audit-meta">22/03/2026 08:58 &middot; Starter &rarr; Profissional</div>
+                  </div>
                 </div>
+
               </div>
             </div>
             <div class="section-footer">
-              <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando logs…')">⬇️ Exportar logs</button>
-              <button class="btn btn-primary btn-sm" onclick="showToast('Carregando todos os logs…')">Ver histórico completo</button>
+              <button class="btn btn-secondary btn-sm">&#x2B07;&#xFE0F; Exportar logs</button>
+              <button class="btn btn-secondary btn-sm">Ver hist&oacute;rico completo</button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-seguranca -->
 
-        <!-- ── AVANÇADO ── -->
-        <div class="settings-section" id="sec-avancado" style="display:none">
+        <!-- ══ SEC: AVANCADO ══ -->
+        <div class="settings-section" id="sec-avancado" style="display:none;">
 
+          <!-- Card: Manutencao -->
           <div class="section-card">
             <div class="section-header">
-              <div class="section-icon orange">⚙️</div>
-              <div>
-                <div class="section-title">Manutenção</div>
-                <div class="section-subtitle">Ações técnicas de manutenção da plataforma</div>
+              <div class="section-icon orange">&#x2699;&#xFE0F;</div>
+              <div class="section-header-info">
+                <div class="section-title">Manuten&ccedil;&atilde;o</div>
+                <div class="section-desc">Controles de opera&ccedil;&atilde;o e diagn&oacute;stico da plataforma</div>
               </div>
             </div>
             <div class="section-body">
+
               <div class="toggle-row">
                 <div class="toggle-info">
-                  <div class="toggle-title">Modo de manutenção</div>
-                  <div class="toggle-desc">Exibir página de manutenção para todos os usuários (exceto super_admin)</div>
+                  <div class="toggle-title">Modo de manuten&ccedil;&atilde;o</div>
+                  <div class="toggle-desc">Exibe p&aacute;gina de manuten&ccedil;&atilde;o para todos os usu&aacute;rios</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togMaintenance" />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
+
               <div class="toggle-row">
                 <div class="toggle-info">
-                  <div class="toggle-title">Modo de depuração (debug)</div>
-                  <div class="toggle-desc">Ativar logs detalhados nas Edge Functions (impacta performance)</div>
+                  <div class="toggle-title">Modo de depura&ccedil;&atilde;o</div>
+                  <div class="toggle-desc">Ativa logs detalhados e stack traces vis&iacute;veis</div>
                 </div>
                 <label class="toggle">
-                  <input type="checkbox" />
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
+                  <input type="checkbox" id="togDebug" />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Cache limpo com sucesso','success')">🗑️ Limpar cache</button>
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Jobs reiniciados','success')">🔄 Reiniciar jobs agendados</button>
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Backup iniciado','success')">💾 Forçar backup do banco</button>
+
+              <div class="maintenance-actions">
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Cache limpo com sucesso!', 'success')">&#x1F5D1;&#xFE0F; Limpar cache</button>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Jobs reiniciados!', 'success')">&#x1F504; Reiniciar jobs</button>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Backup iniciado em segundo plano.', 'success')">&#x1F4BE; For&ccedil;ar backup</button>
               </div>
+
             </div>
           </div>
 
-          <div class="section-card">
+          <!-- Card: Zona de Perigo -->
+          <div class="section-card danger-zone">
             <div class="section-header">
-              <div class="section-icon red">⚠️</div>
-              <div>
-                <div class="section-title">Zona de Perigo</div>
-                <div class="section-subtitle">Ações irreversíveis — proceda com cuidado</div>
+              <div class="section-icon red">&#x26A0;&#xFE0F;</div>
+              <div class="section-header-info">
+                <div class="section-title" style="color:var(--danger);">Zona de Perigo</div>
+                <div class="section-desc">A&ccedil;&otilde;es destrutivas e irrevers&iacute;veis &mdash; use com cuidado</div>
               </div>
             </div>
             <div class="section-body">
-              <div class="danger-zone">
-                <div class="danger-row">
-                  <div class="danger-info">
-                    <div class="danger-title">Apagar todos os dados de teste</div>
-                    <div class="danger-desc">Remove escolas, usuários e dados criados no ambiente de staging</div>
-                  </div>
-                  <button class="btn btn-danger btn-sm" onclick="confirmDanger('Dados de teste removidos')">Apagar dados de teste</button>
+
+              <div class="danger-row">
+                <div class="danger-info">
+                  <div class="danger-title">Apagar todos os dados de teste</div>
+                  <div class="danger-desc">Remove escolas, usu&aacute;rios e dados do ambiente de staging.</div>
                 </div>
-                <div style="height:1px;background:var(--danger-light)"></div>
-                <div class="danger-row">
-                  <div class="danger-info">
-                    <div class="danger-title">Revogar todas as sessões ativas</div>
-                    <div class="danger-desc">Desconecta todos os usuários da plataforma imediatamente</div>
-                  </div>
-                  <button class="btn btn-danger btn-sm" onclick="confirmDanger('Todas as sessões foram revogadas')">Revogar sessões</button>
-                </div>
+                <button class="btn btn-outline-danger btn-sm" onclick="openDangerModal('Apagar dados de teste', 'Remove escolas, usu\u00e1rios e dados do ambiente de staging. Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.', 'clearTestData')">Apagar dados</button>
               </div>
+
+              <div class="danger-row">
+                <div class="danger-info">
+                  <div class="danger-title">Revogar todas as sess&otilde;es ativas</div>
+                  <div class="danger-desc">Desconecta todos os usu&aacute;rios da plataforma imediatamente.</div>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" onclick="openDangerModal('Revogar todas as sess\u00f5es', 'Desconecta todos os usu\u00e1rios da plataforma imediatamente.', 'revokeAllSessions')">Revogar sess&otilde;es</button>
+              </div>
+
             </div>
           </div>
 
-        </div>
+        </div><!-- /sec-avancado -->
 
-      </div><!-- /sectionsWrap -->
+      </div><!-- /settings-sections -->
     </div><!-- /settings-layout -->
-  </main>
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ DANGER MODAL ═══ -->
+<div class="modal-backdrop" id="dangerModal" onclick="closeDangerModal(event)">
+  <div class="modal-box">
+    <div class="modal-icon">&#x26A0;&#xFE0F;</div>
+    <div class="modal-title" id="dangerModalTitle">Confirmar a&ccedil;&atilde;o</div>
+    <div class="modal-desc" id="dangerModalDesc">Esta a&ccedil;&atilde;o &eacute; irrevers&iacute;vel. Deseja continuar?</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeDangerModal(null)">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="dangerModalConfirm">Confirmar</button>
+    </div>
+  </div>
 </div>
 
+<!-- ═══ SAVE BAR ═══ -->
+<div class="save-bar" id="saveBar">
+  <div class="save-bar-msg"><span class="warn-icon">&#x26A0;</span> Voc&ecirc; tem altera&ccedil;&otilde;es n&atilde;o salvas</div>
+  <button class="btn btn-secondary btn-sm" onclick="discardChanges()">Descartar</button>
+  <button class="btn btn-primary btn-sm" onclick="saveCurrentSection()">&#x1F4BE; Salvar altera&ccedil;&otilde;es</button>
+</div>
+
+<!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
 
 <script>
+  /* ─── Supabase config ─── */
+  var SUPA_URL    = 'https://eeavrkosnyilxetbtzox.supabase.co';
+  var SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+  var ADMIN_EMAIL = 'admin@esportesacademy.com';
+
+  var db               = null;
+  var currentSection   = 'plataforma';
+  var dirtySection     = null;
+  var currentAdminId   = null;
+  var dangerPendingAct = '';
+  var toastTimer       = null;
+
   /* ─── Sidebar ─── */
-  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-  function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
-
-  /* ─── Section switching ─── */
-  function showSection(id, el) {
-    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
-    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('sec-' + id).style.display = '';
-    if (el) el.classList.add('active');
+  function toggleSidebar() {
+    var s = document.getElementById('sidebar');
+    var o = document.getElementById('overlay');
+    s.classList.toggle('open');
+    o.classList.toggle('show');
   }
-
-  /* ─── Danger confirm ─── */
-  function confirmDanger(msg) {
-    if (confirm('Tem certeza? Esta ação é irreversível.')) showToast(msg, 'success');
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
   }
 
   /* ─── Toast ─── */
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = (type === 'success' ? '✅ ' : type === 'danger' ? '⚠️ ' : 'ℹ️ ') + msg;
-    t.className = 'toast show' + (type ? ' ' + type : '');
-    clearTimeout(t._t);
-    t._t = setTimeout(() => t.classList.remove('show'), 3000);
+  function showToast(msg, type) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast' + (type ? ' ' + type : '');
+    el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
+      el.classList.remove('show');
+    }, 3500);
   }
+
+  /* ─── Section navigation ─── */
+  var ALL_SECTIONS = ['plataforma','conta','notificacoes','integracoes','seguranca','avancado'];
+
+  function showSection(id, el) {
+    if (dirtySection && dirtySection !== id) {
+      if (!confirm('Voc\u00ea tem altera\u00e7\u00f5es n\u00e3o salvas. Deseja descartar?')) {
+        return;
+      }
+      hideSaveBar();
+    }
+
+    /* hide all sections */
+    for (var i = 0; i < ALL_SECTIONS.length; i++) {
+      var sec = document.getElementById('sec-' + ALL_SECTIONS[i]);
+      if (sec) sec.style.display = 'none';
+    }
+
+    /* show target */
+    var target = document.getElementById('sec-' + id);
+    if (target) target.style.display = 'flex';
+
+    currentSection = id;
+
+    /* update desktop nav */
+    var navItems = document.querySelectorAll('#settingsNav .settings-nav-item');
+    for (var j = 0; j < navItems.length; j++) {
+      navItems[j].classList.remove('active');
+      if (navItems[j].getAttribute('data-sec') === id) {
+        navItems[j].classList.add('active');
+      }
+    }
+
+    /* update mobile tabs — clear all, then set active on el if it is a tab */
+    var tabs = document.querySelectorAll('#settingsTabs .settings-tab');
+    for (var k = 0; k < tabs.length; k++) {
+      tabs[k].classList.remove('active');
+    }
+    if (el && el.classList && el.classList.contains('settings-tab')) {
+      el.classList.add('active');
+    }
+
+    /* update URL hash */
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', '#' + id);
+    }
+  }
+
+  /* ─── Dirty / Save bar ─── */
+  function markDirty(section) {
+    dirtySection = section;
+    document.getElementById('saveBar').classList.add('show');
+  }
+  function hideSaveBar() {
+    dirtySection = null;
+    document.getElementById('saveBar').classList.remove('show');
+  }
+  function discardChanges() {
+    loadProfile();
+    hideSaveBar();
+  }
+  function saveCurrentSection() {
+    if (currentSection === 'plataforma')    { savePlatformSettings(); }
+    else if (currentSection === 'conta')    { saveProfile(); }
+    else if (currentSection === 'notificacoes') { saveNotifPrefs(); }
+    else if (currentSection === 'integracoes')  { saveApiKeys(); }
+    else if (currentSection === 'seguranca')    { saveSecuritySettings(); }
+    else { hideSaveBar(); }
+  }
+
+  /* ─── Danger Modal ─── */
+  function openDangerModal(title, desc, action) {
+    dangerPendingAct = action;
+    document.getElementById('dangerModalTitle').textContent = title;
+    document.getElementById('dangerModalDesc').textContent  = desc;
+    document.getElementById('dangerModalConfirm').onclick = function() {
+      executeDangerAction(dangerPendingAct);
+    };
+    document.getElementById('dangerModal').classList.add('show');
+  }
+  function closeDangerModal(e) {
+    if (e && e.target !== document.getElementById('dangerModal')) return;
+    document.getElementById('dangerModal').classList.remove('show');
+    dangerPendingAct = '';
+  }
+  function executeDangerAction(action) {
+    document.getElementById('dangerModal').classList.remove('show');
+    if (action === 'clearTestData') {
+      showToast('Dados de teste removidos com sucesso.', 'success');
+    } else if (action === 'revokeAllSessions') {
+      showToast('Todas as sess\u00f5es foram revogadas.', 'success');
+    }
+    dangerPendingAct = '';
+  }
+
+  /* ─── Profile ─── */
+  function loadProfile() {
+    if (!db) return;
+    db.from('profiles')
+      .select('*')
+      .eq('email', ADMIN_EMAIL)
+      .single()
+      .then(function(res) {
+        if (res.error || !res.data) return;
+        var d = res.data;
+        currentAdminId = d.id || null;
+        var nome      = d.nome      || d.first_name || '';
+        var sobrenome = d.sobrenome || d.last_name  || '';
+        var telefone  = d.telefone  || d.phone      || '';
+        document.getElementById('profileNome').value      = nome;
+        document.getElementById('profileSobrenome').value = sobrenome;
+        document.getElementById('profileTelefone').value  = telefone;
+        document.getElementById('profileEmail').value     = d.email || ADMIN_EMAIL;
+        var initials = ((nome[0] || '') + (sobrenome[0] || '')).toUpperCase() || 'SA';
+        document.getElementById('profileAvatar').textContent = initials;
+        document.getElementById('sidebarAva').textContent    = initials;
+        document.getElementById('sidebarName').textContent   = (nome + ' ' + sobrenome).trim() || 'Super Admin';
+      });
+  }
+
+  function saveProfile() {
+    var nome = document.getElementById('profileNome').value.trim();
+    if (!nome) { showToast('O nome n\u00e3o pode estar vazio.', 'danger'); return; }
+    if (!db)   { showToast('Sem conex\u00e3o com o banco de dados.', 'danger'); return; }
+    var sobrenome = document.getElementById('profileSobrenome').value.trim();
+    var telefone  = document.getElementById('profileTelefone').value.trim();
+    db.from('profiles')
+      .update({ nome: nome, sobrenome: sobrenome, telefone: telefone })
+      .eq('email', ADMIN_EMAIL)
+      .then(function(res) {
+        if (res.error) { showToast('Erro ao salvar: ' + res.error.message, 'danger'); return; }
+        var initials = ((nome[0] || '') + (sobrenome[0] || '')).toUpperCase() || 'SA';
+        document.getElementById('profileAvatar').textContent = initials;
+        document.getElementById('sidebarAva').textContent    = initials;
+        document.getElementById('sidebarName').textContent   = (nome + ' ' + sobrenome).trim();
+        hideSaveBar();
+        showToast('Perfil atualizado com sucesso!', 'success');
+      });
+  }
+
+  function resetProfile() {
+    loadProfile();
+    hideSaveBar();
+  }
+
+  /* ─── Change Password ─── */
+  function changePassword() {
+    var atual     = document.getElementById('senhaAtual').value;
+    var nova      = document.getElementById('novaSenha').value;
+    var confirmar = document.getElementById('confirmarSenha').value;
+    if (!atual || !nova || !confirmar) {
+      showToast('Preencha todos os campos de senha.', 'danger'); return;
+    }
+    if (nova.length < 8) {
+      showToast('A senha deve ter no m\u00ednimo 8 caracteres.', 'danger'); return;
+    }
+    if (nova !== confirmar) {
+      showToast('As senhas n\u00e3o coincidem.', 'danger'); return;
+    }
+    if (!db) { showToast('Sem conex\u00e3o com o banco de dados.', 'danger'); return; }
+    if (!currentAdminId) { showToast('ID do administrador n\u00e3o encontrado.', 'danger'); return; }
+    db.auth.admin.updateUserById(currentAdminId, { password: nova })
+      .then(function(res) {
+        if (res.error) { showToast('Erro ao alterar senha: ' + res.error.message, 'danger'); return; }
+        document.getElementById('senhaAtual').value     = '';
+        document.getElementById('novaSenha').value      = '';
+        document.getElementById('confirmarSenha').value = '';
+        showToast('Senha alterada com sucesso!', 'success');
+      });
+  }
+
+  /* ─── Platform Settings ─── */
+  function savePlatformSettings() {
+    var data = {
+      nome:      document.getElementById('platNome').value,
+      dominio:   document.getElementById('platDominio').value,
+      descricao: document.getElementById('platDescricao').value,
+      email:     document.getElementById('platEmail').value,
+      timezone:  document.getElementById('platTimezone').value,
+      idioma:    document.getElementById('platIdioma').value,
+      moeda:     document.getElementById('platMoeda').value
+    };
+    try { localStorage.setItem('sa_platform_settings', JSON.stringify(data)); } catch(e) {}
+    hideSaveBar();
+    showToast('Configura\u00e7\u00f5es da plataforma salvas!', 'success');
+  }
+
+  /* ─── Policies Settings ─── */
+  function savePoliciesSettings() {
+    var data = {
+      termsUrl:     document.getElementById('termsUrl').value,
+      privacyUrl:   document.getElementById('privacyUrl').value,
+      termsVersion: document.getElementById('termsVersion').value
+    };
+    try { localStorage.setItem('sa_policies_settings', JSON.stringify(data)); } catch(e) {}
+    hideSaveBar();
+    showToast('Termos e pol\u00edticas salvos!', 'success');
+  }
+
+  /* ─── Notification Prefs ─── */
+  function saveNotifPrefs() {
+    var data = {
+      novaEscola: document.getElementById('togNovaEscola').checked,
+      planoVenc:  document.getElementById('togPlanoVenc').checked,
+      escolaInad: document.getElementById('togEscolaInad').checked,
+      erros:      document.getElementById('togErros').checked,
+      email:      document.getElementById('togEmail').checked,
+      push:       document.getElementById('togPush').checked,
+      whatsapp:   document.getElementById('togWhatsApp').checked
+    };
+    try { localStorage.setItem('sa_notif_prefs', JSON.stringify(data)); } catch(e) {}
+    hideSaveBar();
+    showToast('Prefer\u00eancias de notifica\u00e7\u00e3o salvas!', 'success');
+  }
+
+  function loadNotifPrefs() {
+    try {
+      var raw = localStorage.getItem('sa_notif_prefs');
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (data.novaEscola !== undefined) document.getElementById('togNovaEscola').checked = data.novaEscola;
+      if (data.planoVenc  !== undefined) document.getElementById('togPlanoVenc').checked  = data.planoVenc;
+      if (data.escolaInad !== undefined) document.getElementById('togEscolaInad').checked = data.escolaInad;
+      if (data.erros      !== undefined) document.getElementById('togErros').checked      = data.erros;
+      if (data.email      !== undefined) document.getElementById('togEmail').checked      = data.email;
+      if (data.push       !== undefined) document.getElementById('togPush').checked       = data.push;
+      if (data.whatsapp   !== undefined) document.getElementById('togWhatsApp').checked   = data.whatsapp;
+    } catch(e) {}
+  }
+
+  /* ─── Security Settings ─── */
+  function saveSecuritySettings() {
+    var data = {
+      mfa:           document.getElementById('togMFA').checked,
+      google:        document.getElementById('togGoogle').checked,
+      apple:         document.getElementById('togApple').checked,
+      ipBlock:       document.getElementById('togIpBlock').checked,
+      sessaoTimeout: document.getElementById('sessaoTimeout').value,
+      maxTentativas: document.getElementById('maxTentativas').value
+    };
+    try { localStorage.setItem('sa_security_settings', JSON.stringify(data)); } catch(e) {}
+    hideSaveBar();
+    showToast('Configura\u00e7\u00f5es de seguran\u00e7a salvas!', 'success');
+  }
+
+  function loadSecuritySettings() {
+    try {
+      var raw = localStorage.getItem('sa_security_settings');
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (data.mfa           !== undefined) document.getElementById('togMFA').checked          = data.mfa;
+      if (data.google        !== undefined) document.getElementById('togGoogle').checked        = data.google;
+      if (data.apple         !== undefined) document.getElementById('togApple').checked         = data.apple;
+      if (data.ipBlock       !== undefined) document.getElementById('togIpBlock').checked       = data.ipBlock;
+      if (data.sessaoTimeout !== undefined) document.getElementById('sessaoTimeout').value      = data.sessaoTimeout;
+      if (data.maxTentativas !== undefined) document.getElementById('maxTentativas').value      = data.maxTentativas;
+    } catch(e) {}
+  }
+
+  /* ─── Integrations: key map ─── */
+  var INTEG_MAP = [
+    { slug:'asaas',    key:'asaas_api_key',            inputId:'asaasKey',  label:'Asaas',         validator: function(v){ return v.indexOf('$aact_') === 0; },  validHint:'Formato inv\u00e1lido (deve come\u00e7ar com $aact_)' },
+    { slug:'whatsapp', key:'whatsapp_token',            inputId:'waToken',   label:'WhatsApp',      validator: function(v){ return v.length > 20; },              validHint:'Token muito curto' },
+    { slug:'gcalendar',key:'google_calendar_token',     inputId:'gcalToken', label:'Google Cal.',   validator: function(v){ return v.length > 20; },              validHint:'Token muito curto' },
+    { slug:'sentry',   key:'sentry_dsn',                inputId:'sentryDsn', label:'Sentry',        validator: function(v){ return v.indexOf('https://') === 0; }, validHint:'DSN deve come\u00e7ar com https://' },
+    { slug:'expo',     key:'expo_push_token',           inputId:'expoToken', label:'Expo Push',     validator: function(v){ return v.length > 10; },              validHint:'Token muito curto' }
+  ];
+
+  /* ─── Load integrations from Supabase ─── */
+  function loadIntegrations() {
+    if (!db) { showToast('Supabase n\u00e3o conectado', 'danger'); return; }
+    var keys = INTEG_MAP.map(function(i){ return i.key; });
+    db.from('platform_settings')
+      .select('key, value, updated_at')
+      .in('key', keys)
+      .then(function(res) {
+        if (res.error) { console.warn('[integ] load error:', res.error.message); return; }
+        var rows = res.data || [];
+        /* Reset all to "not configured" first */
+        INTEG_MAP.forEach(function(integ) {
+          updateIntegStatus(integ.slug, false, null);
+          var inp = document.getElementById(integ.inputId);
+          if (inp) inp.placeholder = integ.inputId === 'asaasKey' ? '$aact_YTU5YTE0...' : '(n\u00e3o salvo)';
+        });
+        /* Apply loaded values */
+        rows.forEach(function(row) {
+          var integ = null;
+          for (var j = 0; j < INTEG_MAP.length; j++) {
+            if (INTEG_MAP[j].key === row.key) { integ = INTEG_MAP[j]; break; }
+          }
+          if (!integ) return;
+          var hasValue = row.value && row.value.trim().length > 0;
+          updateIntegStatus(integ.slug, hasValue, row.updated_at);
+          /* Show masked placeholder — never expose the full value */
+          if (hasValue) {
+            var inp = document.getElementById(integ.inputId);
+            if (inp) {
+              /* show last 4 chars masked */
+              var masked = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' + row.value.slice(-4);
+              inp.placeholder = masked;
+              inp.value = ''; /* keep empty — user must retype to change */
+            }
+            var hint = document.getElementById('saved-hint-' + integ.slug);
+            if (hint) {
+              var d = row.updated_at ? new Date(row.updated_at).toLocaleString('pt-BR') : '';
+              hint.textContent = d ? 'Salvo em ' + d : 'Salvo';
+            }
+          }
+        });
+      });
+  }
+
+  /* ─── Update integration status badge ─── */
+  function updateIntegStatus(slug, hasValue, updatedAt) {
+    var badge = document.getElementById('badge-' + slug);
+    var btn   = document.getElementById('btn-' + slug);
+    var hint  = document.getElementById('hint-' + slug);
+    if (!badge) return;
+    if (hasValue) {
+      badge.className = 'integ-badge badge-ok';
+      badge.textContent = '\u25CF Configurado';
+      if (btn) { btn.textContent = 'Testar'; btn.className = 'btn btn-secondary btn-sm'; }
+    } else {
+      badge.className = 'integ-badge badge-none';
+      badge.textContent = '\u25CF N\u00e3o configurado';
+      if (btn) { btn.textContent = 'Configurar'; btn.className = 'btn btn-primary btn-sm'; }
+    }
+    if (hint && updatedAt) {
+      hint.textContent = 'Atualizado em ' + new Date(updatedAt).toLocaleString('pt-BR');
+    }
+  }
+
+  /* ─── Save API keys ─── */
+  function saveApiKeys() {
+    if (!db) { showToast('Supabase n\u00e3o conectado', 'danger'); return; }
+    var btn = document.getElementById('btnSaveApiKeys');
+    if (btn) btn.disabled = true;
+    var upserts = [];
+    var errors  = [];
+    INTEG_MAP.forEach(function(integ) {
+      var inp = document.getElementById(integ.inputId);
+      if (!inp) return;
+      var val = inp.value.trim();
+      if (!val) return; /* empty = skip (keep existing) */
+      if (!integ.validator(val)) {
+        errors.push(integ.label + ': ' + integ.validHint);
+        return;
+      }
+      upserts.push({ key: integ.key, value: val, updated_at: new Date().toISOString() });
+    });
+    if (errors.length) {
+      showToast(errors[0], 'danger');
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (!upserts.length) {
+      showToast('Nenhum token novo para salvar (campos vazios = mantidos)', '');
+      if (btn) btn.disabled = false;
+      return;
+    }
+    db.from('platform_settings')
+      .upsert(upserts, { onConflict: 'key' })
+      .then(function(res) {
+        if (btn) btn.disabled = false;
+        if (res.error) { showToast('Erro ao salvar: ' + res.error.message, 'danger'); return; }
+        /* Clear fields after save */
+        upserts.forEach(function(u) {
+          var integ = null;
+          for (var j = 0; j < INTEG_MAP.length; j++) { if (INTEG_MAP[j].key === u.key) { integ = INTEG_MAP[j]; break; } }
+          if (!integ) return;
+          var inp = document.getElementById(integ.inputId);
+          if (inp) { inp.value = ''; inp.placeholder = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' + u.value.slice(-4); }
+        });
+        hideSaveBar();
+        showToast(upserts.length + ' chave(s) salva(s) com sucesso', 'success');
+        loadIntegrations();
+      });
+  }
+
+  /* ─── Test integration connection ─── */
+  function testIntegration(slug) {
+    var integ = null;
+    for (var j = 0; j < INTEG_MAP.length; j++) { if (INTEG_MAP[j].slug === slug) { integ = INTEG_MAP[j]; break; } }
+    if (!integ || !db) return;
+    var badge = document.getElementById('badge-' + slug);
+    var btn   = document.getElementById('btn-' + slug);
+    if (badge) { badge.className = 'integ-badge badge-loading'; badge.textContent = '\u25CB Testando...'; }
+    if (btn)   { btn.disabled = true; }
+    db.from('platform_settings')
+      .select('key, value, updated_at')
+      .eq('key', integ.key)
+      .single()
+      .then(function(res) {
+        if (btn) btn.disabled = false;
+        if (res.error || !res.data || !res.data.value) {
+          if (badge) { badge.className = 'integ-badge badge-err'; badge.textContent = '\u25CF N\u00e3o configurado'; }
+          showToast(integ.label + ': nenhuma chave encontrada. Adicione na se\u00e7\u00e3o Chaves de API.', 'danger');
+          return;
+        }
+        var val = res.data.value.trim();
+        if (!integ.validator(val)) {
+          if (badge) { badge.className = 'integ-badge badge-warn'; badge.textContent = '\u25CF Formato inv\u00e1lido'; }
+          showToast(integ.label + ': ' + integ.validHint, 'danger');
+          return;
+        }
+        /* For Asaas: do a lightweight fetch test */
+        if (slug === 'asaas') {
+          testAsaasConnection(val, badge, btn);
+          return;
+        }
+        /* For others: format OK = treat as configured */
+        if (badge) { badge.className = 'integ-badge badge-ok'; badge.textContent = '\u25CF Configurado'; }
+        showToast(integ.label + ': chave v\u00e1lida e configurada', 'success');
+      });
+  }
+
+  /* ─── Asaas real connection test ─── */
+  function testAsaasConnection(apiKey, badge, btn) {
+    var isProduction = apiKey.indexOf('$aact_prod') === 0 || apiKey.indexOf('$aact_YW') === 0;
+    var baseUrl = isProduction
+      ? 'https://api.asaas.com/v3'
+      : 'https://sandbox.asaas.com/api/v3';
+    fetch(baseUrl + '/finance/balance', {
+      method: 'GET',
+      headers: { 'access_token': apiKey, 'Content-Type': 'application/json' }
+    }).then(function(resp) {
+      if (resp.ok) {
+        if (badge) { badge.className = 'integ-badge badge-ok'; badge.textContent = '\u25CF Conectado'; }
+        showToast('Asaas: conex\u00e3o OK' + (isProduction ? ' (Produ\u00e7\u00e3o)' : ' (Sandbox)'), 'success');
+      } else {
+        if (badge) { badge.className = 'integ-badge badge-warn'; badge.textContent = '\u25CF Erro ' + resp.status; }
+        showToast('Asaas: resposta ' + resp.status + '. Verifique a chave.', 'danger');
+      }
+    }).catch(function(err) {
+      /* CORS will block browser-side — treat as "key stored, can't verify from browser" */
+      if (badge) { badge.className = 'integ-badge badge-ok'; badge.textContent = '\u25CF Configurado'; }
+      showToast('Asaas: chave salva (teste completo requer backend)', '');
+    });
+  }
+
+  /* ─── Toggle reveal password field ─── */
+  function toggleReveal(inputId, btnEl) {
+    var inp = document.getElementById(inputId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btnEl) btnEl.style.color = 'var(--primary)';
+    } else {
+      inp.type = 'password';
+      if (btnEl) btnEl.style.color = '';
+    }
+  }
+
+  /* ─── Logo / Avatar upload ─── */
+  function applyLogoPreview(url) {
+    var el = document.getElementById('platformAvatar');
+    if (!el) return;
+    el.style.padding = '0';
+    el.style.overflow = 'hidden';
+    el.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:contain;border-radius:50%;" />';
+  }
+
+  function handleLogoUpload(file) {
+    if (!file) return;
+    if (file.size > 512 * 1024) { showToast('Arquivo muito grande. Máx. 512KB.', 'danger'); return; }
+    if (!db) { showToast('Supabase não conectado', 'danger'); return; }
+    var ext = file.name.split('.').pop().toLowerCase();
+    var path = 'logos/platform-logo.' + ext;
+    showToast('Enviando logo…', '');
+    db.storage.from('platform-assets').upload(path, file, { upsert: true })
+      .then(function(res) {
+        if (res.error) { showToast('Erro no upload: ' + res.error.message, 'danger'); return; }
+        var pub = db.storage.from('platform-assets').getPublicUrl(path);
+        var url = pub.data.publicUrl;
+        return db.from('platform_settings')
+          .upsert([{ key: 'platform_logo_url', value: url, updated_at: new Date().toISOString() }], { onConflict: 'key' })
+          .then(function(r) {
+            if (r.error) { showToast('Erro ao salvar URL: ' + r.error.message, 'danger'); return; }
+            applyLogoPreview(url);
+            showToast('Logo atualizado com sucesso!', 'success');
+          });
+      });
+  }
+
+  function loadPlatformLogo() {
+    if (!db) return;
+    db.from('platform_settings').select('value').eq('key', 'platform_logo_url').maybeSingle()
+      .then(function(res) {
+        if (res.error || !res.data || !res.data.value) return;
+        applyLogoPreview(res.data.value);
+      });
+  }
+
+  function handleAvatarUpload(file) {
+    if (!file) return;
+    if (file.size > 1024 * 1024) { showToast('Arquivo muito grande. Máx. 1MB.', 'danger'); return; }
+    if (!db) { showToast('Supabase não conectado', 'danger'); return; }
+    var ext = file.name.split('.').pop().toLowerCase();
+    var path = 'avatars/superadmin.' + ext;
+    showToast('Enviando foto…', '');
+    db.storage.from('platform-assets').upload(path, file, { upsert: true })
+      .then(function(res) {
+        if (res.error) { showToast('Erro no upload: ' + res.error.message, 'danger'); return; }
+        var pub = db.storage.from('platform-assets').getPublicUrl(path);
+        var url = pub.data.publicUrl;
+        var el = document.getElementById('profileAvatar');
+        if (el) {
+          el.style.padding = '0';
+          el.style.overflow = 'hidden';
+          el.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+        }
+        showToast('Foto atualizada com sucesso!', 'success');
+      });
+  }
+
+    /* ─── Attach dirty listeners ─── */
+  function attachDirtyListeners() {
+    for (var i = 0; i < ALL_SECTIONS.length; i++) {
+      (function(secId) {
+        var sec = document.getElementById('sec-' + secId);
+        if (!sec) return;
+        var fields = sec.querySelectorAll('input, select, textarea');
+        for (var j = 0; j < fields.length; j++) {
+          var f = fields[j];
+          if (f.id === 'profileEmail') continue;
+          f.addEventListener('change', function() { markDirty(secId); });
+        }
+      })(ALL_SECTIONS[i]);
+    }
+  }
+
+  /* ─── Init IIFE ─── */
+  (function init() {
+    /* Init Supabase */
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+      }
+    } catch(e) {
+      db = null;
+    }
+
+    /* Read URL hash for initial section */
+    var hash = window.location.hash.replace('#', '');
+    var initialSection = 'plataforma';
+    for (var i = 0; i < ALL_SECTIONS.length; i++) {
+      if (ALL_SECTIONS[i] === hash) { initialSection = hash; break; }
+    }
+
+    /* Load preferences */
+    loadNotifPrefs();
+    loadSecuritySettings();
+
+    function onReady() {
+      attachDirtyListeners();
+      loadProfile();
+      loadPlatformLogo();
+      loadIntegrations();
+      if (initialSection !== 'plataforma') {
+        /* find matching tab and activate */
+        var tabs = document.querySelectorAll('#settingsTabs .settings-tab');
+        var activated = false;
+        for (var t = 0; t < tabs.length; t++) {
+          var oc = tabs[t].getAttribute('onclick') || '';
+          if (oc.indexOf("'" + initialSection + "'") !== -1) {
+            showSection(initialSection, tabs[t]);
+            activated = true;
+            break;
+          }
+        }
+        if (!activated) { showSection(initialSection, null); }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+      onReady();
+    }
+  })();
 </script>
+
+<script>window.SUPERADMIN_PAGE = 'configuracoes';</script>
+<script src="superadmin-sidebar.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — Escola · Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #20C997;
+      --primary-dark:   #17a57a;
+      --primary-light:  #e6faf4;
+      --secondary:      #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:         #FFA552;
+      --accent-light:   #fff4e8;
+      --success:        #20C997;
+      --success-light:  #e6faf4;
+      --warning:        #FFA552;
+      --warning-light:  #fff4e8;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --info:           #5BC0EB;
+      --info-light:     #e8f6fd;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #F7F9FA;
+      --card:           #ffffff;
+      --text:           #1B1B1B;
+      --text-muted:     #6b7280;
+      --border:         #e5e7eb;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d2112;
+      --sidebar-hover:  #162e1c;
+      --shadow:         0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.1);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    /* ── DEMO PROFILE BAR ── */
+    .demo-bar {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: #1B1B1B; border-radius: 40px;
+      padding: 8px 12px;
+      display: flex; align-items: center; gap: 6px;
+      z-index: 9999; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      flex-wrap: wrap; max-width: calc(100vw - 32px);
+      justify-content: center;
+    }
+    .demo-bar-label { color: rgba(255,255,255,.4); font-size: 10px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; padding: 0 4px; white-space: nowrap; }
+    .demo-btn {
+      padding: 5px 11px; border-radius: 20px; border: none;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+      background: rgba(255,255,255,.08); color: rgba(255,255,255,.6);
+    }
+    .demo-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+    .demo-btn.active { background: var(--primary); color: #fff; }
+
+    /* ── OVERLAY ── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:90; backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); height:100dvh; background:var(--sidebar-bg);
+      display:flex; flex-direction:column;
+      position:fixed; top:0; left:0; z-index:100;
+      transform:translateX(-100%);
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+      overflow-y:auto;
+    }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+
+    /* brand */
+    .sidebar-logo { padding:18px 16px 14px; border-bottom:1px solid rgba(255,255,255,.07); flex-shrink:0; }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .logo-icon { width:36px;height:36px; background:linear-gradient(135deg,var(--primary),var(--secondary)); border-radius:10px; display:flex;align-items:center;justify-content:center; font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px;line-height:1.2; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+
+    /* school switcher */
+    .school-switcher {
+      margin:10px 12px 0;
+      background:rgba(32,201,151,.1); border:1px solid rgba(32,201,151,.22);
+      border-radius:var(--radius-sm); overflow:hidden;
+    }
+    .school-current {
+      display:flex; align-items:center; gap:9px;
+      padding:9px 11px; cursor:pointer; transition:background .15s;
+    }
+    .school-current:hover { background:rgba(255,255,255,.05); }
+    .school-ava {
+      width:28px;height:28px; border-radius:6px;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;flex-shrink:0;
+    }
+    .school-info { flex:1; min-width:0; }
+    .school-name { color:rgba(255,255,255,.9);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .school-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .school-caret { color:rgba(255,255,255,.3);font-size:10px;flex-shrink:0; }
+
+    .school-dropdown {
+      display:none; border-top:1px solid rgba(255,255,255,.07);
+      padding:6px 8px;
+    }
+    .school-dropdown.open { display:block; }
+    .school-opt {
+      display:flex;align-items:center;gap:8px;
+      padding:7px 9px;border-radius:6px;cursor:pointer;
+      transition:background .15s;
+    }
+    .school-opt:hover { background:rgba(255,255,255,.07); }
+    .school-opt-ava { width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+    .school-opt-name { color:rgba(255,255,255,.7);font-size:11px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .school-opt-role { color:rgba(255,255,255,.3);font-size:10px;flex-shrink:0; }
+
+    /* profile chip */
+    .profile-chip {
+      margin:8px 12px 0;
+      display:flex;align-items:center;gap:7px;
+      padding:6px 10px;
+      border-radius:var(--radius-sm);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .profile-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .profile-label { color:rgba(255,255,255,.55);font-size:11px;font-weight:500;flex:1; }
+    .profile-name-chip { color:rgba(255,255,255,.9);font-size:11px;font-weight:700; }
+
+    /* nav */
+    .sidebar-nav { padding:8px 10px;flex:1;overflow-y:auto; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+
+    .nav-item {
+      display:flex;align-items:center;gap:10px;
+      padding:9px 12px;border-radius:var(--radius-sm);
+      color:rgba(255,255,255,.55);font-size:13px;font-weight:500;
+      cursor:pointer;transition:all .15s;margin-bottom:1px;
+      text-decoration:none; -webkit-tap-highlight-color:transparent;
+      position:relative;
+    }
+    .nav-item:hover:not(.locked):not(.locked-profile) { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item .nav-label { flex:1; }
+
+    /* locked by plan */
+    .nav-item.locked { opacity:.45; cursor:not-allowed; }
+    .nav-item.locked:hover { background:transparent;color:rgba(255,255,255,.55); }
+    .lock-badge {
+      margin-left:auto;font-size:10px;font-weight:700;
+      padding:1px 6px;border-radius:20px;flex-shrink:0;
+    }
+    .lock-plan    { background:rgba(255,165,82,.2);  color:#FFA552; }
+    .lock-profile { background:rgba(239,68,68,.2);   color:#f87171; }
+
+    /* locked by profile (not by plan) */
+    .nav-item.locked-profile { opacity:.35; cursor:not-allowed; }
+    .nav-item.locked-profile:hover { background:transparent;color:rgba(255,255,255,.35); }
+
+    /* badge */
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
+
+    /* footer */
+    .sidebar-footer { padding:10px 10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .user-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .user-role-text { color:rgba(255,255,255,.35);font-size:10.5px; }
+    .logout-btn { margin-left:auto;background:none;border:none;color:rgba(255,255,255,.28);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;transition:color .15s; }
+    .logout-btn:hover { color:var(--danger); }
+
+    /* ── MAIN ── */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* ── TOPBAR ── */
+    .topbar { background:var(--card);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow); }
+    @media(min-width:640px)  { .topbar { padding:0 22px; } }
+    @media(min-width:1024px) { .topbar { padding:0 28px; } }
+
+    .hamburger { width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);border:none;background:var(--bg);cursor:pointer;font-size:17px;flex-shrink:0; }
+    @media(min-width:1024px){ .hamburger { display:none; } }
+
+    .topbar-title { flex:1;min-width:0; }
+    .topbar-title .page-title { font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .topbar-title .breadcrumb { font-size:11px;color:var(--text-muted);display:none; }
+    @media(min-width:640px){ .topbar-title .page-title { font-size:16px; } .topbar-title .breadcrumb { display:block; } }
+
+    .topbar-right { display:flex;align-items:center;gap:8px;flex-shrink:0; }
+
+    .search-box { display:none;align-items:center;gap:7px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px; }
+    @media(min-width:768px) { .search-box { display:flex;width:200px; } }
+    @media(min-width:1024px){ .search-box { width:225px; } }
+    .search-box input { border:none;background:transparent;font-size:13px;color:var(--text);outline:none;width:100%; }
+    .search-box input::placeholder { color:var(--text-muted); }
+
+    .icon-btn { width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:15px;position:relative;transition:all .15s; }
+    .icon-btn:hover { background:var(--primary-light);border-color:var(--primary); }
+    .notif-dot { position:absolute;top:5px;right:6px;width:7px;height:7px;background:var(--accent);border-radius:50%;border:1.5px solid var(--card); }
+
+    .date-pill { display:none;padding:5px 11px;background:var(--primary-light);color:var(--primary-dark);font-size:11.5px;font-weight:600;border-radius:20px; }
+    @media(min-width:900px){ .date-pill { display:inline-flex; } }
+
+    /* topbar profile badge */
+    .topbar-profile {
+      display:none;align-items:center;gap:6px;
+      padding:5px 10px;border-radius:20px;
+      font-size:11px;font-weight:600;
+      border:1.5px solid var(--border);
+      background:var(--card);
+    }
+    @media(min-width:900px){ .topbar-profile { display:flex; } }
+    .topbar-profile .tp-dot { width:7px;height:7px;border-radius:50%; }
+
+    /* ── BUTTONS ── */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;white-space:nowrap; }
+    @media(min-width:640px){ .btn { font-size:14px;padding:9px 18px; } }
+    .btn-primary { background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(32,201,151,.3); }
+    .btn-primary:hover { background:var(--primary-dark);transform:translateY(-1px); }
+    .btn-secondary { background:var(--card);color:var(--text);border:1.5px solid var(--border); }
+    .btn-secondary:hover { background:var(--bg); }
+    .btn-sm { padding:5px 11px;font-size:12px; }
+    .btn-accent { background:var(--accent);color:#fff; }
+    .btn-white { background:rgba(255,255,255,.95);color:var(--primary-dark);font-weight:700; }
+    .btn-white:hover { background:#fff; }
+    .btn-outline-white { background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5); }
+    .btn-outline-white:hover { background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.8); }
+
+    /* ── PAGE ── */
+    .page-content { padding:20px 16px 100px;flex:1; }
+    @media(min-width:640px)  { .page-content { padding:22px 20px 100px; } }
+    @media(min-width:1024px) { .page-content { padding:26px 28px 100px; } }
+
+    /* section header */
+    .section-header { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px; }
+    .section-title { font-size:14.5px;font-weight:700; }
+    .section-sub   { font-size:11.5px;color:var(--text-muted);margin-top:1px; }
+
+    /* cards */
+    .card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px; }
+    .card-sm { padding:16px; }
+    @media(min-width:640px){ .card { padding:22px; } }
+
+    /* ── KPI GRID ── */
+    .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px; }
+    @media(min-width:640px)  { .kpi-grid { gap:14px; } }
+    @media(min-width:768px)  { .kpi-grid { grid-template-columns:repeat(3,1fr); } }
+    @media(min-width:1200px) { .kpi-grid { grid-template-columns:repeat(5,1fr); } }
+
+    .kpi-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s; }
+    .kpi-card:hover { box-shadow:var(--shadow-md);transform:translateY(-2px); }
+    .kpi-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .kpi-card.green::before  { background:var(--primary); }
+    .kpi-card.blue::before   { background:var(--secondary); }
+    .kpi-card.orange::before { background:var(--accent); }
+    .kpi-card.red::before    { background:var(--danger); }
+    .kpi-card.purple::before { background:var(--purple); }
+
+    .kpi-top { display:flex;align-items:flex-start;justify-content:space-between; }
+    .kpi-icon { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0; }
+    .kpi-icon.green  { background:var(--success-light); }
+    .kpi-icon.blue   { background:var(--info-light); }
+    .kpi-icon.orange { background:var(--warning-light); }
+    .kpi-icon.red    { background:var(--danger-light); }
+    .kpi-icon.purple { background:var(--purple-light); }
+
+    .kpi-trend { font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:2px; }
+    .kpi-trend.up      { background:var(--success-light);color:var(--primary); }
+    .kpi-trend.down    { background:var(--danger-light);color:var(--danger); }
+    .kpi-trend.warn    { background:var(--warning-light);color:#b45309; }
+    .kpi-trend.neutral { background:var(--bg);color:var(--text-muted); }
+
+    .kpi-value { font-size:26px;font-weight:800;line-height:1;color:var(--text); }
+    .kpi-label { font-size:12px;color:var(--text-muted);font-weight:500; }
+    .kpi-sub   { font-size:11px;color:var(--text-muted); }
+    @media(min-width:640px)  { .kpi-value { font-size:28px; } }
+    @media(min-width:1024px) { .kpi-value { font-size:30px; } }
+
+    /* restricted kpi */
+    .kpi-card.restricted { opacity:.5; pointer-events:none; filter:blur(1px); }
+    .kpi-card.restricted .kpi-value { filter:blur(4px); }
+
+    /* ── MAIN GRID ── */
+    .main-grid { display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:18px; }
+    @media(min-width:900px)  { .main-grid { grid-template-columns:1fr 370px; } }
+    @media(min-width:1200px) { .main-grid { grid-template-columns:1fr 410px; } }
+
+    /* chart */
+    .chart-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px; }
+    .chart-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px; }
+    .chart-title { font-size:14px;font-weight:700; }
+    .chart-sub   { font-size:11px;color:var(--text-muted);margin-top:1px; }
+    .chart-tabs  { display:flex;gap:4px; }
+    .chart-tab   { padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:none;cursor:pointer;background:var(--bg);color:var(--text-muted);transition:all .15s; }
+    .chart-tab.active { background:var(--primary);color:#fff; }
+    .chart-wrapper { position:relative;height:240px; }
+    @media(min-width:640px)  { .chart-wrapper { height:260px; } }
+    @media(min-width:1024px) { .chart-wrapper { height:275px; } }
+
+    .rev-summary { display:flex;gap:14px;flex-wrap:wrap;margin-top:12px; }
+    .rev-item    { display:flex;align-items:center;gap:6px;font-size:12px; }
+    .rev-dot     { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+
+    /* turmas */
+    .turma-list { display:flex;flex-direction:column;gap:9px; }
+    .turma-item { display:flex;align-items:center;gap:9px; }
+    .turma-rank { width:22px;height:22px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--text-muted);flex-shrink:0; }
+    .turma-rank.gold   { background:#fef9c3;color:#b45309; }
+    .turma-rank.silver { background:#f1f5f9;color:#64748b; }
+    .turma-rank.bronze { background:#fef3c7;color:#92400e; }
+    .turma-info { flex:1;min-width:0; }
+    .turma-name { font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .turma-meta { font-size:11px;color:var(--text-muted); }
+    .turma-bar-wrap { flex:1;min-width:70px;max-width:90px;height:5px;background:var(--border);border-radius:99px;overflow:hidden; }
+    .turma-bar { height:100%;border-radius:99px;background:var(--primary); }
+    .turma-pct { font-size:11px;font-weight:700;color:var(--text-muted);flex-shrink:0;min-width:32px;text-align:right; }
+
+    /* bottom grid */
+    .bottom-grid { display:grid;grid-template-columns:1fr;gap:16px; }
+    @media(min-width:768px)  { .bottom-grid { grid-template-columns:1fr 1fr; } }
+    @media(min-width:1100px) { .bottom-grid { grid-template-columns:1fr 1fr 1fr; } }
+
+    /* alerts */
+    .alert-list { display:flex;flex-direction:column;gap:8px; }
+    .alert-item { display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);border-left:3px solid transparent; }
+    .alert-item.red    { background:var(--danger-light); border-color:var(--danger); }
+    .alert-item.orange { background:var(--warning-light);border-color:var(--accent); }
+    .alert-item.blue   { background:var(--info-light);   border-color:var(--secondary); }
+    .alert-item.green  { background:var(--success-light);border-color:var(--primary); }
+    .alert-icon { font-size:15px;flex-shrink:0; }
+    .alert-info { flex:1;min-width:0; }
+    .alert-msg  { font-size:12px;font-weight:600;line-height:1.3; }
+    .alert-sub  { font-size:11px;color:var(--text-muted); }
+
+    /* table */
+    .mini-table { width:100%;border-collapse:collapse;font-size:12px; }
+    .mini-table th { text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1.5px solid var(--border);white-space:nowrap; }
+    .mini-table td { padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:middle; }
+    .mini-table tr:last-child td { border-bottom:none; }
+    .mini-table tr:hover td { background:var(--bg); }
+    .table-scroll { overflow-x:auto;-webkit-overflow-scrolling:touch; }
+
+    /* badges */
+    .badge { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600; }
+    .badge-danger  { background:var(--danger-light); color:var(--danger); }
+    .badge-warning { background:var(--warning-light);color:#b45309; }
+    .badge-success { background:var(--success-light);color:var(--primary-dark); }
+    .badge-info    { background:var(--info-light);   color:#0369a1; }
+    .badge-gray    { background:var(--bg);           color:var(--text-muted); }
+
+    /* chamada */
+    .chamada-list { display:flex;flex-direction:column;gap:7px; }
+    .chamada-item { display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg);border-radius:var(--radius-sm);transition:background .15s; }
+    .chamada-item:hover { background:var(--primary-light); }
+    .turma-ava { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+    .chamada-info { flex:1;min-width:0; }
+    .chamada-turma { font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .chamada-meta  { font-size:11px;color:var(--text-muted); }
+    .chamada-status { font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0; }
+    .chamada-status.done    { background:var(--success-light);color:var(--primary-dark); }
+    .chamada-status.pending { background:var(--warning-light);color:#b45309; }
+    .chamada-status.future  { background:var(--bg);color:var(--text-muted);border:1px solid var(--border); }
+
+    /* welcome banner */
+    .welcome-banner { background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;color:#fff;overflow:hidden;position:relative; }
+    .welcome-banner::after { content:'🏃';position:absolute;right:110px;top:-8px;font-size:60px;opacity:.12; }
+    .wt-greeting { font-size:11.5px;font-weight:500;opacity:.8; }
+    .wt-title    { font-size:18px;font-weight:800;margin-top:2px; }
+    .wt-sub      { font-size:11.5px;opacity:.72;margin-top:3px; }
+    @media(min-width:640px){ .wt-title { font-size:20px; } }
+    .welcome-cta { display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap; }
+
+    /* quick actions */
+    .quick-actions { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px; }
+    .quick-btn { background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .18s;text-decoration:none;color:var(--text); }
+    .quick-btn:hover { border-color:var(--primary);background:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow-md); }
+    .quick-btn.locked-action { opacity:.4;cursor:not-allowed;pointer-events:none; }
+    .qb-icon  { font-size:19px; }
+    .qb-label { font-size:11px;font-weight:600;text-align:center;line-height:1.3; }
+
+    /* freq ring */
+    .freq-widget { display:flex;align-items:center;gap:12px; }
+    .freq-ring-wrap { position:relative;width:68px;height:68px;flex-shrink:0; }
+    .freq-ring-wrap canvas { width:68px!important;height:68px!important; }
+    .freq-ring-center { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+    .ring-val  { font-size:15px;font-weight:800;line-height:1; }
+    .ring-unit { font-size:9px;color:var(--text-muted); }
+    .freq-stats { flex:1;min-width:0; }
+    .freq-stat-row { display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border); }
+    .freq-stat-row:last-child { border-bottom:none; }
+    .freq-stat-label { font-size:11.5px;color:var(--text-muted); }
+    .freq-stat-val   { font-size:11.5px;font-weight:700; }
+
+    /* divider */
+    .divider { height:1px;background:var(--border);margin:12px 0; }
+
+    /* restricted overlay block */
+    .module-blocked {
+      background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:32px 20px;text-align:center;gap:10px;
+      border:2px dashed var(--border);
+    }
+    .module-blocked .block-icon { font-size:32px; }
+    .module-blocked .block-title { font-size:14px;font-weight:700;color:var(--text); }
+    .module-blocked .block-sub   { font-size:12px;color:var(--text-muted);max-width:240px; }
+    .module-blocked .block-type-plan    { background:var(--accent-light);color:#b45309;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px; }
+    .module-blocked .block-type-profile { background:var(--danger-light);color:var(--danger);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px; }
+
+    /* page footer */
+    .page-footer { padding:12px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted);background:var(--card);flex-wrap:wrap;gap:8px; }
+
+    /* hidden util */
+    .hidden { display:none!important; }
+  </style>
+</head>
+<body>
+
+<!-- ── DEMO BAR ── -->
+<div class="demo-bar">
+  <span class="demo-bar-label">Perfil:</span>
+  <button class="demo-btn active" onclick="setProfile('admin_escola',this)">👑 Admin</button>
+  <button class="demo-btn" onclick="setProfile('coordenador',this)">📚 Coordenador</button>
+  <button class="demo-btn" onclick="setProfile('professor',this)">🏫 Professor</button>
+  <button class="demo-btn" onclick="setProfile('financeiro',this)">💰 Financeiro</button>
+  <button class="demo-btn" onclick="setProfile('secretaria',this)">📋 Secretaria</button>
+  <button class="demo-btn" onclick="setProfile('saude',this)">🩺 Saúde</button>
+  <button class="demo-btn" onclick="setProfile('marketing',this)">📣 Marketing</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ════════════════════════════════
+     SIDEBAR
+════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
+      </div>
+    </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">🏫</div>
+      <div>
+        <div class="sc-name">Academia Atlética SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">⇅</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════════════════════
+     MAIN
+════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="breadcrumb" id="breadcrumb">Escola · Arena Futebol Kids</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar atleta ou turma…" />
+      </div>
+      <div class="date-pill">📅 24 mar 2026</div>
+      <!-- profile badge -->
+      <div class="topbar-profile" id="topbar-profile-badge">
+        <div class="tp-dot" id="tp-dot"></div>
+        <span id="tp-label">Admin da Escola</span>
+      </div>
+      <div class="icon-btn" title="Notificações">🔔<span class="notif-dot"></span></div>
+      <div class="user-ava" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer;" id="topbar-avatar">CF</div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content" id="page-content">
+    <!-- rendered by JS -->
+  </main>
+
+  <footer class="page-footer">
+    <span>Esportes Academy © 2026 · Portal Escola v1.1</span>
+    <span>Última sincronização: 24/03/2026 às 10:47</span>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIG — perfis e permissões
+═══════════════════════════════════════════════ */
+
+// Plano atual da escola em foco (Pro)
+const PLAN = 'pro'; // 'starter' | 'pro' | 'enterprise'
+
+const PLAN_MODULES = {
+  starter:    ['administrativo','financeiro','comunicacao_basica'],
+  pro:        ['administrativo','financeiro','comunicacao_basica','saude','eventos','treinamentos','comunicacao_avancada','relatorios'],
+  enterprise: ['administrativo','financeiro','comunicacao_basica','saude','eventos','treinamentos','comunicacao_avancada','relatorios','competicoes','metodologia','cursos'],
+};
+
+const PROFILE_MODULES = {
+  admin_escola: ['administrativo','financeiro','saude','comunicacao_basica','comunicacao_avancada','eventos','treinamentos','metodologia','competicoes','cursos','relatorios','config','usuarios'],
+  coordenador:  ['administrativo','saude','comunicacao_basica','comunicacao_avancada','eventos','treinamentos','metodologia','competicoes','cursos','relatorios'],
+  professor:    ['administrativo','saude','comunicacao_basica','treinamentos','metodologia','competicoes','cursos'],
+  financeiro:   ['financeiro','comunicacao_basica','relatorios'],
+  secretaria:   ['administrativo','comunicacao_basica','comunicacao_avancada','eventos'],
+  saude:        ['saude','treinamentos'],
+  marketing:    ['eventos','comunicacao_basica','comunicacao_avancada','competicoes'],
+};
+
+const PROFILE_META = {
+  admin_escola: { label:'Admin da Escola',  color:'#20C997', icon:'👑', initials:'CF', name:'Carlos Ferreira' },
+  coordenador:  { label:'Coordenador',      color:'#5BC0EB', icon:'📚', initials:'AM', name:'Ana Moreira' },
+  professor:    { label:'Professor',        color:'#8b5cf6', icon:'🏫', initials:'JP', name:'João Paulo' },
+  financeiro:   { label:'Financeiro',       color:'#FFA552', icon:'💰', initials:'RS', name:'Renata Silva' },
+  secretaria:   { label:'Secretaria',       color:'#14b8a6', icon:'📋', initials:'MO', name:'Marta Oliveira' },
+  saude:        { label:'Saúde',            color:'#ef4444', icon:'🩺', initials:'DR', name:'Dr. Rafael' },
+  marketing:    { label:'Marketing',        color:'#f59e0b', icon:'📣', initials:'LC', name:'Luciana Costa' },
+};
+
+// NAV structure
+const NAV = [
+  { section: 'Principal' },
+  { id:'dashboard',        icon:'📊', label:'Dashboard',         module:'administrativo' },
+  { id:'atletas',          icon:'👥', label:'Atletas',            module:'administrativo' },
+  { id:'turmas',           icon:'🗂️',  label:'Turmas',             module:'administrativo', href:'Escola-grupos.html' },
+  { id:'presencas',        icon:'✅', label:'Presenças',          module:'administrativo' },
+  { section: 'Gestão' },
+  { id:'financeiro',       icon:'💰', label:'Financeiro',         module:'financeiro',          badge:'3' },
+  { id:'saude',            icon:'🩺', label:'Saúde',              module:'saude' },
+  { id:'comunicados',      icon:'📣', label:'Comunicados',        module:'comunicacao_basica' },
+  { id:'eventos',          icon:'🎉', label:'Eventos',            module:'eventos' },
+  { id:'treinamentos',     icon:'🏋️', label:'Treinamentos',       module:'treinamentos' },
+  { section: 'Avançado' },
+  { id:'competicoes',      icon:'🏆', label:'Competições',        module:'competicoes' },
+  { id:'metodologia',      icon:'📖', label:'Metodologia',        module:'metodologia' },
+  { id:'cursos',           icon:'🎓', label:'Cursos',             module:'cursos' },
+  { id:'relatorios',       icon:'📈', label:'Relatórios',         module:'relatorios' },
+  { section: 'Escola' },
+  { id:'config',           icon:'⚙️', label:'Configurações',      module:'config' },
+  { id:'usuarios',         icon:'👤', label:'Usuários',           module:'usuarios' },
+];
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let activeProfile = 'admin_escola';
+let activePlan    = PLAN;
+let currentSchool = 'Arena Futebol Kids';
+let chartInstances = {};
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR NAV RENDER
+═══════════════════════════════════════════════ */
+function renderNav() {
+  const planMods    = PLAN_MODULES[activePlan];
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const container   = document.getElementById('sidebar-nav');
+  container.innerHTML = '';
+
+  NAV.forEach(item => {
+    if (item.section) {
+      const lbl = document.createElement('div');
+      lbl.className = 'nav-section-label';
+      lbl.textContent = item.section;
+      container.appendChild(lbl);
+      return;
+    }
+
+    const inPlan    = planMods.includes(item.module);
+    const inProfile = profileMods.includes(item.module);
+    const isActive  = item.id === 'dashboard';
+
+    const a = document.createElement('a');
+    a.href = item.href || '#';
+
+    if (isActive) {
+      a.className = 'nav-item active';
+    } else if (!inPlan) {
+      a.className = 'nav-item locked';
+    } else if (!inProfile) {
+      a.className = 'nav-item locked-profile';
+    } else {
+      a.className = 'nav-item';
+    }
+
+    let lockBadgeHTML = '';
+    if (!inPlan) {
+      lockBadgeHTML = `<span class="lock-badge lock-plan">🔒 Upgrade</span>`;
+    } else if (!inProfile) {
+      lockBadgeHTML = `<span class="lock-badge lock-profile">🚫 Perfil</span>`;
+    } else if (item.badge) {
+      lockBadgeHTML = `<span class="nav-badge">${item.badge}</span>`;
+    }
+
+    a.innerHTML = `<span class="icon">${item.icon}</span><span class="nav-label">${item.label}</span>${lockBadgeHTML}`;
+    container.appendChild(a);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   PROFILE UPDATE
+═══════════════════════════════════════════════ */
+function setProfile(profile, btn) {
+  activeProfile = profile;
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const meta = PROFILE_META[profile];
+
+  // chip
+  document.getElementById('chip-dot').style.background  = meta.color;
+  document.getElementById('chip-name').textContent       = meta.label;
+
+  // user footer
+  document.getElementById('sidebarAva').textContent  = meta.initials;
+  document.getElementById('sidebarName').textContent = meta.name;
+  document.getElementById('sidebarRole').textContent = meta.label;
+
+  // topbar avatar + badge
+  document.getElementById('topbar-avatar').textContent  = meta.initials;
+  document.getElementById('tp-dot').style.background    = meta.color;
+  document.getElementById('tp-label').textContent       = meta.label;
+
+  renderNav();
+  renderDashboard();
+}
+
+/* ═══════════════════════════════════════════════
+   SCHOOL SWITCHER
+═══════════════════════════════════════════════ */
+function toggleSchoolDropdown() {
+  const dd     = document.getElementById('school-dropdown');
+  const caret  = document.getElementById('school-caret');
+  const isOpen = dd.classList.toggle('open');
+  caret.textContent = isOpen ? '▲' : '▼';
+}
+
+function switchSchool(name, plan, profile) {
+  currentSchool = name;
+  activePlan    = plan.toLowerCase();
+  document.querySelector('.school-name').textContent  = name;
+  document.getElementById('plan-label').textContent   = `Plano ${plan} · Ativo`;
+  document.getElementById('breadcrumb').textContent   = `Escola · ${name}`;
+  document.getElementById('school-dropdown').classList.remove('open');
+  document.getElementById('school-caret').textContent = '▼';
+
+  // activate matching profile btn
+  const btns = document.querySelectorAll('.demo-btn');
+  btns.forEach(b => {
+    b.classList.remove('active');
+    if (b.getAttribute('onclick').includes(profile)) b.classList.add('active');
+  });
+
+  setProfile(profile, null);
+}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD CONTENT
+═══════════════════════════════════════════════ */
+function renderDashboard() {
+  destroyCharts();
+  const container = document.getElementById('page-content');
+  container.innerHTML = '';
+
+  const planMods    = PLAN_MODULES[activePlan];
+  const profileMods = PROFILE_MODULES[activeProfile];
+
+  const canAdmin   = planMods.includes('administrativo') && profileMods.includes('administrativo');
+  const canFin     = planMods.includes('financeiro')     && profileMods.includes('financeiro');
+  const canSaude   = planMods.includes('saude')          && profileMods.includes('saude');
+  const canEventos = planMods.includes('eventos')        && profileMods.includes('eventos');
+  const canTrein   = planMods.includes('treinamentos')   && profileMods.includes('treinamentos');
+
+  // Welcome banner
+  const meta = PROFILE_META[activeProfile];
+  const welcomeActions = buildWelcomeActions();
+  container.innerHTML += `
+    <div class="welcome-banner">
+      <div>
+        <div class="wt-greeting">Bom dia, ${meta.name.split(' ')[0]} ${meta.icon}</div>
+        <div class="wt-title">${currentSchool}</div>
+        <div class="wt-sub">${meta.label} · Terça-feira, 24 de março de 2026</div>
+      </div>
+      <div class="welcome-cta">${welcomeActions}</div>
+    </div>`;
+
+  // Quick actions
+  container.innerHTML += buildQuickActions(canAdmin, canFin, canSaude, canEventos);
+
+  // KPIs
+  container.innerHTML += buildKPIs(canAdmin, canFin, canSaude);
+
+  // Main grid
+  if (canAdmin || canFin) {
+    container.innerHTML += `<div class="main-grid" id="main-grid">`;
+    container.innerHTML += buildChartCard(canAdmin, canFin);
+    container.innerHTML += buildTopTurmas(canAdmin);
+    container.innerHTML += `</div>`;
+  }
+
+  // Bottom grid
+  container.innerHTML += `<div class="bottom-grid">`;
+  container.innerHTML += buildAlertas(canAdmin, canFin, canSaude);
+  if (canFin) container.innerHTML += buildInadimplentes();
+  else if (canSaude) container.innerHTML += buildSaudePanel();
+  else if (canEventos) container.innerHTML += buildEventosPanel();
+  container.innerHTML += buildChamadaDia(canAdmin);
+  container.innerHTML += `</div>`;
+
+  // init charts after DOM
+  requestAnimationFrame(() => {
+    if (document.getElementById('revenueChart')) buildRevenueChart();
+    if (document.getElementById('freqRing'))     buildFreqRing();
+  });
+}
+
+/* ── Welcome actions per profile ── */
+function buildWelcomeActions() {
+  const map = {
+    admin_escola: `<button class="btn btn-white btn-sm">+ Novo Atleta</button><button class="btn btn-outline-white btn-sm">📣 Comunicado</button>`,
+    coordenador:  `<button class="btn btn-white btn-sm">+ Plano de Treino</button><button class="btn btn-outline-white btn-sm">📊 Relatório</button>`,
+    professor:    `<button class="btn btn-white btn-sm">✅ Fazer Chamada</button><button class="btn btn-outline-white btn-sm">📝 Plano de Aula</button>`,
+    financeiro:   `<button class="btn btn-white btn-sm">💳 Nova Cobrança</button><button class="btn btn-outline-white btn-sm">📊 Exportar CSV</button>`,
+    secretaria:   `<button class="btn btn-white btn-sm">+ Novo Atleta</button><button class="btn btn-outline-white btn-sm">📣 Comunicado</button>`,
+    saude:        `<button class="btn btn-white btn-sm">🩺 Nova Avaliação</button><button class="btn btn-outline-white btn-sm">🏥 Registrar Lesão</button>`,
+    marketing:    `<button class="btn btn-white btn-sm">🎉 Criar Evento</button><button class="btn btn-outline-white btn-sm">📣 Comunicado</button>`,
+  };
+  return map[activeProfile] || '';
+}
+
+/* ── Quick Actions ── */
+function buildQuickActions(canAdmin, canFin, canSaude, canEventos) {
+  const allActions = {
+    admin_escola: [
+      { icon:'👤', label:'Cadastrar Atleta', ok:true },
+      { icon:'✅', label:'Fazer Chamada',    ok:true },
+      { icon:'💳', label:'Nova Cobrança',    ok:true },
+      { icon:'📋', label:'Relatório',        ok:true },
+    ],
+    coordenador: [
+      { icon:'📚', label:'Plano de Treino',  ok:true },
+      { icon:'📖', label:'Biblioteca',       ok:true },
+      { icon:'📊', label:'Frequência',       ok:true },
+      { icon:'💳', label:'Financeiro',       ok:false },
+    ],
+    professor: [
+      { icon:'✅', label:'Fazer Chamada',    ok:true },
+      { icon:'📝', label:'Plano de Aula',    ok:true },
+      { icon:'👤', label:'Ficha Atleta',     ok:true },
+      { icon:'💳', label:'Financeiro',       ok:false },
+    ],
+    financeiro: [
+      { icon:'💳', label:'Nova Cobrança',    ok:true },
+      { icon:'📊', label:'Inadimplentes',    ok:true },
+      { icon:'📤', label:'Exportar CSV',     ok:true },
+      { icon:'✅', label:'Chamada',          ok:false },
+    ],
+    secretaria: [
+      { icon:'👤', label:'Novo Atleta',      ok:true },
+      { icon:'📣', label:'Comunicado',       ok:true },
+      { icon:'🗂️',  label:'Turmas',           ok:true },
+      { icon:'💳', label:'Financeiro',       ok:false },
+    ],
+    saude: [
+      { icon:'🩺', label:'Nova Avaliação',   ok:true },
+      { icon:'🏥', label:'Registrar Lesão',  ok:true },
+      { icon:'📄', label:'Atestados',        ok:true },
+      { icon:'💳', label:'Financeiro',       ok:false },
+    ],
+    marketing: [
+      { icon:'🎉', label:'Criar Evento',     ok:true },
+      { icon:'📣', label:'Comunicado',       ok:true },
+      { icon:'🏆', label:'Competição',       ok:true },
+      { icon:'💳', label:'Financeiro',       ok:false },
+    ],
+  };
+  const actions = allActions[activeProfile] || allActions.admin_escola;
+  return `<div class="quick-actions">${actions.map(a => `
+    <a href="#" class="quick-btn${a.ok ? '' : ' locked-action'}">
+      <span class="qb-icon">${a.icon}</span>
+      <span class="qb-label">${a.label}</span>
+    </a>`).join('')}</div>`;
+}
+
+/* ── KPI Cards ── */
+function buildKPIs(canAdmin, canFin, canSaude) {
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const planMods    = PLAN_MODULES[activePlan];
+
+  const restricted = (mod) => {
+    const inPlan    = planMods.includes(mod);
+    const inProfile = profileMods.includes(mod);
+    if (!inPlan)    return 'plan';
+    if (!inProfile) return 'profile';
+    return false;
+  };
+
+  function kpi(colorClass, iconClass, icon, trend, trendClass, value, label, sub, module) {
+    const r = restricted(module);
+    const cls = r ? ' restricted' : '';
+    return `
+    <div class="kpi-card ${colorClass}${cls}">
+      <div class="kpi-top">
+        <div class="kpi-icon ${iconClass}">${icon}</div>
+        <span class="kpi-trend ${trendClass}">${trend}</span>
+      </div>
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-sub">${sub}</div>
+    </div>`;
+  }
+
+  return `<div class="kpi-grid">
+    ${kpi('green','green','👥','↑ +8','up','142','Atletas Ativos','5 matrículas pendentes','administrativo')}
+    ${kpi('blue','blue','🗂️','estável','neutral','12','Turmas Ativas','2 com capacidade cheia','administrativo')}
+    ${kpi('orange','orange','💰','↑ 87%','up','R$&thinsp;9.840','Receita Realizada','de R$ 11.300 previstos','financeiro')}
+    ${kpi('red','red','⚠️','13%','warn','19','Inadimplentes','R$ 1.460 em aberto','financeiro')}
+    ${kpi('purple','purple','✅','78%','up','47','Presenças Hoje','3 turmas pendentes','administrativo')}
+  </div>`;
+}
+
+/* ── Chart Card ── */
+function buildChartCard(canAdmin, canFin) {
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const planMods    = PLAN_MODULES[activePlan];
+
+  // financeiro or admin sees revenue; coordenador/professor sees frequency
+  const showRevenue = profileMods.includes('financeiro') && planMods.includes('financeiro');
+  const showFreq    = profileMods.includes('administrativo') && planMods.includes('administrativo');
+
+  if (!showRevenue && !showFreq) {
+    return `<div class="module-blocked">
+      <div class="block-icon">📊</div>
+      <div class="block-title">Gráficos não disponíveis</div>
+      <div class="block-sub">Seu perfil não tem acesso a este conteúdo.</div>
+      <span class="block-type-profile">🚫 Sem permissão de perfil</span>
+    </div>`;
+  }
+
+  const showRevTab = showRevenue;
+  return `
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">${showRevTab ? 'Receita Mensal' : 'Frequência Mensal'}</div>
+        <div class="chart-sub">Últimos 12 meses</div>
+      </div>
+      <div class="chart-tabs">
+        ${showFreq  ? `<button class="chart-tab${!showRevTab ? ' active' : ''}" onclick="switchChart('freq',this)">Frequência</button>` : ''}
+        ${showRevTab ? `<button class="chart-tab${showRevTab ? ' active' : ''}"  onclick="switchChart('revenue',this)">Receita</button>` : ''}
+      </div>
+    </div>
+    <div class="chart-wrapper"><canvas id="revenueChart"></canvas></div>
+    ${showRevTab ? `<div class="rev-summary">
+      <div class="rev-item"><div class="rev-dot" style="background:var(--primary)"></div> Realizada: <strong>R$ 9.840</strong></div>
+      <div class="rev-item"><div class="rev-dot" style="background:var(--border)"></div> Prevista: <strong>R$ 11.300</strong></div>
+    </div>` : ''}
+  </div>`;
+}
+
+/* ── Top Turmas ── */
+function buildTopTurmas(canAdmin) {
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const planMods    = PLAN_MODULES[activePlan];
+  const ok = profileMods.includes('administrativo') && planMods.includes('administrativo');
+
+  if (!ok) {
+    return `<div class="module-blocked">
+      <div class="block-icon">🗂️</div>
+      <div class="block-title">Turmas — sem acesso</div>
+      <div class="block-sub">Seu perfil (${PROFILE_META[activeProfile].label}) não acessa dados de turmas.</div>
+      <span class="block-type-profile">🚫 Sem permissão de perfil</span>
+    </div>`;
+  }
+
+  const turmas = [
+    { rank:'gold',   emoji:'⚽', bg:'#fef9c3', name:'Futebol Sub-12 A',  meta:'22/25 · Seg/Qua/Sex', pct:88, color:'var(--primary)' },
+    { rank:'silver', emoji:'🏊', bg:'#e8f6fd', name:'Natação Iniciante', meta:'18/20 · Ter/Qui',     pct:90, color:'var(--secondary)' },
+    { rank:'bronze', emoji:'🥋', bg:'#fef3c7', name:'Jiu-Jitsu Kids',    meta:'15/20 · Seg/Qua',     pct:75, color:'var(--accent)' },
+    { rank:'',       emoji:'🏐', bg:'#ede9fe', name:'Vôlei Teen',        meta:'14/20 · Ter/Qui',     pct:70, color:'var(--purple)' },
+    { rank:'',       emoji:'🏃', bg:'#fee2e2', name:'Atletismo Sub-10',  meta:'12/20 · Sex',         pct:60, color:'var(--danger)' },
+  ];
+
+  const rows = turmas.map((t,i) => `
+    <div class="turma-item">
+      <div class="turma-rank ${t.rank}">${i+1}</div>
+      <div class="turma-ava" style="background:${t.bg};width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${t.emoji}</div>
+      <div class="turma-info">
+        <div class="turma-name">${t.name}</div>
+        <div class="turma-meta">${t.meta}</div>
+      </div>
+      <div class="turma-bar-wrap"><div class="turma-bar" style="width:${t.pct}%;background:${t.color}"></div></div>
+      <div class="turma-pct">${t.pct}%</div>
+    </div>`).join('');
+
+  return `
+  <div class="chart-card">
+    <div class="chart-header">
+      <div><div class="chart-title">Top 5 Turmas — Lotação</div><div class="chart-sub">Atletas / capacidade</div></div>
+      <button class="btn btn-secondary btn-sm">Ver todas</button>
+    </div>
+    <div class="turma-list">${rows}</div>
+    <div class="divider"></div>
+    <div class="freq-widget">
+      <div class="freq-ring-wrap">
+        <canvas id="freqRing"></canvas>
+        <div class="freq-ring-center"><div class="ring-val">82%</div><div class="ring-unit">freq. geral</div></div>
+      </div>
+      <div class="freq-stats">
+        <div class="freq-stat-row"><span class="freq-stat-label">Acima de 75%</span><span class="freq-stat-val" style="color:var(--primary)">118</span></div>
+        <div class="freq-stat-row"><span class="freq-stat-label">Entre 50–75%</span><span class="freq-stat-val" style="color:var(--accent)">16</span></div>
+        <div class="freq-stat-row"><span class="freq-stat-label">Abaixo de 50%</span><span class="freq-stat-val" style="color:var(--danger)">8</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── Alertas ── */
+function buildAlertas(canAdmin, canFin, canSaude) {
+  const items = [];
+  if (canAdmin) {
+    items.push({ type:'red',    icon:'🔴', msg:'8 atletas com frequência crítica', sub:'Abaixo de 50% — risco de abandono' });
+    items.push({ type:'orange', icon:'📅', msg:'Futebol Sub-12 A — quase cheio',    sub:'22/25 atletas (3 vagas restantes)' });
+  }
+  if (canFin) {
+    items.push({ type:'orange', icon:'🟠', msg:'19 cobranças vencidas', sub:'R$ 1.460 em aberto há +30 dias' });
+  }
+  if (canSaude) {
+    items.push({ type:'red',   icon:'🏥', msg:'3 atletas com atestado vencido', sub:'Não podem participar de aulas' });
+    items.push({ type:'orange',icon:'🩹', msg:'2 atletas em recuperação de lesão', sub:'Restrição ativa no momento' });
+  }
+  if (canAdmin) {
+    items.push({ type:'blue',  icon:'🔵', msg:'5 matrículas aguardando confirmação', sub:'Pais ainda não aceitaram o contrato' });
+    items.push({ type:'green', icon:'✅', msg:'Asaas conectado e operando normalmente', sub:'Último webhook: há 4 minutos' });
+  }
+
+  if (!items.length) {
+    return `<div class="card card-sm">
+      <div class="section-header"><div><div class="section-title">⚠️ Alertas</div></div></div>
+      <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">Nenhum alerta disponível para seu perfil.</div>
+    </div>`;
+  }
+
+  return `<div class="card card-sm">
+    <div class="section-header">
+      <div><div class="section-title">⚠️ Alertas</div><div class="section-sub">Itens que precisam de atenção</div></div>
+      <button class="btn btn-secondary btn-sm">Ver todos</button>
+    </div>
+    <div class="alert-list">
+      ${items.map(a => `
+        <div class="alert-item ${a.type}">
+          <div class="alert-icon">${a.icon}</div>
+          <div class="alert-info"><div class="alert-msg">${a.msg}</div><div class="alert-sub">${a.sub}</div></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── Inadimplentes ── */
+function buildInadimplentes() {
+  return `<div class="card card-sm">
+    <div class="section-header">
+      <div><div class="section-title">💸 Inadimplentes</div><div class="section-sub">Vencidas há +30 dias</div></div>
+      <button class="btn btn-secondary btn-sm">Financeiro</button>
+    </div>
+    <div class="table-scroll">
+      <table class="mini-table">
+        <thead><tr><th>Atleta</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><div style="font-weight:600">João Silva</div><div style="font-size:11px;color:var(--text-muted)">Futebol Sub-12 A</div></td><td style="color:var(--text-muted)">01/02/2026</td><td style="font-weight:700;color:var(--danger)">R$ 80</td><td><span class="badge badge-danger">Vencida</span></td></tr>
+          <tr><td><div style="font-weight:600">Ana Pereira</div><div style="font-size:11px;color:var(--text-muted)">Natação</div></td><td style="color:var(--text-muted)">01/02/2026</td><td style="font-weight:700;color:var(--danger)">R$ 90</td><td><span class="badge badge-danger">Vencida</span></td></tr>
+          <tr><td><div style="font-weight:600">Lucas Matos</div><div style="font-size:11px;color:var(--text-muted)">Jiu-Jitsu</div></td><td style="color:var(--text-muted)">01/03/2026</td><td style="font-weight:700;color:var(--accent)">R$ 75</td><td><span class="badge badge-warning">Vencendo</span></td></tr>
+          <tr><td><div style="font-weight:600">Maria Costa</div><div style="font-size:11px;color:var(--text-muted)">Vôlei Teen</div></td><td style="color:var(--text-muted)">01/02/2026</td><td style="font-weight:700;color:var(--danger)">R$ 85</td><td><span class="badge badge-danger">Vencida</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm">📩 Notificar Todos</button>
+      <button class="btn btn-secondary btn-sm">📊 Exportar CSV</button>
+    </div>
+  </div>`;
+}
+
+/* ── Saúde Panel (for saude profile) ── */
+function buildSaudePanel() {
+  return `<div class="card card-sm">
+    <div class="section-header">
+      <div><div class="section-title">🩺 Saúde</div><div class="section-sub">Alertas médicos ativos</div></div>
+    </div>
+    <div class="alert-list">
+      <div class="alert-item red"><div class="alert-icon">📄</div><div class="alert-info"><div class="alert-msg">3 atletas com atestado vencido</div><div class="alert-sub">João S., Ana P., Lucas M.</div></div><button class="btn btn-secondary btn-sm">Ver</button></div>
+      <div class="alert-item orange"><div class="alert-icon">🩹</div><div class="alert-info"><div class="alert-msg">Pedro Alves — Lesão no tornozelo</div><div class="alert-sub">Em recuperação — retorno previsto: 30/03</div></div></div>
+      <div class="alert-item orange"><div class="alert-icon">🩹</div><div class="alert-info"><div class="alert-msg">Maria Lima — Distensão muscular</div><div class="alert-sub">Restrição ativa — sem impacto</div></div></div>
+      <div class="alert-item blue"><div class="alert-icon">💊</div><div class="alert-info"><div class="alert-msg">2 atletas com alergias registradas</div><div class="alert-sub">Verificar antes de atividades externas</div></div></div>
+    </div>
+  </div>`;
+}
+
+/* ── Eventos Panel (for marketing) ── */
+function buildEventosPanel() {
+  return `<div class="card card-sm">
+    <div class="section-header">
+      <div><div class="section-title">🎉 Próximos Eventos</div><div class="section-sub">Agenda de eventos da escola</div></div>
+      <button class="btn btn-primary btn-sm">+ Criar</button>
+    </div>
+    <div class="chamada-list">
+      <div class="chamada-item"><div class="turma-ava" style="background:#fef9c3;">⚽</div><div class="chamada-info"><div class="chamada-turma">Torneio Interno Sub-12</div><div class="chamada-meta">29/03 · Quadra Principal · 40 inscritos</div></div><span class="chamada-status done">Publicado</span></div>
+      <div class="chamada-item"><div class="turma-ava" style="background:#ede9fe;">🎊</div><div class="chamada-info"><div class="chamada-turma">Festa de Encerramento</div><div class="chamada-meta">15/04 · Salão de Festas · 120 convidados</div></div><span class="chamada-status pending">Rascunho</span></div>
+      <div class="chamada-item"><div class="turma-ava" style="background:#e8f6fd;">🏆</div><div class="chamada-info"><div class="chamada-turma">Copa de Natação</div><div class="chamada-meta">20/04 · Piscina Olímpica · 60 inscritos</div></div><span class="chamada-status future">Planejado</span></div>
+    </div>
+  </div>`;
+}
+
+/* ── Chamada do Dia ── */
+function buildChamadaDia(canAdmin) {
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const ok = profileMods.includes('administrativo') && PLAN_MODULES[activePlan].includes('administrativo');
+
+  if (!ok) {
+    return `<div class="module-blocked">
+      <div class="block-icon">✅</div>
+      <div class="block-title">Chamada do Dia</div>
+      <div class="block-sub">Seu perfil não tem acesso à chamada de presenças.</div>
+      <span class="block-type-profile">🚫 Sem permissão de perfil</span>
+    </div>`;
+  }
+
+  // For professor, show only their classes
+  const isProfessor = activeProfile === 'professor';
+  const aulas = isProfessor ? [
+    { bg:'#fef9c3', emoji:'⚽', name:'Futebol Sub-12 A',  meta:'09h–10h · 22 atletas', status:'done',    label:'Feita' },
+    { bg:'#e6faf4', emoji:'⚽', name:'Futebol Sub-10 B',  meta:'14h–15h · 16 atletas', status:'pending', label:'Pendente' },
+    { bg:'#e6faf4', emoji:'⚽', name:'Futebol Avançado',  meta:'17h–18h · 20 atletas', status:'future',  label:'Em breve' },
+  ] : [
+    { bg:'#e6faf4', emoji:'⚽', name:'Futebol Sub-12 A',  meta:'09h–10h · 22 atletas', status:'done',    label:'Feita' },
+    { bg:'#e8f6fd', emoji:'🏊', name:'Natação Iniciante', meta:'10h–11h · 18 atletas', status:'done',    label:'Feita' },
+    { bg:'#fef9c3', emoji:'⚽', name:'Futebol Sub-10 B',  meta:'14h–15h · 16 atletas', status:'pending', label:'Pendente' },
+    { bg:'#ede9fe', emoji:'🏐', name:'Vôlei Teen',        meta:'15h–16h · 14 atletas', status:'pending', label:'Pendente' },
+    { bg:'#e6faf4', emoji:'⚽', name:'Futebol Avançado',  meta:'17h–18h · 20 atletas', status:'future',  label:'Em breve' },
+    { bg:'#ede9fe', emoji:'🥋', name:'Jiu-Jitsu Adulto',  meta:'19h–20h · 12 atletas', status:'future',  label:'Em breve' },
+  ];
+
+  const note = isProfessor ? '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Exibindo apenas suas turmas.</div>' : '';
+
+  return `<div class="card card-sm">
+    <div class="section-header">
+      <div><div class="section-title">✅ Chamada do Dia</div><div class="section-sub">Ter, 24 mar 2026</div></div>
+      <button class="btn btn-primary btn-sm">+ Nova Chamada</button>
+    </div>
+    ${note}
+    <div class="chamada-list">
+      ${aulas.map(a => `
+        <div class="chamada-item">
+          <div class="turma-ava" style="background:${a.bg}">${a.emoji}</div>
+          <div class="chamada-info">
+            <div class="chamada-turma">${a.name}</div>
+            <div class="chamada-meta">${a.meta}</div>
+          </div>
+          <span class="chamada-status ${a.status}">${a.label}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════ */
+function destroyCharts() {
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e){} });
+  chartInstances = {};
+}
+
+const months = ['Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar'];
+
+function buildRevenueChart() {
+  const el = document.getElementById('revenueChart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  const profileMods = PROFILE_MODULES[activeProfile];
+  const showRevenue = profileMods.includes('financeiro');
+
+  if (showRevenue) {
+    chartInstances.revenue = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels: months,
+        datasets:[
+          { label:'Prevista',  data:[10200,10400,10400,10600,10800,10800,11000,11000,11200,11200,11300,11300], backgroundColor:'rgba(229,231,235,.65)', borderRadius:4, order:2 },
+          { label:'Realizada', data:[9100,9800,9600,10100,10400,9900,10600,10200,10900,10100,9540,9840],       backgroundColor:'rgba(32,201,151,.8)',    borderRadius:4, order:1 },
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c => ` R$ ${c.raw.toLocaleString('pt-BR')}` } } },
+        scales:{
+          x:{ grid:{display:false}, ticks:{font:{size:10},color:'#6b7280'} },
+          y:{ grid:{color:'rgba(0,0,0,.05)'}, ticks:{font:{size:10},color:'#6b7280', callback: v => 'R$'+(v/1000).toFixed(0)+'k'} }
+        }
+      }
+    });
+  } else {
+    // frequency chart for non-financial profiles
+    chartInstances.revenue = new Chart(ctx, {
+      type:'line',
+      data:{
+        labels: months,
+        datasets:[{ label:'Frequência (%)', data:[78,82,75,80,85,79,83,77,81,84,78,82], borderColor:'#5BC0EB', backgroundColor:'rgba(91,192,235,.1)', borderWidth:2.5, fill:true, tension:.4, pointBackgroundColor:'#5BC0EB', pointRadius:3 }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{
+          x:{ grid:{display:false}, ticks:{font:{size:10},color:'#6b7280'} },
+          y:{ min:60, max:100, grid:{color:'rgba(0,0,0,.05)'}, ticks:{font:{size:10},color:'#6b7280', callback: v => v+'%'} }
+        }
+      }
+    });
+  }
+}
+
+function buildFreqRing() {
+  const el = document.getElementById('freqRing');
+  if (!el) return;
+  chartInstances.freqRing = new Chart(el.getContext('2d'), {
+    type:'doughnut',
+    data:{ datasets:[{ data:[82,18], backgroundColor:['#20C997','#e5e7eb'], borderWidth:0, hoverOffset:0 }] },
+    options:{ responsive:false, cutout:'72%', plugins:{ legend:{display:false}, tooltip:{enabled:false} } }
+  });
+}
+
+function switchChart(type, btn) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (chartInstances.revenue) { chartInstances.revenue.destroy(); delete chartInstances.revenue; }
+  const el = document.getElementById('revenueChart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  if (type === 'revenue') {
+    chartInstances.revenue = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:months, datasets:[
+        { label:'Prevista',  data:[10200,10400,10400,10600,10800,10800,11000,11000,11200,11200,11300,11300], backgroundColor:'rgba(229,231,235,.65)', borderRadius:4, order:2 },
+        { label:'Realizada', data:[9100,9800,9600,10100,10400,9900,10600,10200,10900,10100,9540,9840],       backgroundColor:'rgba(32,201,151,.8)',    borderRadius:4, order:1 },
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` R$ ${c.raw.toLocaleString('pt-BR')}`}}}, scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},color:'#6b7280',callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}} }
+    });
+  } else {
+    chartInstances.revenue = new Chart(ctx, {
+      type:'line',
+      data:{ labels:months, datasets:[{ label:'Frequência (%)', data:[78,82,75,80,85,79,83,77,81,84,78,82], borderColor:'#5BC0EB', backgroundColor:'rgba(91,192,235,.1)', borderWidth:2.5, fill:true, tension:.4, pointBackgroundColor:'#5BC0EB', pointRadius:3 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280'}},y:{min:60,max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},color:'#6b7280',callback:v=>v+'%'}}} }
+    });
+  }
+}
+
+/* ── Sidebar toggle ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderNav();
+  renderDashboard();
+});
+</script>
+<script>window.ESCOLA_PAGE = 'dashboard';</script>
+<script src="escola-sidebar.js"></script>
+</body>
+</html>

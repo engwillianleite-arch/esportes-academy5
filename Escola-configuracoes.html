@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esportes Academy — Escola · Configurações</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #20C997;
+      --primary-dark:  #17a57a;
+      --primary-light: #e6faf4;
+      --secondary:     #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:        #FFA552;
+      --accent-light:  #fff4e8;
+      --success:       #20C997;
+      --success-light: #e6faf4;
+      --warning:       #FFA552;
+      --warning-light: #fff4e8;
+      --danger:        #ef4444;
+      --danger-light:  #fee2e2;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --bg:            #F7F9FA;
+      --card:          #ffffff;
+      --text:          #1B1B1B;
+      --text-muted:    #6b7280;
+      --border:        #e5e7eb;
+      --sidebar-w:     268px;
+      --sidebar-bg:    #0d2112;
+      --sidebar-hover: #162e1c;
+      --shadow:        0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:     0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:     0 10px 24px -3px rgba(0,0,0,.12);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --topbar-h:      60px;
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    /* OVERLAY */
+    .overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w);height:100dvh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .brand { display:flex;align-items:center;gap:10px; }
+    .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+    .school-chip { margin:10px 12px 0;padding:8px 10px;background:rgba(32,201,151,.1);border:1px solid rgba(32,201,151,.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer; }
+    .school-chip .sc-ava { width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .sc-name { color:rgba(255,255,255,.85);font-size:11px;font-weight:600; }
+    .sc-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .sidebar-nav { padding:8px 10px;flex:1; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+    .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.locked { color:rgba(255,255,255,.28);cursor:not-allowed; }
+    .nav-item.locked:hover { background:none; }
+    .lock-badge { margin-left:auto;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600; }
+    .lock-plan { background:rgba(255,165,82,.15);color:#FFA552; }
+    .nav-sub { padding-left:30px; }
+    .sidebar-footer { padding:10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+
+    /* MAIN */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* TOPBAR */
+    .topbar { background:var(--card);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow); }
+    .menu-btn { display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;color:var(--text-muted); }
+    @media(min-width:1024px){ .menu-btn { display:none; } }
+    .breadcrumb { font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px; }
+    .breadcrumb span { color:var(--text);font-weight:600; }
+    .topbar-right { margin-left:auto;display:flex;align-items:center;gap:8px; }
+    .icon-btn { width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative; }
+    .notif-dot { width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:6px;right:6px;border:2px solid #fff; }
+    .topbar-ava { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer; }
+
+    /* UNSAVED BADGE */
+    .unsaved-pill { display:none;align-items:center;gap:5px;background:var(--warning-light);border:1px solid var(--accent);color:var(--accent);font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px; }
+    .unsaved-pill.show { display:inline-flex; }
+
+    /* PAGE */
+    .page { padding:24px 20px 120px;flex:1;position:relative; }
+    @media(min-width:1280px){ .page { padding:28px 32px 120px; } }
+
+    /* BUTTONS */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif; }
+    .btn-primary { background:var(--primary);color:#fff; }
+    .btn-primary:hover { background:var(--primary-dark); }
+    .btn-outline { background:var(--card);border:1px solid var(--border);color:var(--text); }
+    .btn-outline:hover { background:var(--bg); }
+    .btn-ghost { background:transparent;border:none;color:var(--text-muted);font-family:'Inter',sans-serif; }
+    .btn-ghost:hover { background:var(--bg);color:var(--text); }
+    .btn-sm { padding:6px 12px;font-size:12px; }
+    .btn-danger { background:var(--danger);color:#fff; }
+    .btn-danger:hover { background:#dc2626; }
+    .btn-danger-ghost { background:transparent;border:none;color:var(--danger);font-family:'Inter',sans-serif;padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600; }
+    .btn-danger-ghost:hover { background:var(--danger-light); }
+
+    /* PAGE HEADER */
+    .page-header { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
+    .page-title h1 { font-size:22px;font-weight:800; }
+    .page-title p { color:var(--text-muted);font-size:13px;margin-top:3px; }
+
+    /* SETTINGS LAYOUT */
+    .settings-layout { display:flex;gap:24px;align-items:flex-start; }
+    .settings-tabs { width:200px;flex-shrink:0;position:sticky;top:80px; }
+    @media(max-width:768px){ .settings-layout { flex-direction:column; } .settings-tabs { width:100%;position:static; } }
+    .settings-content { flex:1;min-width:0; }
+
+    /* SETTINGS TAB NAV */
+    .stab-list { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
+    .stab-item { display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;border-left:3px solid transparent; }
+    .stab-item:hover { background:var(--bg);color:var(--text); }
+    .stab-item.active { background:var(--primary-light);color:var(--primary-dark);font-weight:600;border-left-color:var(--primary); }
+    .stab-item .stab-icon { font-size:15px;width:18px;text-align:center; }
+    .stab-divider { height:1px;background:var(--border); }
+
+    /* SETTINGS SECTIONS */
+    .settings-section { display:none; }
+    .settings-section.active { display:block; }
+
+    /* CARD */
+    .scard { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden; }
+    .scard-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+    .scard-title { font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px; }
+    .scard-body { padding:20px; }
+
+    /* FORM */
+    .form-grid { display:grid;gap:16px; }
+    .form-grid-2 { grid-template-columns:1fr 1fr; }
+    .form-grid-3 { grid-template-columns:1fr 1fr 1fr; }
+    @media(max-width:640px){ .form-grid-2, .form-grid-3 { grid-template-columns:1fr; } }
+    .field { display:flex;flex-direction:column;gap:5px; }
+    .field label { font-size:12.5px;font-weight:600;color:var(--text); }
+    .field input, .field select, .field textarea {
+      padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);transition:border .15s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { outline:none;border-color:var(--primary); }
+    .field textarea { resize:vertical;min-height:80px; }
+    .hint { font-size:11px;color:var(--text-muted); }
+    .req { color:var(--danger); }
+
+    /* LOGO UPLOAD */
+    .logo-upload-area { border:2px dashed var(--border);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden; }
+    .logo-upload-area:hover { border-color:var(--primary);background:var(--primary-light); }
+    .logo-preview { width:80px;height:80px;border-radius:12px;object-fit:cover;margin:0 auto 10px;display:block; }
+    .logo-placeholder { width:80px;height:80px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px; }
+    .logo-upload-text { font-size:13px;color:var(--text-muted); }
+    .logo-upload-text strong { display:block;color:var(--text);font-weight:600;margin-bottom:3px; }
+
+    /* MODALIDADES */
+    .modal-chips { display:flex;flex-wrap:wrap;gap:8px;margin-top:8px; }
+    .mod-chip { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--primary-light);color:var(--primary-dark);border:1px solid rgba(32,201,151,.25);cursor:default; }
+    .mod-chip .rm { cursor:pointer;opacity:.6;font-size:11px;padding:0 2px; }
+    .mod-chip .rm:hover { opacity:1; }
+    .add-mod-row { display:flex;gap:8px;margin-top:8px; }
+    .add-mod-row input { flex:1; }
+
+    /* CEP ROW */
+    .cep-row { display:flex;gap:8px;align-items:flex-end; }
+    .cep-row input { flex:1; }
+    .cep-status { font-size:11.5px;padding:4px 8px;border-radius:6px;font-weight:600; }
+    .cep-ok { background:var(--success-light);color:var(--primary-dark); }
+    .cep-err { background:var(--danger-light);color:var(--danger); }
+
+    /* ASAAS SECTION */
+    .env-toggle { display:flex;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;width:fit-content; }
+    .env-opt { padding:7px 18px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .15s; }
+    .env-opt.active { background:var(--primary);color:#fff; }
+    .env-sandbox { }
+    .env-sandbox.active { background:var(--accent);color:#fff; }
+
+    .api-key-wrap { position:relative; }
+    .api-key-wrap input { font-family:'Courier New',monospace;font-size:12.5px;padding-right:42px;background:#f8fafc; }
+    .api-key-wrap input:focus { background:var(--card); }
+    .eye-btn { position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted); }
+
+    .conn-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600; }
+    .conn-ok { background:var(--success-light);color:var(--primary-dark); }
+    .conn-err { background:var(--danger-light);color:var(--danger); }
+    .conn-idle { background:var(--bg);color:var(--text-muted);border:1px solid var(--border); }
+    .conn-loading { background:var(--secondary-light);color:#0369a1; }
+    .conn-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .conn-dot-ok { background:var(--primary); }
+    .conn-dot-err { background:var(--danger); }
+    .conn-dot-idle { background:var(--border); }
+    .conn-dot-pulse { background:var(--secondary);animation:pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .asaas-info-box { background:#f0fdf4;border:1px solid rgba(32,201,151,.25);border-radius:var(--radius-sm);padding:12px 14px;font-size:12.5px;color:#166534;line-height:1.6; }
+    .asaas-info-box a { color:var(--primary-dark);font-weight:600; }
+    .asaas-webhook-box { background:#eff6ff;border:1px solid rgba(91,192,235,.3);border-radius:var(--radius-sm);padding:12px 14px; }
+    .webhook-url { font-family:'Courier New',monospace;font-size:11.5px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;word-break:break-all;color:var(--text); }
+
+    /* TOGGLE */
+    .toggle-row { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border); }
+    .toggle-row:last-child { border-bottom:none; }
+    .toggle-label { display:flex;flex-direction:column;gap:2px; }
+    .toggle-label strong { font-size:13px;font-weight:600; }
+    .toggle-label small { font-size:11.5px;color:var(--text-muted); }
+    .toggle-switch { position:relative;width:42px;height:24px;flex-shrink:0; }
+    .toggle-switch input { opacity:0;width:0;height:0; }
+    .toggle-track { position:absolute;inset:0;background:var(--border);border-radius:12px;cursor:pointer;transition:background .2s; }
+    .toggle-track::after { content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .toggle-switch input:checked + .toggle-track { background:var(--primary); }
+    .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+
+    /* NOTIF CHANNEL CARDS */
+    .channel-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px; }
+    .channel-card { border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s; }
+    .channel-card.active { border-color:var(--primary);background:var(--primary-light); }
+    .channel-icon { font-size:24px;margin-bottom:8px; }
+    .channel-name { font-size:13px;font-weight:700;margin-bottom:3px; }
+    .channel-desc { font-size:11.5px;color:var(--text-muted); }
+
+    /* DANGER ZONE */
+    .danger-zone { border:1.5px solid var(--danger);border-radius:var(--radius);padding:20px;background:var(--danger-light); }
+    .danger-zone-title { font-size:13px;font-weight:700;color:var(--danger);margin-bottom:4px; }
+    .danger-zone-desc { font-size:12.5px;color:#7f1d1d;margin-bottom:14px; }
+
+    /* SAVE BAR */
+    .save-bar { position:fixed;bottom:80px;left:0;right:0;z-index:60;pointer-events:none;display:flex;justify-content:center; }
+    @media(min-width:1024px){ .save-bar { left:var(--sidebar-w); } }
+    .save-bar-inner { pointer-events:all;background:var(--text);color:#fff;border-radius:var(--radius);padding:12px 20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-lg);transform:translateY(20px);opacity:0;transition:all .25s; }
+    .save-bar-inner.show { transform:translateY(0);opacity:1; }
+    .save-bar-inner span { font-size:13px;font-weight:500; }
+
+    /* DEMO BAR */
+    .demo-bar { position:fixed;bottom:0;left:0;right:0;background:#1B1B1B;border-top:1px solid #333;z-index:200;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    @media(min-width:1024px){ .demo-bar { left:var(--sidebar-w); } }
+    .demo-label { color:rgba(255,255,255,.4);font-size:10.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap; }
+    .demo-profiles { display:flex;gap:5px;flex-wrap:wrap; }
+    .demo-btn { padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .15s; }
+    .demo-btn.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+    .demo-btn:not(.active) { background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.1); }
+
+    /* ACCESS BLOCKED OVERLAY */
+    .access-overlay { display:none;position:absolute;inset:0;background:rgba(247,249,250,.92);z-index:30;align-items:center;justify-content:center;border-radius:var(--radius); }
+    .access-overlay.show { display:flex; }
+    .access-msg { text-align:center;padding:32px; }
+    .access-msg .lock { font-size:40px;margin-bottom:12px; }
+    .access-msg h3 { font-size:16px;font-weight:700;margin-bottom:6px; }
+    .access-msg p { font-size:13px;color:var(--text-muted);max-width:300px; }
+
+    /* TOAST */
+    .toast { position:fixed;top:80px;right:20px;z-index:300;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);transform:translateX(120%);transition:transform .3s;max-width:320px; }
+    .toast.show { transform:translateX(0); }
+    .toast.success { background:#166534;border-left:4px solid var(--primary); }
+    .toast.error { background:#7f1d1d;border-left:4px solid var(--danger); }
+    .toast.info { background:#1e3a5f;border-left:4px solid var(--secondary); }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
+      </div>
+    </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">🏫</div>
+      <div>
+        <div class="sc-name">Academia Atlética SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">⇅</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="breadcrumb">Escola · <span>Configurações</span></div>
+    <div class="topbar-right">
+      <div class="unsaved-pill" id="unsaved-pill">● Alterações não salvas</div>
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="topbar-ava" id="topbarAva">AD</div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <main class="page">
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>⚙️ Configurações da Escola</h1>
+        <p>Informações, integrações e preferências da sua escola. Disponível para todos os planos.</p>
+      </div>
+      <button class="btn btn-primary" id="global-save-btn" onclick="saveSection()">💾 Salvar alterações</button>
+    </div>
+
+    <!-- ACCESS OVERLAY (for non-admin profiles) -->
+    <div class="access-overlay" id="accessOverlay">
+      <div class="access-msg">
+        <div class="lock">🔒</div>
+        <h3>Acesso restrito</h3>
+        <p>Apenas o <strong>Administrador da Escola</strong> pode acessar as configurações.</p>
+      </div>
+    </div>
+
+    <!-- SETTINGS LAYOUT -->
+    <div class="settings-layout">
+
+      <!-- TAB NAV -->
+      <div class="settings-tabs">
+        <div class="stab-list">
+          <div class="stab-item active" data-tab="dados" onclick="switchTab('dados', this)">
+            <span class="stab-icon">🏫</span> Dados da Escola
+          </div>
+          <div class="stab-divider"></div>
+          <div class="stab-item" data-tab="endereco" onclick="switchTab('endereco', this)">
+            <span class="stab-icon">📍</span> Endereço
+          </div>
+          <div class="stab-divider"></div>
+          <div class="stab-item" data-tab="asaas" onclick="switchTab('asaas', this)">
+            <span class="stab-icon">💳</span> Integração Asaas
+          </div>
+          <div class="stab-divider"></div>
+          <div class="stab-item" data-tab="geral" onclick="switchTab('geral', this)">
+            <span class="stab-icon">🛠️</span> Configurações Gerais
+          </div>
+          <div class="stab-divider"></div>
+          <div class="stab-item" data-tab="notif" onclick="switchTab('notif', this)">
+            <span class="stab-icon">🔔</span> Notificações
+          </div>
+          <div class="stab-divider"></div>
+          <div class="stab-item" data-tab="perigo" onclick="switchTab('perigo', this)" style="color:var(--danger);">
+            <span class="stab-icon">⚠️</span> Zona de Risco
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="settings-content">
+
+        <!-- ─── TAB: DADOS DA ESCOLA ─── -->
+        <div class="settings-section active" id="tab-dados">
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🏫 Identidade Visual</div>
+            </div>
+            <div class="scard-body">
+              <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+                <div>
+                  <div class="logo-upload-area" onclick="triggerLogoUpload()" style="width:160px;">
+                    <div class="logo-placeholder" id="logoPlaceholder">⚽</div>
+                    <img id="logoPreview" class="logo-preview" style="display:none;" src="" alt="Logo"/>
+                    <div class="logo-upload-text">
+                      <strong>Logotipo da escola</strong>
+                      Clique para enviar PNG, JPG ou SVG
+                    </div>
+                  </div>
+                  <input type="file" id="logoInput" accept="image/*" style="display:none;" onchange="previewLogo(event)"/>
+                  <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px;" onclick="removeLogo()">Remover logo</button>
+                </div>
+                <div style="flex:1;min-width:220px;">
+                  <div class="form-grid" style="gap:12px;">
+                    <div class="field">
+                      <label>Nome Fantasia <span class="req">*</span></label>
+                      <input type="text" id="f-nome-fantasia" value="Academia Atlética SP" oninput="markDirty()"/>
+                    </div>
+                    <div class="field">
+                      <label>Razão Social <span class="req">*</span></label>
+                      <input type="text" id="f-razao-social" value="Academia Atlética São Paulo Ltda." oninput="markDirty()"/>
+                    </div>
+                    <div class="field">
+                      <label>Slogan / Descrição curta</label>
+                      <input type="text" id="f-slogan" value="Formando campeões desde 2010" placeholder="Ex: Formando campeões desde 2010" oninput="markDirty()"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">📄 Dados Jurídicos</div>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid form-grid-2">
+                <div class="field">
+                  <label>CNPJ <span class="req">*</span></label>
+                  <input type="text" id="f-cnpj" value="12.345.678/0001-90" placeholder="00.000.000/0000-00" oninput="maskCNPJ(this);markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>Inscrição Estadual</label>
+                  <input type="text" id="f-ie" placeholder="Isento ou número" oninput="markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>Inscrição Municipal</label>
+                  <input type="text" id="f-im" placeholder="Número da IM" oninput="markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>Regime Tributário</label>
+                  <select id="f-regime" onchange="markDirty()">
+                    <option value="simples">Simples Nacional</option>
+                    <option value="presumido">Lucro Presumido</option>
+                    <option value="real">Lucro Real</option>
+                    <option value="mei">MEI</option>
+                    <option value="isento">Isento / Pessoa Física</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">📞 Contato</div>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid form-grid-2">
+                <div class="field">
+                  <label>Telefone / WhatsApp <span class="req">*</span></label>
+                  <input type="tel" id="f-telefone" value="(11) 99999-0000" placeholder="(11) 99999-0000" oninput="markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>E-mail da escola <span class="req">*</span></label>
+                  <input type="email" id="f-email" value="contato@academiaatletica.com.br" placeholder="contato@suaescola.com.br" oninput="markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>Site</label>
+                  <input type="url" id="f-site" placeholder="https://suaescola.com.br" oninput="markDirty()"/>
+                </div>
+                <div class="field">
+                  <label>Instagram</label>
+                  <input type="text" id="f-instagram" placeholder="@suaescola" oninput="markDirty()"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">⚽ Modalidades Ofertadas</div>
+              <span style="font-size:12px;color:var(--text-muted);">Afeta filtros e relatórios</span>
+            </div>
+            <div class="scard-body">
+              <div class="modal-chips" id="mod-chips"></div>
+              <div class="add-mod-row" style="margin-top:12px;">
+                <input type="text" id="new-mod-input" placeholder="Ex: Natação, Tênis, Judô..." style="border:1.5px solid var(--border);padding:8px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;" onkeydown="if(event.key==='Enter')addModalidade()"/>
+                <button class="btn btn-outline btn-sm" onclick="addModalidade()">+ Adicionar</button>
+              </div>
+              <span class="hint" style="display:block;margin-top:6px;">Pressione Enter ou clique em Adicionar para incluir uma nova modalidade.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── TAB: ENDEREÇO ─── -->
+        <div class="settings-section" id="tab-endereco">
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">📍 Endereço Principal</div>
+              <span style="font-size:12px;color:var(--text-muted);">Usado em boletos, contratos e notas fiscais</span>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid" style="gap:16px;">
+
+                <div class="field">
+                  <label>CEP <span class="req">*</span></label>
+                  <div class="cep-row">
+                    <input type="text" id="f-cep" value="01310-100" placeholder="00000-000" maxlength="9" oninput="maskCEP(this)" style="max-width:180px;"/>
+                    <button class="btn btn-outline btn-sm" onclick="buscarCEP()">🔍 Buscar</button>
+                    <span class="cep-status cep-ok" id="cep-status">✓ Endereço localizado</span>
+                  </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                  <div class="field" style="grid-column:1/-1;">
+                    <label>Logradouro <span class="req">*</span></label>
+                    <input type="text" id="f-logradouro" value="Av. Paulista" oninput="markDirty()"/>
+                  </div>
+                  <div class="field">
+                    <label>Número <span class="req">*</span></label>
+                    <input type="text" id="f-numero" value="1000" placeholder="Número ou S/N" oninput="markDirty()"/>
+                  </div>
+                  <div class="field">
+                    <label>Complemento</label>
+                    <input type="text" id="f-complemento" placeholder="Sala, Bloco, Galpão..." oninput="markDirty()"/>
+                  </div>
+                  <div class="field">
+                    <label>Bairro <span class="req">*</span></label>
+                    <input type="text" id="f-bairro" value="Bela Vista" oninput="markDirty()"/>
+                  </div>
+                  <div class="field">
+                    <label>Cidade <span class="req">*</span></label>
+                    <input type="text" id="f-cidade" value="São Paulo" oninput="markDirty()"/>
+                  </div>
+                  <div class="field">
+                    <label>Estado <span class="req">*</span></label>
+                    <select id="f-estado" onchange="markDirty()">
+                      <option value="SP" selected>SP — São Paulo</option>
+                      <option value="RJ">RJ — Rio de Janeiro</option>
+                      <option value="MG">MG — Minas Gerais</option>
+                      <option value="RS">RS — Rio Grande do Sul</option>
+                      <option value="PR">PR — Paraná</option>
+                      <option value="SC">SC — Santa Catarina</option>
+                      <option value="BA">BA — Bahia</option>
+                      <option value="GO">GO — Goiás</option>
+                      <option value="DF">DF — Distrito Federal</option>
+                      <option value="outros">Outros estados</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🏟️ Unidades / Espaços</div>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Em breve: multi-unidades','info')">+ Adicionar unidade</button>
+            </div>
+            <div class="scard-body">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);">
+                <div style="width:40px;height:40px;background:var(--primary-light);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;">🏠</div>
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:600;">Sede Principal</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Av. Paulista, 1000 — São Paulo/SP</div>
+                </div>
+                <span style="font-size:11px;background:var(--primary-light);color:var(--primary-dark);padding:3px 8px;border-radius:20px;font-weight:600;">Principal</span>
+              </div>
+              <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">Multi-unidades disponível a partir do plano Pro.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── TAB: ASAAS ─── -->
+        <div class="settings-section" id="tab-asaas">
+
+          <div class="asaas-info-box" style="margin-bottom:16px;">
+            ℹ️ O Esportes Academy usa o <strong>Asaas</strong> como gateway de pagamento para gerar cobranças (boleto, Pix, cartão) e receber automaticamente. Você precisa de uma conta Asaas para ativar o módulo financeiro. <a href="#" onclick="showToast('Abrindo docs Asaas...','info');return false;">Ver documentação →</a>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🔑 Credenciais da API</div>
+              <div id="conn-status-badge" class="conn-badge conn-idle">
+                <div class="conn-dot conn-dot-idle"></div>
+                Não testado
+              </div>
+            </div>
+            <div class="scard-body">
+
+              <div class="form-grid" style="gap:16px;">
+
+                <div class="field">
+                  <label>Ambiente</label>
+                  <div class="env-toggle">
+                    <div class="env-opt active" id="env-prod" onclick="setEnv('producao')">🟢 Produção</div>
+                    <div class="env-opt env-sandbox" id="env-sandbox" onclick="setEnv('sandbox')">🧪 Sandbox</div>
+                  </div>
+                  <span class="hint">Use Sandbox para testes sem cobranças reais. Troque para Produção ao ir ao ar.</span>
+                </div>
+
+                <div class="field">
+                  <label>Access Token (API Key) <span class="req">*</span></label>
+                  <div class="api-key-wrap">
+                    <input type="password" id="f-asaas-key" value="$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2I3ZmNkMTlhMjU6OjAwMDAwMDAwMDAwMDAwMDAwMDAw" placeholder="$aact_..." oninput="markDirty();resetConnStatus()"/>
+                    <button class="eye-btn" id="eye-btn" onclick="toggleApiKeyVisibility()" title="Mostrar/ocultar">👁️</button>
+                  </div>
+                  <span class="hint">Encontre em <strong>Asaas → Configurações → Chave de API</strong>. Começa com <code>$aact_</code>.</span>
+                </div>
+
+                <div class="field">
+                  <label>Wallet ID (Subconta) <span style="color:var(--text-muted);font-weight:400;">— opcional</span></label>
+                  <input type="text" id="f-wallet-id" placeholder="wallet_xxx..." oninput="markDirty()"/>
+                  <span class="hint">Necessário apenas para split de pagamentos entre múltiplas unidades.</span>
+                </div>
+
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                  <button class="btn btn-outline" onclick="testAsaasConnection()">
+                    <span id="test-btn-icon">🔌</span>
+                    <span id="test-btn-label">Testar Conexão</span>
+                  </button>
+                  <span style="font-size:12px;color:var(--text-muted);" id="last-test-time"></span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🔗 Webhook (Recebimento automático)</div>
+              <span style="font-size:11.5px;font-weight:600;background:var(--primary-light);color:var(--primary-dark);padding:3px 8px;border-radius:20px;">Configurado</span>
+            </div>
+            <div class="scard-body">
+              <div class="asaas-webhook-box">
+                <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">URL do Webhook — configure no painel Asaas:</div>
+                <div class="webhook-url">https://esportesacademy.com/api/asaas/webhook</div>
+                <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="copyWebhook()">📋 Copiar URL</button>
+              </div>
+              <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">O webhook notifica o sistema quando um pagamento é confirmado, atrasado ou cancelado no Asaas. Sem ele, os status não atualizam automaticamente.</p>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">⚙️ Preferências de Cobrança</div>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid form-grid-2">
+                <div class="field">
+                  <label>Dias de antecipação para emissão</label>
+                  <select id="f-dias-antecip" onchange="markDirty()">
+                    <option value="1">1 dia antes do vencimento</option>
+                    <option value="3" selected>3 dias antes do vencimento</option>
+                    <option value="5">5 dias antes do vencimento</option>
+                    <option value="7">7 dias antes do vencimento</option>
+                    <option value="10">10 dias antes do vencimento</option>
+                  </select>
+                  <span class="hint">Quando a Edge Function deve gerar/enviar a cobrança ao Asaas antes do vencimento.</span>
+                </div>
+                <div class="field">
+                  <label>Multa por atraso (%)</label>
+                  <input type="number" id="f-multa" value="2" min="0" max="20" step="0.5" oninput="markDirty()"/>
+                  <span class="hint">Percentual aplicado sobre o valor em atraso (máx. 20%).</span>
+                </div>
+                <div class="field">
+                  <label>Juros mensais por atraso (%)</label>
+                  <input type="number" id="f-juros" value="1" min="0" max="3" step="0.1" oninput="markDirty()"/>
+                  <span class="hint">Juros mensais aplicados após o vencimento (máx. 3%).</span>
+                </div>
+                <div class="field">
+                  <label>Desconto por pagamento antecipado (%)</label>
+                  <input type="number" id="f-desconto-ant" value="0" min="0" max="15" step="0.5" oninput="markDirty()"/>
+                  <span class="hint">Desconto dado se pagar antes do vencimento.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── TAB: CONFIGURAÇÕES GERAIS ─── -->
+        <div class="settings-section" id="tab-geral">
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🕐 Regional e Formato</div>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid form-grid-2">
+                <div class="field">
+                  <label>Fuso horário</label>
+                  <select id="f-timezone" onchange="markDirty()">
+                    <option value="America/Sao_Paulo" selected>America/Sao_Paulo (UTC-3)</option>
+                    <option value="America/Manaus">America/Manaus (UTC-4)</option>
+                    <option value="America/Belem">America/Belem (UTC-3)</option>
+                    <option value="America/Fortaleza">America/Fortaleza (UTC-3)</option>
+                    <option value="America/Recife">America/Recife (UTC-3)</option>
+                    <option value="America/Noronha">America/Noronha (UTC-2)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Formato de data</label>
+                  <select id="f-date-format" onchange="markDirty()">
+                    <option value="dd/mm/yyyy" selected>DD/MM/AAAA (padrão BR)</option>
+                    <option value="mm/dd/yyyy">MM/DD/AAAA</option>
+                    <option value="yyyy-mm-dd">AAAA-MM-DD (ISO)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Moeda</label>
+                  <select id="f-moeda" onchange="markDirty()">
+                    <option value="BRL" selected>R$ — Real Brasileiro (BRL)</option>
+                    <option value="USD">$ — Dólar Americano (USD)</option>
+                    <option value="EUR">€ — Euro (EUR)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Idioma da plataforma</label>
+                  <select id="f-idioma" onchange="markDirty()">
+                    <option value="pt-BR" selected>Português — Brasil</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">📊 Limites Operacionais</div>
+            </div>
+            <div class="scard-body">
+              <div class="form-grid form-grid-2">
+                <div class="field">
+                  <label>Capacidade máxima padrão por turma</label>
+                  <input type="number" id="f-cap-turma" value="20" min="1" max="200" oninput="markDirty()"/>
+                  <span class="hint">Aplicado a novas turmas. Pode ser ajustado por turma individualmente.</span>
+                </div>
+                <div class="field">
+                  <label>Limite de alerta de frequência (%)</label>
+                  <input type="number" id="f-limiar-freq" value="75" min="50" max="100" oninput="markDirty()"/>
+                  <span class="hint">Atletas abaixo desse percentual são sinalizados como em risco.</span>
+                </div>
+                <div class="field">
+                  <label>Janela de edição de chamada (horas)</label>
+                  <select id="f-janela-chamada" onchange="markDirty()">
+                    <option value="24">24 horas</option>
+                    <option value="48" selected>48 horas (padrão)</option>
+                    <option value="72">72 horas</option>
+                    <option value="168">7 dias</option>
+                  </select>
+                  <span class="hint">Por quanto tempo é possível lançar ou editar uma chamada retroativamente.</span>
+                </div>
+                <div class="field">
+                  <label>Período de contratos padrão</label>
+                  <select id="f-periodo-default" onchange="markDirty()">
+                    <option value="mensal" selected>Mensal</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="semestral">Semestral</option>
+                    <option value="anual">Anual</option>
+                  </select>
+                  <span class="hint">Pré-selecionado ao criar novas matrículas.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🔒 Privacidade e Segurança</div>
+            </div>
+            <div class="scard-body">
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Exibir CPF completo para não-administradores</strong>
+                  <small>Se desativado, professores e secretaria veem apenas o CPF mascarado (***.***.123-00)</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Permitir que professores vejam dados financeiros de seus atletas</strong>
+                  <small>Restringe o acesso ao módulo financeiro apenas para admin_escola e perfil financeiro</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Histórico de outras escolas visível para staff</strong>
+                  <small>Se ativado, coordenadores veem a lista de escolas anteriores do atleta (sem dados financeiros)</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Exigir confirmação de 2 fatores para admin_escola</strong>
+                  <small>Recomendado para produção — requer configuração do Supabase Auth</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── TAB: NOTIFICAÇÕES ─── -->
+        <div class="settings-section" id="tab-notif">
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">📡 Canais de Comunicação</div>
+              <span style="font-size:12px;color:var(--text-muted);">Clique para ativar/desativar</span>
+            </div>
+            <div class="scard-body">
+              <div class="channel-grid">
+                <div class="channel-card active" onclick="toggleChannel(this)">
+                  <div class="channel-icon">📱</div>
+                  <div class="channel-name">WhatsApp</div>
+                  <div class="channel-desc">Cobranças, vencimentos, comunicados via WhatsApp Business API</div>
+                </div>
+                <div class="channel-card active" onclick="toggleChannel(this)">
+                  <div class="channel-icon">📧</div>
+                  <div class="channel-name">E-mail</div>
+                  <div class="channel-desc">Boletos, faturas, boas-vindas e relatórios mensais</div>
+                </div>
+                <div class="channel-card active" onclick="toggleChannel(this)">
+                  <div class="channel-icon">🔔</div>
+                  <div class="channel-name">Push (App Pais)</div>
+                  <div class="channel-desc">Notificações em tempo real no app dos responsáveis</div>
+                </div>
+                <div class="channel-card" onclick="toggleChannel(this)">
+                  <div class="channel-icon">💬</div>
+                  <div class="channel-name">SMS</div>
+                  <div class="channel-desc">Lembretes via SMS — requer integração extra</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">💰 Gatilhos Financeiros</div>
+            </div>
+            <div class="scard-body">
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Lembrete de vencimento</strong>
+                  <small>Enviar aviso X dias antes do vencimento da cobrança</small>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <select style="border:1.5px solid var(--border);padding:5px 8px;border-radius:var(--radius-sm);font-size:12px;font-family:inherit;" onchange="markDirty()">
+                    <option>1 dia antes</option>
+                    <option selected>3 dias antes</option>
+                    <option>5 dias antes</option>
+                    <option>7 dias antes</option>
+                  </select>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="markDirty()"/>
+                    <div class="toggle-track"></div>
+                  </label>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Notificar cobrança vencida</strong>
+                  <small>Avisar responsável financeiro no dia do vencimento</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Reenvio automático para inadimplentes</strong>
+                  <small>Reenviar cobrança a cada 7 dias após o vencimento (máx. 3x)</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Confirmação de pagamento</strong>
+                  <small>Notificar quando o pagamento for confirmado no Asaas</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-header">
+              <div class="scard-title">🏫 Gatilhos Pedagógicos</div>
+            </div>
+            <div class="scard-body">
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Alerta de frequência baixa</strong>
+                  <small>Avisar responsável quando atleta ficar abaixo do limiar de frequência</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Confirmação de presença</strong>
+                  <small>Enviar comprovante de chamada feita para os responsáveis via WhatsApp</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <strong>Relatório mensal por e-mail</strong>
+                  <small>Enviar resumo mensal (presenças + financeiro) para o admin_escola</small>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="markDirty()"/>
+                  <div class="toggle-track"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── TAB: ZONA DE RISCO ─── -->
+        <div class="settings-section" id="tab-perigo">
+
+          <div class="scard" style="border-color:var(--warning);">
+            <div class="scard-header" style="background:var(--warning-light);">
+              <div class="scard-title" style="color:#92400e;">⚠️ Ações Irreversíveis</div>
+            </div>
+            <div class="scard-body">
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">As ações abaixo são permanentes e não podem ser desfeitas. Prossiga com cuidado.</p>
+
+              <div style="display:flex;flex-direction:column;gap:16px;">
+
+                <div class="danger-zone">
+                  <div class="danger-zone-title">🗑️ Encerrar plano atual</div>
+                  <div class="danger-zone-desc">Cancela a assinatura ativa ao final do período. A escola e os dados ficam preservados em modo somente leitura por 90 dias.</div>
+                  <button class="btn btn-outline btn-sm" style="border-color:var(--warning);color:var(--warning);" onclick="showToast('Solicite o cancelamento via suporte@esportesacademy.com','info')">Solicitar cancelamento</button>
+                </div>
+
+                <div class="danger-zone">
+                  <div class="danger-zone-title">🧹 Limpar dados de teste (Sandbox)</div>
+                  <div class="danger-zone-desc">Remove todos os atletas, cobranças e registros criados em modo sandbox. Irreversível. Só disponível enquanto o ambiente Asaas for Sandbox.</div>
+                  <button class="btn btn-danger btn-sm" onclick="confirmClearSandbox()">Limpar dados de sandbox</button>
+                </div>
+
+                <div class="danger-zone" style="border-color:#7f1d1d;background:#fff5f5;">
+                  <div class="danger-zone-title" style="color:#7f1d1d;">💀 Excluir escola permanentemente</div>
+                  <div class="danger-zone-desc" style="color:#7f1d1d;">Remove todos os dados da escola, atletas, cobranças, turmas e arquivos. Ação irreversível. Requer confirmação por e-mail e aprovação do suporte.</div>
+                  <button class="btn btn-danger btn-sm" onclick="showToast('Solicite via suporte@esportesacademy.com com o assunto: EXCLUIR ESCOLA','error')">Solicitar exclusão permanente</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- /settings-content -->
+    </div><!-- /settings-layout -->
+
+  </main>
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar" id="save-bar">
+  <div class="save-bar-inner" id="save-bar-inner">
+    <span>● Você tem alterações não salvas</span>
+    <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.6);" onclick="discardChanges()">Descartar</button>
+    <button class="btn btn-primary btn-sm" onclick="saveSection()">💾 Salvar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ DEMO BAR ═══════════════ -->
+<div class="demo-bar">
+  <div class="demo-label">Demo</div>
+  <div class="demo-profiles">
+    <button class="demo-btn active" onclick="setProfile('admin_escola',this)">Admin</button>
+    <button class="demo-btn" onclick="setProfile('coordenador',this)">Coordenador</button>
+    <button class="demo-btn" onclick="setProfile('professor',this)">Professor</button>
+    <button class="demo-btn" onclick="setProfile('financeiro',this)">Financeiro</button>
+    <button class="demo-btn" onclick="setProfile('secretaria',this)">Secretaria</button>
+    <button class="demo-btn" onclick="setProfile('saude',this)">Saúde</button>
+    <button class="demo-btn" onclick="setProfile('marketing',this)">Marketing</button>
+  </div>
+  <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.35);">Configurações — disponível em todos os planos</div>
+</div>
+
+<script>
+// ═══════════ STATE ═══════════
+let isDirty = false;
+let currentProfile = 'admin_escola';
+let asaasEnv = 'producao';
+let apiKeyVisible = false;
+
+// Mock modalidades
+let modalidades = ['Futebol','Natação','Jiu-Jitsu','Vôlei','Atletismo'];
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderModalidades();
+});
+
+// ═══════════ SIDEBAR ═══════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═══════════ TABS ═══════════
+function switchTab(name, el) {
+  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.stab-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ═══════════ DIRTY STATE ═══════════
+function markDirty() {
+  if(!isDirty) {
+    isDirty = true;
+    document.getElementById('unsaved-pill').classList.add('show');
+    document.getElementById('save-bar-inner').classList.add('show');
+  }
+}
+
+function discardChanges() {
+  isDirty = false;
+  document.getElementById('unsaved-pill').classList.remove('show');
+  document.getElementById('save-bar-inner').classList.remove('show');
+  showToast('Alterações descartadas','info');
+}
+
+// ═══════════ SAVE ═══════════
+function saveSection() {
+  if(currentProfile !== 'admin_escola') {
+    showToast('Sem permissão para salvar configurações','error');
+    return;
+  }
+  // Validate Asaas key if on asaas tab
+  const key = document.getElementById('f-asaas-key')?.value || '';
+  isDirty = false;
+  document.getElementById('unsaved-pill').classList.remove('show');
+  document.getElementById('save-bar-inner').classList.remove('show');
+  showToast('✅ Configurações salvas com sucesso!','success');
+}
+
+// ═══════════ LOGO ═══════════
+function triggerLogoUpload() {
+  document.getElementById('logoInput').click();
+}
+function previewLogo(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('logoPreview').src = ev.target.result;
+    document.getElementById('logoPreview').style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+    markDirty();
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo() {
+  document.getElementById('logoPreview').style.display = 'none';
+  document.getElementById('logoPlaceholder').style.display = 'flex';
+  document.getElementById('logoInput').value = '';
+  markDirty();
+}
+
+// ═══════════ MODALIDADES ═══════════
+function renderModalidades() {
+  const container = document.getElementById('mod-chips');
+  container.innerHTML = modalidades.map((m,i) => `
+    <div class="mod-chip">
+      ${m}
+      <span class="rm" onclick="removeModalidade(${i})">✕</span>
+    </div>
+  `).join('');
+}
+function addModalidade() {
+  const inp = document.getElementById('new-mod-input');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(modalidades.some(m => m.toLowerCase() === val.toLowerCase())) {
+    showToast('Modalidade já cadastrada','error'); return;
+  }
+  modalidades.push(val);
+  inp.value = '';
+  renderModalidades();
+  markDirty();
+}
+function removeModalidade(idx) {
+  modalidades.splice(idx,1);
+  renderModalidades();
+  markDirty();
+}
+
+// ═══════════ CEP ═══════════
+function maskCEP(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,8);
+  if(v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+  el.value = v;
+  markDirty();
+}
+function buscarCEP() {
+  const cep = document.getElementById('f-cep').value.replace(/\D/g,'');
+  if(cep.length !== 8) { showToast('CEP inválido','error'); return; }
+  const status = document.getElementById('cep-status');
+  status.textContent = '⏳ Buscando...';
+  status.className = 'cep-status';
+  // Simulate API call
+  setTimeout(() => {
+    if(cep === '01310100') {
+      document.getElementById('f-logradouro').value = 'Av. Paulista';
+      document.getElementById('f-bairro').value = 'Bela Vista';
+      document.getElementById('f-cidade').value = 'São Paulo';
+      document.getElementById('f-estado').value = 'SP';
+    }
+    status.textContent = '✓ Endereço localizado';
+    status.className = 'cep-status cep-ok';
+    markDirty();
+  }, 900);
+}
+
+// ═══════════ CNPJ MASK ═══════════
+function maskCNPJ(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,14);
+  if(v.length > 12) v = v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
+  else if(v.length > 8) v = v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
+  else if(v.length > 5) v = v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
+  else if(v.length > 2) v = v.slice(0,2)+'.'+v.slice(2);
+  el.value = v;
+}
+
+// ═══════════ ASAAS ═══════════
+function setEnv(env) {
+  asaasEnv = env;
+  document.getElementById('env-prod').classList.toggle('active', env === 'producao');
+  document.getElementById('env-sandbox').classList.toggle('active', env === 'sandbox');
+  resetConnStatus();
+  markDirty();
+  if(env === 'sandbox') showToast('🧪 Modo Sandbox ativado — cobranças não são reais','info');
+  else showToast('🟢 Modo Produção ativado','info');
+}
+
+function toggleApiKeyVisibility() {
+  apiKeyVisible = !apiKeyVisible;
+  const inp = document.getElementById('f-asaas-key');
+  inp.type = apiKeyVisible ? 'text' : 'password';
+  document.getElementById('eye-btn').textContent = apiKeyVisible ? '🙈' : '👁️';
+}
+
+function resetConnStatus() {
+  const badge = document.getElementById('conn-status-badge');
+  badge.className = 'conn-badge conn-idle';
+  badge.innerHTML = '<div class="conn-dot conn-dot-idle"></div> Não testado';
+  document.getElementById('last-test-time').textContent = '';
+}
+
+function testAsaasConnection() {
+  const key = document.getElementById('f-asaas-key').value.trim();
+  if(!key) { showToast('Informe o Access Token antes de testar','error'); return; }
+  if(!key.startsWith('$aact_') && !key.startsWith('$aasp_')) {
+    showToast('Token inválido — deve começar com $aact_ ou $aasp_','error'); return;
+  }
+
+  const btn = document.querySelector('[onclick="testAsaasConnection()"]');
+  const badge = document.getElementById('conn-status-badge');
+  const icon = document.getElementById('test-btn-icon');
+  const label = document.getElementById('test-btn-label');
+
+  badge.className = 'conn-badge conn-loading';
+  badge.innerHTML = '<div class="conn-dot conn-dot-pulse"></div> Testando...';
+  icon.textContent = '⏳';
+  label.textContent = 'Testando...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const ok = true; // simulate success
+    if(ok) {
+      badge.className = 'conn-badge conn-ok';
+      badge.innerHTML = '<div class="conn-dot conn-dot-ok"></div> Conexão ativa (' + (asaasEnv === 'sandbox' ? 'Sandbox' : 'Produção') + ')';
+      showToast('✅ Conexão com Asaas estabelecida com sucesso!','success');
+    } else {
+      badge.className = 'conn-badge conn-err';
+      badge.innerHTML = '<div class="conn-dot conn-dot-err"></div> Falha na conexão';
+      showToast('Falha ao conectar com Asaas — verifique o token','error');
+    }
+    icon.textContent = '🔌';
+    label.textContent = 'Testar Conexão';
+    btn.disabled = false;
+    const now = new Date();
+    document.getElementById('last-test-time').textContent = 'Último teste: ' + now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }, 1800);
+}
+
+function copyWebhook() {
+  const url = 'https://esportesacademy.com/api/asaas/webhook';
+  navigator.clipboard?.writeText(url).then(() => showToast('URL copiada!','success')).catch(() => showToast('Copie manualmente: ' + url,'info'));
+}
+
+// ═══════════ NOTIF CHANNELS ═══════════
+function toggleChannel(card) {
+  card.classList.toggle('active');
+  markDirty();
+}
+
+// ═══════════ CONFIRM CLEAR ═══════════
+function confirmClearSandbox() {
+  if(asaasEnv !== 'sandbox') {
+    showToast('Disponível apenas em modo Sandbox','error'); return;
+  }
+  if(confirm('Tem certeza? Todos os dados de teste serão removidos permanentemente.')) {
+    showToast('Dados de sandbox removidos','success');
+  }
+}
+
+// ═══════════ PROFILE DEMO ═══════════
+const PROFILES = {
+  admin_escola: { nome:'Admin Escola', ava:'AD', role:'admin_escola', access:true },
+  coordenador:  { nome:'Coord. Silva', ava:'CS', role:'coordenador',  access:false },
+  professor:    { nome:'Prof. Lima',   ava:'PL', role:'professor',    access:false },
+  financeiro:   { nome:'Fin. Costa',  ava:'FC', role:'financeiro',   access:false },
+  secretaria:   { nome:'Sec. Alves',  ava:'SA', role:'secretaria',   access:false },
+  saude:        { nome:'Dr. Rocha',   ava:'DR', role:'saude',        access:false },
+  marketing:    { nome:'Mkt. Dias',   ava:'MD', role:'marketing',    access:false },
+};
+function setProfile(p, btn) {
+  currentProfile = p;
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const prof = PROFILES[p];
+  document.getElementById('sidebarAva').textContent  = prof.ava;
+  document.getElementById('sidebarName').textContent = prof.nome;
+  document.getElementById('sidebarRole').textContent = prof.role;
+  document.getElementById('topbarAva').textContent   = prof.ava;
+
+  const overlay = document.getElementById('accessOverlay');
+  if(prof.access) {
+    overlay.classList.remove('show');
+    document.getElementById('global-save-btn').disabled = false;
+  } else {
+    overlay.classList.add('show');
+    document.getElementById('global-save-btn').disabled = true;
+  }
+}
+
+// ═══════════ TOAST ═══════════
+let toastTimer;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✅':type==='error'?'❌':'ℹ️') + ' ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+<script>window.ESCOLA_PAGE = 'configuracoes';</script>
+<script src="escola-sidebar.js"></script>
+</body>
+</html>

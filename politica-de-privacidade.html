@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — Esportes Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #4f46e5;
+      --primary-dark:  #3730a3;
+      --primary-light: #eef2ff;
+      --success:       #10b981;
+      --danger:        #ef4444;
+      --warning:       #f59e0b;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --card:          #ffffff;
+      --bg:            #f8fafc;
+      --sidebar-w:     280px;
+      --radius:        12px;
+      --shadow:        0 1px 3px rgba(0,0,0,.08);
+      --shadow-md:     0 4px 12px rgba(0,0,0,.08);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow);
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .brand-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .brand-sub  { font-size: 10px; color: var(--text-muted); letter-spacing: .6px; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .badge-doc {
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--purple-light); color: var(--purple);
+      font-size: 11px; font-weight: 700;
+    }
+    .back-link {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      text-decoration: none; transition: color .15s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; max-width: 1200px; margin: 0 auto; padding: 32px 16px; gap: 32px; }
+    @media (min-width: 1024px) { .layout { padding: 40px 32px; } }
+
+    /* ── TOC ── */
+    .toc { width: var(--sidebar-w); flex-shrink: 0; display: none; }
+    @media (min-width: 1024px) { .toc { display: block; } }
+    .toc-inner {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border); padding: 20px;
+      position: sticky; top: 80px;
+    }
+    .toc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px; }
+    .toc-item {
+      display: block; padding: 7px 10px; border-radius: 7px;
+      text-decoration: none; font-size: 12.5px; color: var(--text-muted);
+      font-weight: 500; line-height: 1.4; transition: all .15s;
+      border-left: 2px solid transparent; margin-bottom: 2px;
+    }
+    .toc-item:hover { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); }
+    .toc-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; border-left-color: var(--primary); }
+    .toc-num { font-size: 10px; color: var(--text-muted); margin-right: 4px; }
+    .toc-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .toc-meta { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; min-width: 0; }
+
+    .doc-header {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4f46e5 100%);
+      border-radius: 16px; padding: 36px 36px 32px;
+      margin-bottom: 28px; color: #fff; position: relative; overflow: hidden;
+    }
+    .doc-header::before {
+      content: '🔒';
+      position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+      font-size: 64px; opacity: .15;
+    }
+    .doc-type  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; opacity: .7; margin-bottom: 8px; }
+    .doc-title { font-size: clamp(22px, 3vw, 30px); font-weight: 900; margin-bottom: 10px; line-height: 1.2; }
+    .doc-meta  { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; opacity: .75; }
+    .doc-meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* ── RIGHTS GRID ── */
+    .rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+    @media (max-width: 600px) { .rights-grid { grid-template-columns: 1fr; } }
+    .right-card {
+      padding: 14px 16px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: #fafbff;
+      display: flex; gap: 10px; align-items: flex-start;
+      transition: border-color .15s, background .15s;
+    }
+    .right-card:hover { border-color: var(--primary); background: var(--primary-light); }
+    .right-card-icon { font-size: 20px; flex-shrink: 0; }
+    .right-card-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .right-card-desc  { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+
+    /* Sections */
+    .section {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 28px 30px; margin-bottom: 16px;
+      scroll-margin-top: 80px;
+    }
+    .section-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--purple-light); color: var(--purple);
+      font-size: 12px; font-weight: 800; margin-right: 10px; flex-shrink: 0;
+    }
+    .section-title {
+      display: flex; align-items: center;
+      font-size: 16px; font-weight: 800; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .section p { font-size: 14px; line-height: 1.75; color: #334155; margin-bottom: 12px; }
+    .section p:last-child { margin-bottom: 0; }
+    .section ol, .section ul { padding-left: 20px; margin: 10px 0 12px; }
+    .section li { font-size: 14px; line-height: 1.75; color: #334155; margin-bottom: 6px; }
+    .section li::marker { color: var(--purple); font-weight: 700; }
+    .sub-title { font-size: 13px; font-weight: 700; color: var(--text); margin: 18px 0 8px; }
+
+    /* Boxes */
+    .box { border-radius: 10px; padding: 14px 16px; margin: 14px 0; font-size: 13px; line-height: 1.65; display: flex; gap: 10px; }
+    .box-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .box-text { flex: 1; }
+    .box.info    { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1e40af; }
+    .box.warning { background: #fffbeb; border-left: 3px solid var(--warning); color: #92400e; }
+    .box.danger  { background: #fef2f2; border-left: 3px solid var(--danger); color: #991b1b; }
+    .box.success { background: #f0fdf4; border-left: 3px solid var(--success); color: #14532d; }
+    .box.purple  { background: var(--purple-light); border-left: 3px solid var(--purple); color: #4c1d95; }
+
+    .law-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 4px;
+      background: #f1f5f9; border: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    .data-table th {
+      background: #f8fafc; padding: 9px 14px; text-align: left;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--text-muted); border-bottom: 2px solid var(--border);
+    }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: #334155; line-height: 1.5; vertical-align: top; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    /* Badge legal basis */
+    .basis-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10.5px; font-weight: 700;
+    }
+    .basis-consent    { background: #dbeafe; color: #1e40af; }
+    .basis-contract   { background: #d1fae5; color: #065f46; }
+    .basis-legal      { background: #fef3c7; color: #92400e; }
+    .basis-legitimate { background: var(--purple-light); color: #4c1d95; }
+
+    /* Footer */
+    .doc-footer {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px 28px;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; justify-content: space-between; margin-top: 8px;
+    }
+    .doc-footer-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+    .doc-footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .doc-footer-link { font-size: 12.5px; font-weight: 600; color: var(--primary); text-decoration: none; transition: color .15s; }
+    .doc-footer-link:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    @media print {
+      .topbar, .toc, .doc-footer { display: none; }
+      .layout { padding: 0; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <a href="login.html" class="topbar-brand">
+    <div class="logo-mark">🛡️</div>
+    <div>
+      <div class="brand-name">Esportes Academy</div>
+      <div class="brand-sub">PLATAFORMA DE GESTÃO</div>
+    </div>
+  </a>
+  <div class="topbar-actions">
+    <span class="badge-doc">Privacidade</span>
+    <a href="login.html" class="back-link">← Voltar ao login</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── TOC ── -->
+  <aside class="toc">
+    <div class="toc-inner">
+      <div class="toc-title">Sumário</div>
+      <a class="toc-item" href="#s1"><span class="toc-num">1.</span> Introdução e Controlador</a>
+      <a class="toc-item" href="#s2"><span class="toc-num">2.</span> Dados que Coletamos</a>
+      <a class="toc-item" href="#s3"><span class="toc-num">3.</span> Finalidades e Bases Legais</a>
+      <a class="toc-item" href="#s4"><span class="toc-num">4.</span> Dados de Menores</a>
+      <a class="toc-item" href="#s5"><span class="toc-num">5.</span> Compartilhamento</a>
+      <a class="toc-item" href="#s6"><span class="toc-num">6.</span> Transferência Internacional</a>
+      <a class="toc-item" href="#s7"><span class="toc-num">7.</span> Retenção e Exclusão</a>
+      <a class="toc-item" href="#s8"><span class="toc-num">8.</span> Segurança</a>
+      <a class="toc-item" href="#s9"><span class="toc-num">9.</span> Cookies e Rastreadores</a>
+      <a class="toc-item" href="#s10"><span class="toc-num">10.</span> Seus Direitos (LGPD)</a>
+      <a class="toc-item" href="#s11"><span class="toc-num">11.</span> Encarregado (DPO)</a>
+      <a class="toc-item" href="#s12"><span class="toc-num">12.</span> Incidentes de Segurança</a>
+      <a class="toc-item" href="#s13"><span class="toc-num">13.</span> Alterações na Política</a>
+      <a class="toc-item" href="#s14"><span class="toc-num">14.</span> Contato e ANPD</a>
+
+      <div class="toc-divider"></div>
+      <div class="toc-meta">
+        <strong>Versão:</strong> 1.0<br/>
+        <strong>Vigência:</strong> 26/03/2026<br/>
+        <strong>Lei base:</strong> LGPD (Lei 13.709/2018)<br/>
+        <strong>Regulamentação:</strong> Dec. 8.771/2016 · ANPD
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT ── -->
+  <main class="content">
+
+    <div class="doc-header">
+      <div class="doc-type">Documento legal</div>
+      <div class="doc-title">Política de Privacidade</div>
+      <div class="doc-meta">
+        <span>📅 Última atualização: 26 de março de 2026</span>
+        <span>📄 Versão 1.0</span>
+        <span>⚖️ Conforme LGPD — Lei 13.709/2018</span>
+      </div>
+    </div>
+
+    <div class="box purple">
+      <span class="box-icon">🔒</span>
+      <span class="box-text">Esta Política de Privacidade descreve como a <strong>Esportes Academy Tecnologia Ltda.</strong> coleta, usa, armazena e protege seus dados pessoais, em conformidade com a <strong>Lei Geral de Proteção de Dados — LGPD (Lei nº 13.709/2018)</strong> e demais normas aplicáveis. Recomendamos a leitura integral deste documento.</span>
+    </div>
+
+    <!-- 1 -->
+    <div class="section" id="s1">
+      <div class="section-title"><span class="section-num">1</span>Introdução e Identificação do Controlador</div>
+      <p>A <strong>Esportes Academy Tecnologia Ltda.</strong>, inscrita no CNPJ sob o nº [CNPJ], com sede em [Endereço completo], é a <strong>Controladora</strong> dos dados pessoais tratados por meio da Plataforma Esportes Academy, nos termos do <strong>art. 5º, VI da LGPD</strong>.</p>
+      <p>Esta Política aplica-se a todos os usuários da Plataforma, incluindo administradores de escolas (<em>tenants</em>), professores, pais, responsáveis e atletas cadastrados.</p>
+
+      <div class="box info">
+        <span class="box-icon">ℹ️</span>
+        <span class="box-text"><strong>Dupla qualidade:</strong> Em relação aos dados de atletas e responsáveis inseridos pelas escolas, a Empresa atua como <strong>Operadora</strong> (art. 5º, VII da LGPD), processando os dados sob instrução das escolas (Controladoras). Em relação aos dados de usuários diretos da Plataforma, a Empresa atua como <strong>Controladora</strong>.</span>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="section" id="s2">
+      <div class="section-title"><span class="section-num">2</span>Dados Pessoais que Coletamos</div>
+
+      <div class="sub-title">2.1 Dados fornecidos pelo Usuário</div>
+      <table class="data-table">
+        <thead><tr><th>Categoria</th><th>Dados coletados</th><th>Quando</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Cadastro</strong></td>
+            <td>Nome completo, e-mail, senha (hash), cargo, telefone</td>
+            <td>Ao criar conta</td>
+          </tr>
+          <tr>
+            <td><strong>Perfil da escola</strong></td>
+            <td>Nome fantasia, CNPJ/CPF, endereço, telefone, modalidades esportivas</td>
+            <td>Ao configurar tenant</td>
+          </tr>
+          <tr>
+            <td><strong>Atletas</strong></td>
+            <td>Nome, data de nascimento, foto, dados de saúde (alergias, laudos), filiação</td>
+            <td>Ao cadastrar atleta</td>
+          </tr>
+          <tr>
+            <td><strong>Responsáveis</strong></td>
+            <td>Nome, CPF, e-mail, telefone, endereço, parentesco</td>
+            <td>Ao vincular responsável</td>
+          </tr>
+          <tr>
+            <td><strong>Financeiro</strong></td>
+            <td>Dados de pagamento (processados por gateway terceiro), histórico de cobranças</td>
+            <td>Ao realizar pagamento</td>
+          </tr>
+          <tr>
+            <td><strong>Comunicações</strong></td>
+            <td>Conteúdo de mensagens de suporte, feedback</td>
+            <td>Ao contatar o suporte</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sub-title">2.2 Dados coletados automaticamente</div>
+      <ul>
+        <li><strong>Dados de acesso:</strong> endereço IP, data/hora de acesso, páginas visitadas, tipo de navegador e sistema operacional;</li>
+        <li><strong>Dados de uso:</strong> funcionalidades acessadas, tempo de sessão, ações realizadas na Plataforma;</li>
+        <li><strong>Cookies e tecnologias similares:</strong> detalhados na Seção 9.</li>
+      </ul>
+
+      <div class="sub-title">2.3 Dados sensíveis</div>
+      <p>A Plataforma pode coletar <strong>dados pessoais sensíveis</strong> de atletas, tais como informações de saúde (alergias, laudos médicos, condições físicas), nos termos do <strong>art. 5º, II, e art. 11 da LGPD</strong>. O tratamento desses dados somente ocorre com consentimento específico e destacado do titular ou de seu representante legal.</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="section" id="s3">
+      <div class="section-title"><span class="section-num">3</span>Finalidades e Bases Legais do Tratamento</div>
+      <p>Tratamos seus dados pessoais com fundamento nas hipóteses legais previstas no <strong>art. 7º e art. 11 da LGPD</strong>:</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Finalidade</th>
+            <th>Dados utilizados</th>
+            <th>Base legal (LGPD)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Criar e gerenciar sua conta</td>
+            <td>Nome, e-mail, senha</td>
+            <td><span class="basis-badge basis-contract">Execução de contrato — art. 7º, V</span></td>
+          </tr>
+          <tr>
+            <td>Prestar o serviço contratado</td>
+            <td>Todos os dados do sistema</td>
+            <td><span class="basis-badge basis-contract">Execução de contrato — art. 7º, V</span></td>
+          </tr>
+          <tr>
+            <td>Processar pagamentos</td>
+            <td>Dados financeiros</td>
+            <td><span class="basis-badge basis-contract">Execução de contrato — art. 7º, V</span></td>
+          </tr>
+          <tr>
+            <td>Tratamento de dados de saúde de atletas</td>
+            <td>Dados sensíveis de saúde</td>
+            <td><span class="basis-badge basis-consent">Consentimento — art. 11, I</span></td>
+          </tr>
+          <tr>
+            <td>Comunicações de serviço e suporte</td>
+            <td>Nome, e-mail</td>
+            <td><span class="basis-badge basis-legitimate">Legítimo interesse — art. 7º, IX</span></td>
+          </tr>
+          <tr>
+            <td>Prevenção a fraudes e segurança</td>
+            <td>IP, logs de acesso</td>
+            <td><span class="basis-badge basis-legitimate">Legítimo interesse — art. 7º, IX</span></td>
+          </tr>
+          <tr>
+            <td>Cumprimento de obrigação legal</td>
+            <td>Dados fiscais e contábeis</td>
+            <td><span class="basis-badge basis-legal">Obrigação legal — art. 7º, II</span></td>
+          </tr>
+          <tr>
+            <td>Marketing e comunicações promocionais</td>
+            <td>Nome, e-mail</td>
+            <td><span class="basis-badge basis-consent">Consentimento — art. 7º, I</span></td>
+          </tr>
+          <tr>
+            <td>Melhoria do produto (analytics)</td>
+            <td>Dados de uso anonimizados</td>
+            <td><span class="basis-badge basis-legitimate">Legítimo interesse — art. 7º, IX</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Não utilizamos seus dados para finalidades incompatíveis com as indicadas acima. Caso necessitemos tratar seus dados para novas finalidades, comunicaremos previamente e, quando exigido, solicitaremos novo consentimento.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="section" id="s4">
+      <div class="section-title"><span class="section-num">4</span>Tratamento de Dados de Crianças e Adolescentes</div>
+      <div class="box danger">
+        <span class="box-icon">🔴</span>
+        <span class="box-text">O tratamento de dados pessoais de <strong>crianças e adolescentes</strong> é realizado com observância rigorosa do <strong>art. 14 da LGPD</strong> e do <strong>Estatuto da Criança e do Adolescente (ECA — Lei 8.069/1990)</strong>.</span>
+      </div>
+      <p>Para atletas menores de 18 anos, aplicamos as seguintes salvaguardas:</p>
+      <ul>
+        <li><strong>Consentimento dos pais ou responsáveis legais</strong> é obrigatório para o cadastro e para o tratamento de dados sensíveis (saúde), nos termos do <strong>art. 14, §1º da LGPD</strong>;</li>
+        <li>Os dados coletados são <strong>estritamente necessários</strong> à prestação do serviço, não podendo ser utilizados para outros fins sem novo consentimento do responsável;</li>
+        <li>É vedado o tratamento de dados de crianças para fins de publicidade ou marketing direto;</li>
+        <li>Os responsáveis legais podem solicitar a exclusão dos dados a qualquer momento;</li>
+        <li>Realizamos esforços razoáveis para verificar a autenticidade do consentimento parental, conforme o <strong>art. 14, §5º da LGPD</strong>.</li>
+      </ul>
+    </div>
+
+    <!-- 5 -->
+    <div class="section" id="s5">
+      <div class="section-title"><span class="section-num">5</span>Compartilhamento de Dados</div>
+      <p>Seus dados pessoais <strong>não são vendidos</strong> a terceiros. Podemos compartilhá-los nas seguintes situações:</p>
+
+      <div class="sub-title">5.1 Fornecedores e parceiros de serviço (suboperadores)</div>
+      <p>Compartilhamos dados com prestadores de serviço que nos auxiliam na operação da Plataforma, sempre mediante contrato com cláusulas de proteção de dados (<strong>art. 39 da LGPD</strong>):</p>
+      <table class="data-table">
+        <thead><tr><th>Fornecedor</th><th>Serviço</th><th>País</th></tr></thead>
+        <tbody>
+          <tr><td>Supabase Inc.</td><td>Banco de dados e autenticação</td><td>EUA</td></tr>
+          <tr><td>Asaas / Gateway de pagamento</td><td>Processamento de cobranças</td><td>Brasil</td></tr>
+          <tr><td>Serviço de e-mail transacional</td><td>Envio de notificações</td><td>EUA/Brasil</td></tr>
+          <tr><td>Cloudflare Inc.</td><td>CDN e segurança de rede</td><td>EUA</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sub-title">5.2 Cumprimento de obrigações legais</div>
+      <p>Podemos divulgar dados pessoais quando exigido por lei, regulamento, decisão judicial ou requisição de autoridade pública competente, nos termos do <strong>art. 7º, II e VI da LGPD</strong> e do <strong>art. 13 do Marco Civil da Internet</strong>.</p>
+
+      <div class="sub-title">5.3 Proteção de direitos</div>
+      <p>Podemos compartilhar dados para proteger os direitos, a propriedade ou a segurança da Empresa, de nossos usuários ou de terceiros, inclusive para detectar e prevenir fraudes.</p>
+
+      <div class="sub-title">5.4 Reorganização empresarial</div>
+      <p>Em caso de fusão, aquisição, venda de ativos ou reestruturação societária, os dados poderão ser transferidos ao adquirente, que ficará vinculado a esta Política, mediante notificação prévia ao Usuário.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="section" id="s6">
+      <div class="section-title"><span class="section-num">6</span>Transferência Internacional de Dados</div>
+      <p>Alguns de nossos fornecedores (como Supabase e Cloudflare) estão sediados no exterior. Toda transferência internacional de dados pessoais obedece ao <strong>art. 33 da LGPD</strong>, sendo realizada apenas quando o país destinatário oferece grau de proteção equivalente ao brasileiro, ou mediante adoção de cláusulas contratuais padrão aprovadas pela <strong>ANPD (Autoridade Nacional de Proteção de Dados)</strong>.</p>
+      <p>Adotamos contratos específicos com esses fornecedores, incluindo as <strong>Standard Contractual Clauses (SCCs)</strong> equivalentes, garantindo que seus dados recebam proteção adequada independentemente do país de processamento.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="section" id="s7">
+      <div class="section-title"><span class="section-num">7</span>Retenção e Exclusão de Dados</div>
+      <p>Armazenamos seus dados pessoais pelo tempo necessário às finalidades declaradas, respeitando os seguintes prazos mínimos legais:</p>
+      <table class="data-table">
+        <thead><tr><th>Tipo de dado</th><th>Prazo de retenção</th><th>Fundamento</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Dados de cadastro e uso</td>
+            <td>Enquanto a conta estiver ativa + 5 anos após encerramento</td>
+            <td>Prescrição cível — CC, art. 206</td>
+          </tr>
+          <tr>
+            <td>Registros de acesso (IP, logs)</td>
+            <td>6 meses</td>
+            <td>Marco Civil da Internet, art. 15</td>
+          </tr>
+          <tr>
+            <td>Dados de aplicações (conteúdo)</td>
+            <td>6 meses após encerramento do contrato</td>
+            <td>Marco Civil da Internet, art. 13</td>
+          </tr>
+          <tr>
+            <td>Dados financeiros e fiscais</td>
+            <td>10 anos</td>
+            <td>Código Tributário Nacional, art. 174; Lei 9.532/1997</td>
+          </tr>
+          <tr>
+            <td>Dados de saúde de atletas</td>
+            <td>20 anos após última consulta</td>
+            <td>CFM Resolução 1.821/2007 (aplicada por analogia)</td>
+          </tr>
+          <tr>
+            <td>Comunicações de suporte</td>
+            <td>3 anos</td>
+            <td>CDC, art. 27</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Expirado o prazo de retenção, os dados são <strong>anonimizados ou eliminados</strong> de forma segura e irreversível, nos termos do <strong>art. 16 da LGPD</strong>.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="section" id="s8">
+      <div class="section-title"><span class="section-num">8</span>Segurança dos Dados</div>
+      <p>Implementamos medidas técnicas e organizacionais adequadas para proteger seus dados contra acesso não autorizado, alteração, divulgação ou destruição, conforme o <strong>art. 46 da LGPD</strong> e o <strong>Regulamento de Segurança da ANPD</strong>:</p>
+      <ul>
+        <li><strong>Criptografia em trânsito:</strong> TLS 1.2+ para todas as comunicações;</li>
+        <li><strong>Criptografia em repouso:</strong> dados armazenados com AES-256;</li>
+        <li><strong>Controle de acesso:</strong> RBAC (controle baseado em papéis), autenticação multifator disponível;</li>
+        <li><strong>Monitoramento:</strong> logs de acesso e alertas de comportamentos anômalos;</li>
+        <li><strong>Backups:</strong> cópias de segurança automáticas com retenção de 30 dias;</li>
+        <li><strong>Teste de segurança:</strong> avaliações periódicas de vulnerabilidades e <em>pentests</em>;</li>
+        <li><strong>Treinamento:</strong> capacitação periódica da equipe em proteção de dados e segurança da informação.</li>
+      </ul>
+      <div class="box warning">
+        <span class="box-icon">⚠️</span>
+        <span class="box-text">Nenhum sistema de segurança é absolutamente inviolável. Em caso de incidente, seguimos o procedimento descrito na Seção 12.</span>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="section" id="s9">
+      <div class="section-title"><span class="section-num">9</span>Cookies e Tecnologias de Rastreamento</div>
+      <p>Utilizamos cookies e tecnologias similares para o funcionamento da Plataforma, conforme o <strong>art. 7º do Marco Civil da Internet</strong> e as diretrizes da <strong>ANPD</strong>:</p>
+      <table class="data-table">
+        <thead><tr><th>Categoria</th><th>Descrição</th><th>Consentimento</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Essenciais</strong></td>
+            <td>Autenticação, sessão, segurança — necessários para o funcionamento</td>
+            <td>Não exigido</td>
+          </tr>
+          <tr>
+            <td><strong>Funcionais</strong></td>
+            <td>Preferências do usuário, idioma, configurações de interface</td>
+            <td>Não exigido</td>
+          </tr>
+          <tr>
+            <td><strong>Analíticos</strong></td>
+            <td>Estatísticas de uso (anonimizados), melhoria do produto</td>
+            <td>Opt-in</td>
+          </tr>
+          <tr>
+            <td><strong>Marketing</strong></td>
+            <td>Publicidade personalizada em plataformas externas</td>
+            <td>Opt-in</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Você pode gerenciar as preferências de cookies a qualquer momento nas configurações da Plataforma ou do seu navegador. A recusa de cookies não essenciais não prejudica o funcionamento básico do serviço.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="section" id="s10">
+      <div class="section-title"><span class="section-num">10</span>Seus Direitos como Titular de Dados (LGPD)</div>
+      <p>Nos termos dos <strong>arts. 17 a 22 da LGPD</strong>, você possui os seguintes direitos em relação aos seus dados pessoais:</p>
+
+      <div class="rights-grid">
+        <div class="right-card">
+          <div class="right-card-icon">👁</div>
+          <div>
+            <div class="right-card-title">Acesso</div>
+            <div class="right-card-desc">Confirmar a existência e obter cópia dos seus dados tratados (art. 18, I e II)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">✏️</div>
+          <div>
+            <div class="right-card-title">Correção</div>
+            <div class="right-card-desc">Corrigir dados incompletos, inexatos ou desatualizados (art. 18, III)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">🗑️</div>
+          <div>
+            <div class="right-card-title">Eliminação</div>
+            <div class="right-card-desc">Solicitar exclusão dos dados desnecessários ou tratados com consentimento (art. 18, VI)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">🔄</div>
+          <div>
+            <div class="right-card-title">Portabilidade</div>
+            <div class="right-card-desc">Receber seus dados em formato interoperável para outro fornecedor (art. 18, V)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">🚫</div>
+          <div>
+            <div class="right-card-title">Oposição</div>
+            <div class="right-card-desc">Opor-se ao tratamento realizado com base em legítimo interesse (art. 18, IX)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">⏸️</div>
+          <div>
+            <div class="right-card-title">Bloqueio</div>
+            <div class="right-card-desc">Bloquear dados desnecessários, excessivos ou tratados em desconformidade (art. 18, IV)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">📋</div>
+          <div>
+            <div class="right-card-title">Informação</div>
+            <div class="right-card-desc">Conhecer as entidades com as quais compartilhamos seus dados (art. 18, VII)</div>
+          </div>
+        </div>
+        <div class="right-card">
+          <div class="right-card-icon">↩️</div>
+          <div>
+            <div class="right-card-title">Revogação</div>
+            <div class="right-card-desc">Revogar o consentimento a qualquer momento, de forma gratuita (art. 18, IX)</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:16px">Para exercer qualquer direito, envie solicitação ao nosso DPO pelo e-mail <strong>privacidade@esportesacademy.com.br</strong>. Responderemos em até <strong>15 dias úteis</strong>, conforme o <strong>art. 19, §3º da LGPD</strong>. A resposta é <strong>gratuita</strong> para a primeira solicitação de cada tipo em um período de 12 meses.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="section" id="s11">
+      <div class="section-title"><span class="section-num">11</span>Encarregado de Proteção de Dados (DPO)</div>
+      <p>Em cumprimento ao <strong>art. 41 da LGPD</strong>, designamos um <strong>Encarregado de Proteção de Dados (Data Protection Officer — DPO)</strong>, responsável por:</p>
+      <ul>
+        <li>Receber comunicações dos titulares de dados e da ANPD;</li>
+        <li>Orientar a Empresa sobre práticas de proteção de dados;</li>
+        <li>Atuar como canal de comunicação entre a Empresa, os titulares e a ANPD.</li>
+      </ul>
+      <table class="data-table">
+        <tbody>
+          <tr><td><strong>Nome do DPO</strong></td><td>[Nome completo do Encarregado]</td></tr>
+          <tr><td><strong>E-mail</strong></td><td>privacidade@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Telefone</strong></td><td>[Número de contato]</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 12 -->
+    <div class="section" id="s12">
+      <div class="section-title"><span class="section-num">12</span>Incidentes de Segurança</div>
+      <p>Em caso de incidente de segurança que possa acarretar risco ou dano relevante aos titulares, cumpriremos rigorosamente o <strong>art. 48 da LGPD</strong>:</p>
+      <ol>
+        <li><strong>Identificação e contenção:</strong> ao detectar o incidente, a equipe de segurança iniciará imediatamente medidas de contenção;</li>
+        <li><strong>Notificação à ANPD:</strong> em prazo razoável (até 72 horas após a ciência do incidente com impacto relevante), conforme a Resolução CD/ANPD nº 15/2024;</li>
+        <li><strong>Notificação aos titulares:</strong> os titulares afetados serão comunicados por e-mail com informações sobre a natureza dos dados comprometidos, os riscos envolvidos e as medidas adotadas;</li>
+        <li><strong>Relatório pós-incidente:</strong> elaboração de relatório completo e adoção de medidas corretivas para evitar recorrência.</li>
+      </ol>
+    </div>
+
+    <!-- 13 -->
+    <div class="section" id="s13">
+      <div class="section-title"><span class="section-num">13</span>Alterações nesta Política</div>
+      <p>Esta Política pode ser atualizada periodicamente para refletir mudanças em nossas práticas, na legislação ou nos serviços prestados. Alterações relevantes serão comunicadas por:</p>
+      <ul>
+        <li><strong>E-mail</strong> cadastrado na conta, com antecedência mínima de 15 dias;</li>
+        <li><strong>Aviso na Plataforma</strong> no primeiro acesso após a atualização;</li>
+        <li><strong>Publicação</strong> da versão atualizada nesta página com nova data de vigência.</li>
+      </ul>
+      <p>O uso continuado da Plataforma após a data de vigência constituirá concordância com as novas condições. Caso não concorde, o Usuário poderá encerrar sua conta conforme descrito nos Termos de Uso.</p>
+    </div>
+
+    <!-- 14 -->
+    <div class="section" id="s14">
+      <div class="section-title"><span class="section-num">14</span>Contato e Reclamação à ANPD</div>
+      <p>Para exercer seus direitos ou tirar dúvidas sobre esta Política:</p>
+      <table class="data-table">
+        <tbody>
+          <tr><td><strong>DPO / Privacidade</strong></td><td>privacidade@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Suporte geral</strong></td><td>contato@esportesacademy.com.br</td></tr>
+          <tr><td><strong>Endereço postal</strong></td><td>[Rua, Número, Bairro, Cidade — Estado, CEP]</td></tr>
+          <tr><td><strong>Prazo de resposta</strong></td><td>Até 15 dias úteis</td></tr>
+        </tbody>
+      </table>
+
+      <div class="box info">
+        <span class="box-icon">⚖️</span>
+        <span class="box-text"><strong>Reclamação à ANPD:</strong> Se você não estiver satisfeito com nossa resposta, você tem o direito de peticionar à <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong>, conforme o <strong>art. 18, § 1º da LGPD</strong>. Acesse: <strong>gov.br/anpd</strong></span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="doc-footer">
+      <div class="doc-footer-text">
+        <strong>Esportes Academy Tecnologia Ltda.</strong> — CNPJ [XX.XXX.XXX/0001-XX]<br/>
+        Política vigente desde 26 de março de 2026. Versão 1.0. Conforme LGPD — Lei 13.709/2018.
+      </div>
+      <div class="doc-footer-links">
+        <a href="termos-de-uso.html" class="doc-footer-link">Termos de Uso →</a>
+        <a href="login.html" class="doc-footer-link">← Voltar ao login</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* Active TOC highlight on scroll */
+  var sections = document.querySelectorAll('.section[id]');
+  var tocLinks = document.querySelectorAll('.toc-item');
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        tocLinks.forEach(function(l) {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px' });
+
+  sections.forEach(function(s) { observer.observe(s); });
+</script>
+</body>
+</html>

@@ -1,1512 +1,647 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Esportes Academy — Escola-grupos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esportes Academy — Escola · Turmas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --primary: #1a56db; --primary-dark: #1e429f; --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669; --success-light: #d1fae5;
-      --warning: #d97706; --warning-light: #fef3c7;
-      --danger: #dc2626; --danger-light: #fee2e2;
-      --purple: #7c3aed; --purple-light: #ede9fe;
-      --orange: #ea580c; --orange-light: #fff7ed;
-      --teal: #0d9488; --teal-light: #ccfbf1;
-      --bg: #f1f5f9; --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
-      --card: #ffffff; --text: #1e293b; --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px; --radius-sm: 8px;
-      --sidebar-w: 260px; --topbar-h: 56px;
+      --primary:        #20C997;
+      --primary-dark:   #17a57a;
+      --primary-light:  #e6faf4;
+      --secondary:      #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:         #FFA552;
+      --accent-light:   #fff4e8;
+      --success:        #20C997;
+      --success-light:  #e6faf4;
+      --warning:        #FFA552;
+      --warning-light:  #fff4e8;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #F7F9FA;
+      --card:           #ffffff;
+      --text:           #1B1B1B;
+      --text-muted:     #6b7280;
+      --border:         #e5e7eb;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d2112;
+      --sidebar-hover:  #162e1c;
+      --shadow:         0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:      0 10px 24px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
-
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-    /* ── OVERLAY ── */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; backdrop-filter: blur(2px); }
-    .overlay.show { display: block; }
+    /* DEMO BAR */
+    .demo-bar { position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1B1B1B;border-radius:40px;padding:8px 12px;display:flex;align-items:center;gap:6px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);flex-wrap:wrap;max-width:calc(100vw - 32px);justify-content:center; }
+    .demo-bar-label { color:rgba(255,255,255,.4);font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:0 4px;white-space:nowrap; }
+    .demo-btn { padding:5px 11px;border-radius:20px;border:none;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6); }
+    .demo-btn:hover { background:rgba(255,255,255,.15);color:#fff; }
+    .demo-btn.active { background:var(--primary);color:#fff; }
 
-    /* ── SIDEBAR ── */
-    .sidebar {
-      width: var(--sidebar-w); height: 100dvh;
-      background: var(--sidebar-bg); display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; z-index: 100;
-      transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
-      overflow-y: auto;
-    }
-    .sidebar.open { transform: translateX(0); }
-    @media (min-width: 1024px) { .sidebar { transform: translateX(0); } }
+    /* OVERLAY */
+    .overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
 
-    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
-    .sidebar-logo .brand { display: flex; align-items: center; gap: 10px; }
-    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .brand-text .name { color: #fff; font-weight: 700; font-size: 14px; line-height: 1.2; }
-    .brand-text .sub  { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: .6px; }
-    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
-    .nav-section-label { color: rgba(255,255,255,.3); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin: 14px 0 5px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; margin-bottom: 2px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-    .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; }
-    .nav-item.active { background: var(--primary); }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
-    .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
-    .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
-    .user-avatar-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#1a56db); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
-    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w);height:100dvh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .brand { display:flex;align-items:center;gap:10px; }
+    .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px;line-height:1.2; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+    .school-chip { margin:10px 12px 0;padding:8px 10px;background:rgba(32,201,151,.1);border:1px solid rgba(32,201,151,.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer; }
+    .school-chip .sc-ava { width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .sc-name { color:rgba(255,255,255,.85);font-size:11px;font-weight:600; }
+    .sc-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .sidebar-nav { padding:8px 10px;flex:1; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+    .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.locked { color:rgba(255,255,255,.28);cursor:not-allowed; }
+    .nav-item.locked:hover { background:none; }
+    .lock-badge { margin-left:auto;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600; }
+    .lock-plan { background:rgba(255,165,82,.15);color:#FFA552; }
+    .nav-badge { margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .sidebar-footer { padding:10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
 
-    /* ── MAIN ── */
-    .main { display: flex; flex-direction: column; min-height: 100dvh; }
-    @media (min-width: 1024px) { .main { margin-left: var(--sidebar-w); } }
+    /* MAIN */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
 
-    /* ── TOPBAR ── */
-    .topbar { background: var(--card); border-bottom: 1px solid var(--border); height: var(--topbar-h); padding: 0 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
-    @media (min-width: 640px) { .topbar { padding: 0 20px; } }
-    @media (min-width: 1024px) { .topbar { padding: 0 28px; height: 64px; } }
-    .hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 18px; flex-shrink: 0; }
-    @media (min-width: 1024px) { .hamburger { display: none; } }
-    .topbar-title-group { flex: 1; min-width: 0; }
-    .topbar-title-group .page-title { font-size: 16px; font-weight: 700; }
-    .topbar-title-group .breadcrumb { font-size: 11px; color: var(--text-muted); display: none; }
-    @media (min-width: 640px) { .topbar-title-group .page-title { font-size: 17px; } .topbar-title-group .breadcrumb { display: block; } }
-    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .search-box { display: none; align-items: center; gap: 8px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 12px; }
-    @media (min-width: 768px) { .search-box { display: flex; width: 220px; } }
-    .search-box input { border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; width: 100%; }
-    .search-box input::placeholder { color: var(--text-muted); }
-    .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1.5px solid var(--border); cursor: pointer; font-size: 15px; position: relative; transition: all .15s; flex-shrink: 0; }
-    .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); }
-    .notif-dot { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; position: absolute; top: 5px; right: 5px; border: 1.5px solid #fff; }
-    .hide-mobile { display: none; }
-    @media (min-width: 640px) { .hide-mobile { display: flex; } }
+    /* TOPBAR */
+    .topbar { position:sticky;top:0;z-index:50;height:var(--topbar-h);background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px;flex-shrink:0;box-shadow:var(--shadow); }
+    .hamburger { background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:var(--text);display:flex; }
+    @media(min-width:1024px){ .hamburger { display:none; } }
+    .topbar-title { flex:1;min-width:0; }
+    .page-title { font-size:15px;font-weight:700; }
+    .breadcrumb { font-size:11px;color:var(--text-muted); }
+    .topbar-right { display:flex;align-items:center;gap:8px;flex-shrink:0; }
+    .icon-btn { width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:15px;position:relative;transition:all .15s; }
+    .icon-btn:hover { background:var(--primary-light);border-color:var(--primary); }
+    .notif-dot { position:absolute;top:5px;right:6px;width:7px;height:7px;background:var(--accent);border-radius:50%;border:1.5px solid var(--card); }
+    .topbar-ava { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0; }
 
-    /* ── BUTTONS ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-    @media (min-width: 640px) { .btn { font-size: 14px; padding: 9px 18px; } }
-    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,86,219,.3); }
-    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-    .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
-    .btn-secondary:hover { background: var(--bg); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-danger:hover { background: #b91c1c; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-ghost { background: transparent; color: var(--text-muted); border: none; }
-    .btn-ghost:hover { background: var(--bg); color: var(--text); }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .btn-xs { padding: 4px 9px; font-size: 11px; border-radius: 6px; }
+    /* BUTTONS */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;white-space:nowrap; }
+    .btn-primary { background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(32,201,151,.3); }
+    .btn-primary:hover { background:var(--primary-dark);transform:translateY(-1px); }
+    .btn-secondary { background:var(--card);color:var(--text);border:1.5px solid var(--border); }
+    .btn-secondary:hover { background:var(--bg); }
+    .btn-sm { padding:5px 11px;font-size:12px; }
+    .btn-outline { background:transparent;color:var(--text);border:1.5px solid var(--border); }
+    .btn-outline:hover { background:var(--bg); }
 
-    /* ── CONTENT ── */
-    .content { padding: 16px; flex: 1; }
-    @media (min-width: 640px)  { .content { padding: 20px; } }
-    @media (min-width: 1024px) { .content { padding: 28px; } }
+    /* PAGE CONTENT */
+    .page-content { padding:20px 16px 120px;flex:1; }
+    @media(min-width:640px) { .page-content { padding:22px 20px 120px; } }
+    @media(min-width:1024px){ .page-content { padding:26px 28px 120px; } }
 
-    /* ── CARD ── */
-    .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-    @media (min-width: 640px)  { .card { padding: 20px; } }
-    @media (min-width: 1024px) { .card { padding: 22px; } }
-    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .card-title    { font-size: 15px; font-weight: 700; }
-    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    /* PAGE HEADER */
+    .page-header { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap; }
+    .page-header h1 { font-size:20px;font-weight:800; }
+    .page-header p  { font-size:13px;color:var(--text-muted);margin-top:2px; }
+    @media(min-width:640px){ .page-header h1 { font-size:22px; } }
 
-    /* ── KPI MINI GRID ── */
-    .kpi-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-    @media (min-width: 640px)  { .kpi-mini-grid { grid-template-columns: repeat(4, 1fr); } }
-    .kpi-mini { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .kpi-mini-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .kpi-mini-body .value { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
-    .kpi-mini-body .label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-mini-body .trend { font-size: 11px; font-weight: 600; margin-top: 3px; }
-    .trend-up   { color: var(--success); }
-    .trend-down { color: var(--danger); }
+    /* STATS ROW */
+    .stats-row { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px; }
+    @media(min-width:640px){ .stats-row { grid-template-columns:repeat(4,1fr); } }
+    .stat-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;display:flex;align-items:center;gap:12px; }
+    .stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .stat-icon.green  { background:var(--primary-light); }
+    .stat-icon.blue   { background:var(--secondary-light); }
+    .stat-icon.orange { background:var(--accent-light); }
+    .stat-icon.purple { background:var(--purple-light); }
+    .stat-val   { font-size:22px;font-weight:800;line-height:1; }
+    .stat-label { font-size:11.5px;color:var(--text-muted);margin-top:2px; }
 
-    /* ── FILTERS ── */
-    .filters-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
-    .filter-search { display: flex; align-items: center; gap: 7px; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 180px; max-width: 300px; }
-    .filter-search input { border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; width: 100%; }
-    .filter-search input::placeholder { color: var(--text-muted); }
+    /* TOOLBAR */
+    .toolbar { display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap; }
+    .search-wrap { display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;flex:1;min-width:180px; }
+    .search-wrap input { border:none;background:transparent;font-size:13px;color:var(--text);outline:none;width:100%; }
+    .search-wrap input::placeholder { color:var(--text-muted); }
+    .filter-select { height:38px;padding:0 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:13px;color:var(--text);outline:none;cursor:pointer;font-family:inherit; }
+    .toolbar-right { margin-left:auto; }
 
-    select { appearance: none; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 28px 8px 10px; font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text); cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; }
+    /* TURMAS GRID */
+    .turmas-grid { display:grid;grid-template-columns:1fr;gap:16px; }
+    @media(min-width:640px) { .turmas-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(min-width:1024px){ .turmas-grid { grid-template-columns:repeat(3,1fr); } }
+    .turma-card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .2s,transform .2s;display:flex;flex-direction:column; }
+    .turma-card:hover { box-shadow:var(--shadow-md);transform:translateY(-2px); }
+    .turma-color-bar { height:4px;width:100%; }
+    .turma-body { padding:16px;flex:1;display:flex;flex-direction:column;gap:10px; }
+    .turma-head { display:flex;align-items:flex-start;justify-content:space-between;gap:8px; }
+    .turma-name { font-size:15px;font-weight:700; }
+    .turma-badge { font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0; }
+    .turma-status-badge { font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px; }
+    .turma-status-badge.ativa   { background:var(--primary-light);color:var(--primary-dark); }
+    .turma-status-badge.pausada { background:var(--accent-light);color:#b45309; }
+    .turma-meta-list { display:flex;flex-direction:column;gap:4px; }
+    .turma-meta-item { display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted); }
+    .turma-meta-item .mi { font-size:13px;width:16px;text-align:center;flex-shrink:0; }
+    .turma-meta-item strong { color:var(--text);font-weight:600; }
+    .progress-wrap { display:flex;flex-direction:column;gap:4px; }
+    .progress-label { display:flex;align-items:center;justify-content:space-between;font-size:11.5px; }
+    .progress-label .pl-left  { color:var(--text-muted); }
+    .progress-label .pl-right { font-weight:700; }
+    .progress-bar-bg { height:6px;background:var(--border);border-radius:99px;overflow:hidden; }
+    .progress-bar-fill { height:100%;border-radius:99px;transition:width .4s; }
+    .turma-actions { display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border); }
+    .action-btn { flex:1;min-width:70px;padding:6px 8px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s; }
+    .action-btn:hover { border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark); }
+    .action-btn.primary-action { background:var(--primary);border-color:var(--primary);color:#fff; }
+    .action-btn.primary-action:hover { background:var(--primary-dark);border-color:var(--primary-dark); }
 
-    /* ── TABLE ── */
-    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { background: var(--bg); padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    tbody tr { transition: background .1s; cursor: pointer; }
-    tbody tr:hover td { background: #f8fafc; }
-    tbody td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
-    tbody tr:last-child td { border-bottom: none; }
+    /* DRAWER */
+    .drawer-backdrop { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;backdrop-filter:blur(2px); }
+    .drawer-backdrop.show { display:block; }
+    .drawer { position:fixed;top:0;right:-520px;width:100%;max-width:500px;height:100dvh;background:var(--card);z-index:201;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 32px rgba(0,0,0,.15); }
+    .drawer.open { right:0; }
+    .drawer-header { padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0; }
+    .drawer-title { font-size:16px;font-weight:700; }
+    .drawer-close { width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s; }
+    .drawer-close:hover { background:var(--border); }
+    .drawer-body { padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px; }
+    .form-group { display:flex;flex-direction:column;gap:5px; }
+    .form-label { font-size:12.5px;font-weight:600;color:var(--text); }
+    .form-label span { color:var(--danger); }
+    .form-control { padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;width:100%; }
+    .form-control:focus { border-color:var(--primary);background:#fff; }
+    .color-picker-row { display:flex;gap:10px;flex-wrap:wrap; }
+    .color-swatch { width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s,box-shadow .15s; }
+    .color-swatch.selected { border-color:#fff;box-shadow:0 0 0 2px var(--text);transform:scale(1.15); }
+    .dias-row { display:flex;gap:6px;flex-wrap:wrap; }
+    .dia-chip { padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none; }
+    .dia-chip.selected { background:var(--primary);border-color:var(--primary);color:#fff; }
+    .form-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .drawer-footer { padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0; }
+    .drawer-footer .btn { flex:1;justify-content:center; }
 
-    .group-cell { display: flex; align-items: center; gap: 10px; }
-    .group-icon-sm { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .group-name { font-weight: 600; font-size: 13px; }
-    .group-school { font-size: 11px; color: var(--text-muted); }
+    /* ACCESS OVERLAY */
+    .access-overlay { display:none;position:absolute;inset:0;background:rgba(247,249,250,.92);z-index:40;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:32px; }
+    .access-overlay.show { display:flex; }
+    .access-overlay .lock { font-size:40px; }
+    .access-overlay h3 { font-size:18px;font-weight:800; }
+    .access-overlay p  { font-size:13px;color:var(--text-muted);max-width:300px;line-height:1.5; }
 
-    .badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-    .badge-active   { background: var(--success-light); color: var(--success); }
-    .badge-inactive { background: #f1f5f9; color: var(--text-muted); }
-    .badge-full     { background: var(--warning-light); color: var(--warning); }
+    /* EMPTY STATE */
+    .empty-state { text-align:center;padding:60px 20px;color:var(--text-muted); }
+    .empty-state .es-icon  { font-size:48px;margin-bottom:12px; }
+    .empty-state .es-title { font-size:16px;font-weight:700;color:var(--text); }
+    .empty-state .es-sub   { font-size:13px;margin-top:4px; }
 
-    .chip { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-    .chip-blue   { background: var(--primary-light); color: var(--primary); }
-    .chip-green  { background: var(--success-light); color: var(--success); }
-    .chip-orange { background: var(--warning-light); color: var(--warning); }
-    .chip-purple { background: var(--purple-light); color: var(--purple); }
-    .chip-teal   { background: var(--teal-light); color: var(--teal); }
-    .chip-gray   { background: #f1f5f9; color: var(--text-muted); }
-
-    /* ── DAYS CHIPS ── */
-    .days-wrap { display: flex; gap: 4px; flex-wrap: wrap; }
-    .day-chip {
-      width: 26px; height: 26px; border-radius: 50%;
-      display: inline-flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 700; flex-shrink: 0;
-    }
-    .day-chip.on  { background: var(--primary); color: #fff; }
-    .day-chip.off { background: var(--bg); color: var(--text-muted); }
-
-    .row-actions { display: flex; gap: 4px; align-items: center; }
-    .action-btn { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; background: var(--bg); color: var(--text-muted); transition: all .15s; }
-    .action-btn:hover        { background: var(--primary-light); color: var(--primary); }
-    .action-btn.danger:hover { background: var(--danger-light); color: var(--danger); }
-    .action-btn.success:hover{ background: var(--success-light); color: var(--success); }
-
-    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 2px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
-    .pagination-pages { display: flex; gap: 5px; }
-
-    /* ── SIDE PANEL ── */
-    .panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; }
-    .panel-overlay.show { display: block; }
-
-    .side-panel {
-      position: fixed; top: 0; right: 0; bottom: 0;
-      width: 100%; max-width: 580px;
-      background: var(--card);
-      z-index: 210;
-      display: flex; flex-direction: column;
-      transform: translateX(100%);
-      transition: transform .3s cubic-bezier(.4,0,.2,1);
-      box-shadow: -8px 0 40px rgba(0,0,0,.15);
-      overflow: hidden;
-    }
-    .side-panel.open { transform: translateX(0); }
-    @media (min-width: 768px) { .side-panel { max-width: 560px; } }
-
-    .panel-header {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 12px;
-      flex-shrink: 0;
-    }
-    .panel-header-info { flex: 1; min-width: 0; }
-    .panel-header-info .panel-title { font-size: 16px; font-weight: 700; }
-    .panel-header-info .panel-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .panel-close { width: 32px; height: 32px; border-radius: 8px; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all .15s; flex-shrink: 0; }
-    .panel-close:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
-
-    .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
-    .panel-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
-
-    /* ── TABS ── */
-    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
-    .tab-item { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all .15s; }
-    .tab-item:hover { color: var(--text); }
-    .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* ── GROUP HERO ── */
-    .group-hero { display: flex; align-items: center; gap: 14px; padding: 18px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: var(--radius); margin-bottom: 20px; }
-    .group-hero-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
-    .group-hero-info .hero-name { font-size: 17px; font-weight: 800; color: var(--text); }
-    .group-hero-info .hero-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .group-hero-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-
-    /* ── SCHEDULE DISPLAY ── */
-    .schedule-box { background: var(--bg); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 14px; }
-    .schedule-days { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-    .sched-day { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .sched-day.on  { background: var(--primary); color: #fff; }
-    .sched-day.off { background: var(--border); color: var(--text-muted); }
-    .schedule-time { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text); }
-    .schedule-time span { font-size: 16px; }
-
-    .info-section { margin-bottom: 20px; }
-    .info-section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .info-item .info-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; }
-    .info-item .info-value { font-size: 13px; color: var(--text); font-weight: 600; }
-    .info-item.full { grid-column: 1 / -1; }
-
-    /* athlete list */
-    .athlete-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .athlete-row:last-child { border-bottom: none; }
-    .athlete-av { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .athlete-name { font-size: 13px; font-weight: 500; }
-    .athlete-groups { font-size: 11px; color: var(--text-muted); }
-    .athlete-status { margin-left: auto; }
-
-    /* progress bar */
-    .progress-bar-wrap { background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; }
-    .progress-bar { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
-    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-
-    /* ── FORM ── */
-    .form-section { margin-bottom: 24px; }
-    .form-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .form-section-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .form-section-title { font-size: 13px; font-weight: 700; color: var(--text); }
-
-    .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 500px) { .form-grid { grid-template-columns: 1fr 1fr; } }
-    .form-grid .full { grid-column: 1 / -1; }
-
-    .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-label { font-size: 12px; font-weight: 600; color: var(--text); }
-    .form-label .required { color: var(--danger); margin-left: 2px; }
-    .form-label .hint { font-weight: 400; color: var(--text-muted); margin-left: 4px; font-size: 11px; }
-
-    .form-input, .form-select, .form-textarea {
-      width: 100%; padding: 9px 12px;
-      border: 1.5px solid var(--border); border-radius: 8px;
-      font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text);
-      background: var(--card); outline: none;
-      transition: border-color .15s;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.1); }
-    .form-input::placeholder { color: var(--text-muted); }
-    .form-textarea { resize: vertical; min-height: 72px; }
-
-    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-color: var(--card); padding-right: 30px; }
-
-    /* ── DAYS PICKER ── */
-    .days-picker { display: flex; gap: 6px; flex-wrap: wrap; }
-    .day-pick {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: var(--bg);
-      font-size: 11px; font-weight: 700; color: var(--text-muted);
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: all .15s; user-select: none;
-    }
-    .day-pick:hover { border-color: var(--primary); color: var(--primary); }
-    .day-pick.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
-
-    .time-row { display: flex; gap: 10px; align-items: center; }
-    .time-row .form-input { flex: 1; }
-    .time-separator { font-size: 13px; font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
-
-    /* Toggle switch */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
-    .toggle-label { font-size: 13px; font-weight: 500; color: var(--text); }
-    .toggle-sub   { font-size: 11px; color: var(--text-muted); }
-    .toggle { position: relative; display: inline-block; width: 40px; height: 22px; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: .2s; }
-    .toggle-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
-    .toggle input:checked + .toggle-slider { background: var(--primary); }
-    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
-
-    /* ── CONFIRM MODAL ── */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: var(--card); border-radius: var(--radius); padding: 28px; max-width: 420px; width: 100%; box-shadow: var(--shadow-lg); animation: modalIn .2s ease; }
-    @keyframes modalIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
-    .modal-icon { width: 52px; height: 52px; border-radius: 50%; background: var(--danger-light); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px; }
-    .modal-title    { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 8px; }
-    .modal-text     { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; margin-bottom: 20px; }
-    .modal-actions  { display: flex; gap: 10px; }
-    .modal-actions .btn { flex: 1; justify-content: center; }
-
-    /* ── UTILS ── */
-    .text-muted { color: var(--text-muted); }
-    .text-sm    { font-size: 12px; }
-    .fw-600     { font-weight: 600; }
-    .mt-4       { margin-top: 16px; }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-    .empty-state .es-icon { font-size: 40px; margin-bottom: 10px; }
-    .empty-state .es-text { font-size: 14px; font-weight: 500; }
-
-    /* sport color variants */
-    .sport-futebol  { background: #dcfce7; }
-    .sport-natacao  { background: #dbeafe; }
-    .sport-basquete { background: #fef3c7; }
-    .sport-volei    { background: #ede9fe; }
-    .sport-atletismo{ background: #fce7f3; }
-    .sport-tenis    { background: #ccfbf1; }
+    .hidden { display:none !important; }
   </style>
 </head>
 <body>
 
-<!-- ── OVERLAY sidebar ── -->
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<!-- DEMO BAR -->
+<div class="demo-bar">
+  <span class="demo-bar-label">Perfil:</span>
+  <button class="demo-btn active" onclick="setProfile('admin_escola',this)">&#128081; Admin</button>
+  <button class="demo-btn" onclick="setProfile('coordenador',this)">&#128218; Coordenador</button>
+  <button class="demo-btn" onclick="setProfile('professor',this)">&#127979; Professor</button>
+  <button class="demo-btn" onclick="setProfile('financeiro',this)">&#128176; Financeiro</button>
+  <button class="demo-btn" onclick="setProfile('secretaria',this)">&#128203; Secretaria</button>
+  <button class="demo-btn" onclick="setProfile('saude',this)">&#129338; Saude</button>
+  <button class="demo-btn" onclick="setProfile('marketing',this)">&#128226; Marketing</button>
+</div>
 
-<!-- ════ SIDEBAR ════ -->
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">&#9917;</div>
       <div class="brand-text">
-        <div class="name">Santos FC</div>
-        <div class="sub">PORTAL ESCOLA</div>
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
       </div>
     </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">&#127979;</div>
+      <div>
+        <div class="sc-name">Academia Atletica SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">&#8645;</span>
+    </div>
   </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item" href="#"><span class="icon">🏠</span> Dashboard</a>
-    <a class="nav-item active" href="grupos.html"><span class="icon">🏃</span> Grupos <span class="nav-badge" id="sb-count">12</span></a>
-    <a class="nav-item" href="#"><span class="icon">👨‍🎓</span> Atletas <span class="nav-badge">284</span></a>
-    <a class="nav-item" href="#"><span class="icon">👨‍🏫</span> Professores</a>
-    <a class="nav-item" href="#"><span class="icon">📅</span> Agenda</a>
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="#"><span class="icon">💳</span> Cobranças</a>
-    <a class="nav-item" href="#"><span class="icon">📊</span> Relatórios</a>
-    <div class="nav-section-label">Escola</div>
-    <a class="nav-item" href="#"><span class="icon">⚙️</span> Configurações</a>
-    <a class="nav-item" href="#"><span class="icon">🔔</span> Notificações <span class="nav-badge">3</span></a>
-  </nav>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
       <div class="user-info">
-        <div class="user-name">João Diretor</div>
-        <div class="user-role">Admin da Escola</div>
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
       </div>
     </div>
   </div>
 </aside>
 
-<!-- ════ MAIN ════ -->
+<!-- MAIN -->
 <div class="main">
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <button class="hamburger" onclick="toggleSidebar()">☰</button>
-    <div class="topbar-title-group">
-      <div class="page-title">Grupos de Atletas</div>
-      <div class="breadcrumb">Admin / Grupos</div>
+    <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="topbar-title">
+      <div class="page-title">Turmas</div>
+      <div class="breadcrumb">Academia Atletica SP · Gestao de Turmas</div>
     </div>
-    <div class="topbar-actions">
-      <div class="search-box hide-mobile">
-        <span>🔍</span>
-        <input type="text" placeholder="Buscar grupos..." oninput="filterTable(this.value)" />
-      </div>
-      <button class="icon-btn">
-        🔔
-        <span class="notif-dot"></span>
-      </button>
-      <button class="btn btn-primary" onclick="openCreate()">
-        <span>＋</span> Novo Grupo
-      </button>
+    <div class="topbar-right">
+      <div class="icon-btn" title="Notificacoes">&#128276;<span class="notif-dot"></span></div>
+      <div class="topbar-ava" id="topbarAva">AD</div>
     </div>
   </header>
 
-  <!-- CONTENT -->
-  <main class="content">
+  <!-- PAGE CONTENT -->
+  <main class="page-content" style="position:relative;">
 
-    <!-- KPIs -->
-    <div class="kpi-mini-grid">
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon" style="background:#dbeafe">🏃</div>
-        <div class="kpi-mini-body">
-          <div class="value">12</div>
-          <div class="label">Grupos Ativos</div>
-          <div class="trend trend-up">+2 este mês</div>
-        </div>
+    <!-- ACCESS OVERLAY -->
+    <div class="access-overlay" id="accessOverlay">
+      <div class="lock">&#128274;</div>
+      <h3>Acesso restrito</h3>
+      <p>Voce nao tem permissao para acessar o modulo de Turmas com este perfil.</p>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>&#127939; Turmas</h1>
+        <p>Gerencie turmas, horarios, modalidades e professores responsaveis.</p>
       </div>
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon" style="background:#d1fae5">👥</div>
-        <div class="kpi-mini-body">
-          <div class="value">284</div>
-          <div class="label">Atletas (total)</div>
-          <div class="trend trend-up">+18 este mês</div>
-        </div>
+      <button class="btn btn-primary" id="btnNovaTurma" onclick="openDrawer(null)">+ Nova Turma</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon green">&#127939;</div>
+        <div><div class="stat-val" style="color:var(--primary)">7</div><div class="stat-label">Total de Turmas</div></div>
       </div>
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon" style="background:#fef3c7">⏱️</div>
-        <div class="kpi-mini-body">
-          <div class="value">4,2</div>
-          <div class="label">Horas/semana (méd.)</div>
-          <div class="trend" style="color:var(--text-muted)">por grupo</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">&#128101;</div>
+        <div><div class="stat-val" style="color:var(--secondary)">41</div><div class="stat-label">Atletas Ativos</div></div>
       </div>
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon" style="background:#ede9fe">📊</div>
-        <div class="kpi-mini-body">
-          <div class="value">78%</div>
-          <div class="label">Ocupação média</div>
-          <div class="trend trend-up">↑ 5% vs mês ant.</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">&#128197;</div>
+        <div><div class="stat-val" style="color:var(--accent)">12</div><div class="stat-label">Aulas Esta Semana</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">&#128202;</div>
+        <div><div class="stat-val" style="color:var(--purple)">78%</div><div class="stat-label">Taxa de Ocupacao</div></div>
       </div>
     </div>
 
-    <!-- FILTERS + TABLE -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Todos os Grupos</div>
-          <div class="card-subtitle">12 grupos cadastrados · 6 modalidades</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <select id="filterEsporte" onchange="applyFilters()">
-            <option value="">Todos os esportes</option>
-            <option>Futebol</option>
-            <option>Natação</option>
-            <option>Basquete</option>
-            <option>Vôlei</option>
-            <option>Atletismo</option>
-            <option>Tênis</option>
-          </select>
-          <select id="filterStatus" onchange="applyFilters()">
-            <option value="">Todos status</option>
-            <option>Ativo</option>
-            <option>Inativo</option>
-            <option>Lotado</option>
-          </select>
-          <select id="filterDia" onchange="applyFilters()">
-            <option value="">Qualquer dia</option>
-            <option value="Seg">Segunda</option>
-            <option value="Ter">Terça</option>
-            <option value="Qua">Quarta</option>
-            <option value="Qui">Quinta</option>
-            <option value="Sex">Sexta</option>
-            <option value="Sab">Sábado</option>
-          </select>
-        </div>
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span>&#128269;</span>
+        <input type="text" id="searchInput" placeholder="Buscar turma ou professor..." oninput="filterCards()"/>
       </div>
+      <select class="filter-select" id="filterModalidade" onchange="filterCards()">
+        <option value="">Todas as modalidades</option>
+        <option value="Futebol">Futebol</option>
+        <option value="Natacao">Natacao</option>
+        <option value="Futsal">Futsal</option>
+        <option value="Ginastica">Ginastica</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="filterCards()">
+        <option value="">Todas</option>
+        <option value="ativa">Ativas</option>
+        <option value="pausada">Pausadas</option>
+      </select>
+      <div class="toolbar-right">
+        <button class="btn btn-outline btn-sm" onclick="alert('Exportar turmas em CSV...')">&#128202; Exportar</button>
+      </div>
+    </div>
 
-      <!-- TABLE -->
-      <div class="table-scroll">
-        <table id="groupsTable">
-          <thead>
-            <tr>
-              <th>Grupo</th>
-              <th>Dias de treino</th>
-              <th>Horário</th>
-              <th>Professor</th>
-              <th>Atletas</th>
-              <th>Ocupação</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="groupsTbody">
-            <!-- preenchido por JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- PAGINATION -->
-      <div class="pagination">
-        <span class="text-sm text-muted" id="paginationInfo">Mostrando 1–10 de 12 grupos</span>
-        <div class="pagination-pages">
-          <button class="btn btn-secondary btn-xs">‹</button>
-          <button class="btn btn-primary btn-xs">1</button>
-          <button class="btn btn-secondary btn-xs">2</button>
-          <button class="btn btn-secondary btn-xs">›</button>
-        </div>
-      </div>
+    <!-- TURMAS GRID -->
+    <div class="turmas-grid" id="turmasGrid"></div>
+    <div class="empty-state hidden" id="emptyState">
+      <div class="es-icon">&#128269;</div>
+      <div class="es-title">Nenhuma turma encontrada</div>
+      <div class="es-sub">Tente ajustar os filtros ou criar uma nova turma.</div>
     </div>
 
   </main>
 </div>
 
-<!-- ════ SIDE PANEL OVERLAY ════ -->
-<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<!-- DRAWER BACKDROP -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 
-<!-- ════ PANEL: VISUALIZAR GRUPO ════ -->
-<div class="side-panel" id="viewPanel">
-  <div class="panel-header">
-    <div class="panel-header-info">
-      <div class="panel-title" id="vp-title">Sub-13 Futebol</div>
-      <div class="panel-sub" id="vp-sub">Escola Santos FC · Futebol</div>
-    </div>
-    <button class="panel-close" onclick="closePanel()">✕</button>
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="drawerTitle">Nova Turma</div>
+    <button class="drawer-close" onclick="closeDrawer()">&#10005;</button>
   </div>
-  <div class="panel-body" id="viewPanelBody">
-
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab-item active" onclick="switchTab(this,'tab-info')">Informações</button>
-      <button class="tab-item" onclick="switchTab(this,'tab-atletas')">Atletas <span id="vp-count-tab"></span></button>
-      <button class="tab-item" onclick="switchTab(this,'tab-freq')">Frequência</button>
+  <div class="drawer-body">
+    <div class="form-group">
+      <label class="form-label">Nome da turma <span>*</span></label>
+      <input type="text" class="form-control" id="f-nome" placeholder="Ex: Futebol Sub-13 A"/>
     </div>
-
-    <!-- TAB INFO -->
-    <div class="tab-content active" id="tab-info">
-      <div class="group-hero" id="vp-hero">
-        <div class="group-hero-icon sport-futebol" id="vp-hero-icon">⚽</div>
-        <div class="group-hero-info">
-          <div class="hero-name" id="vp-hero-name">Sub-13 Futebol</div>
-          <div class="hero-meta" id="vp-hero-meta">Escola Santos FC · Prof. Carlos Silva</div>
-          <div class="group-hero-badges" id="vp-hero-badges"></div>
-        </div>
-      </div>
-
-      <!-- Schedule box -->
-      <div class="schedule-box">
-        <div class="schedule-days" id="vp-sched-days"></div>
-        <div class="schedule-time"><span>🕐</span> <span id="vp-sched-time"></span></div>
-      </div>
-
-      <div class="info-section">
-        <div class="info-section-title">Detalhes do Grupo</div>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Esporte / Modalidade</div>
-            <div class="info-value" id="vp-esporte">—</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Categoria</div>
-            <div class="info-value" id="vp-categoria">—</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Escola</div>
-            <div class="info-value" id="vp-escola">—</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Professor</div>
-            <div class="info-value" id="vp-professor">—</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Local do treino</div>
-            <div class="info-value" id="vp-local">—</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Capacidade máx.</div>
-            <div class="info-value" id="vp-capacidade">—</div>
-          </div>
-          <div class="info-item full">
-            <div class="info-label">Descrição</div>
-            <div class="info-value" id="vp-descricao" style="font-weight:400;line-height:1.5">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-section">
-        <div class="info-section-title">Ocupação</div>
-        <div class="progress-label">
-          <span id="vp-ocp-label">0 / 0 atletas</span>
-          <span id="vp-ocp-pct">0%</span>
-        </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar" id="vp-prog" style="width:0%"></div>
-        </div>
+    <div class="form-group">
+      <label class="form-label">Modalidade <span>*</span></label>
+      <select class="form-control" id="f-modalidade">
+        <option value="">Selecionar...</option>
+        <option>Futebol</option>
+        <option>Futsal</option>
+        <option>Natacao</option>
+        <option>Ginastica</option>
+        <option>Volei</option>
+        <option>Basquete</option>
+        <option>Atletismo</option>
+        <option>Jiu-Jitsu</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cor da turma</label>
+      <div class="color-picker-row" id="colorPicker">
+        <div class="color-swatch selected" data-color="#20C997" style="background:#20C997" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="#17a57a" style="background:#17a57a" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="#5BC0EB" style="background:#5BC0EB" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="#FFA552" style="background:#FFA552" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="#ef4444" style="background:#ef4444" onclick="selectColor(this)"></div>
       </div>
     </div>
-
-    <!-- TAB ATLETAS -->
-    <div class="tab-content" id="tab-atletas">
-      <div id="vp-atletas-list"></div>
-    </div>
-
-    <!-- TAB FREQUÊNCIA -->
-    <div class="tab-content" id="tab-freq">
-      <p class="text-sm text-muted" style="margin-bottom:14px">Resumo de presença nos últimos 30 dias.</p>
-      <div id="vp-freq-list"></div>
-    </div>
-
-  </div>
-  <div class="panel-footer">
-    <button class="btn btn-secondary" onclick="closePanel()">Fechar</button>
-    <button class="btn btn-primary" id="vpEditBtn" onclick="openEdit()">✏️ Editar</button>
-  </div>
-</div>
-
-<!-- ════ PANEL: CRIAR / EDITAR GRUPO ════ -->
-<div class="side-panel" id="formPanel">
-  <div class="panel-header">
-    <div class="panel-header-info">
-      <div class="panel-title" id="fp-title">Novo Grupo</div>
-      <div class="panel-sub" id="fp-sub">Preencha os dados do grupo de treinamento</div>
-    </div>
-    <button class="panel-close" onclick="closeFormPanel()">✕</button>
-  </div>
-  <div class="panel-body">
-
-    <!-- SEÇÃO 1: Identificação -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">🏷️</div>
-        <div class="form-section-title">Identificação</div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">Nome do Grupo <span class="required">*</span></label>
-          <input type="text" class="form-input" id="f-nome" placeholder="Ex: Sub-13 Futebol, Natação Avançado..." />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Esporte / Modalidade <span class="required">*</span></label>
-          <select class="form-select" id="f-esporte">
-            <option value="">Selecione...</option>
-            <option>Futebol</option>
-            <option>Natação</option>
-            <option>Basquete</option>
-            <option>Vôlei</option>
-            <option>Atletismo</option>
-            <option>Tênis</option>
-            <option>Outro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Categoria</label>
-          <input type="text" class="form-input" id="f-categoria" placeholder="Ex: Sub-13, Adulto, Iniciante..." />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Escola <span class="required">*</span></label>
-          <select class="form-select" id="f-escola">
-            <option value="">Selecione...</option>
-            <option>Santos FC</option>
-            <option>Academia Olimpo</option>
-            <option>Clube Aquático Azul</option>
-            <option>Arena Basquete SP</option>
-            <option>Esporte Total</option>
-            <option>Instituto Atletismo BR</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Professor <span class="required">*</span></label>
-          <select class="form-select" id="f-professor">
-            <option value="">Selecione...</option>
-            <option>Carlos Silva</option>
-            <option>Ana Souza</option>
-            <option>João Ferreira</option>
-            <option>Mariana Costa</option>
-            <option>Rafael Nunes</option>
-            <option>Patrícia Lima</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Local do Treino</label>
-          <input type="text" class="form-input" id="f-local" placeholder="Ex: Campo 1, Piscina Olímpica, Quadra B..." />
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Descrição <span class="hint">(opcional)</span></label>
-          <textarea class="form-textarea" id="f-descricao" placeholder="Informações adicionais sobre o grupo..."></textarea>
-        </div>
+    <div class="form-group">
+      <label class="form-label">Dias da semana <span>*</span></label>
+      <div class="dias-row" id="diasRow">
+        <div class="dia-chip" data-dia="Seg" onclick="toggleDia(this)">Seg</div>
+        <div class="dia-chip" data-dia="Ter" onclick="toggleDia(this)">Ter</div>
+        <div class="dia-chip" data-dia="Qua" onclick="toggleDia(this)">Qua</div>
+        <div class="dia-chip" data-dia="Qui" onclick="toggleDia(this)">Qui</div>
+        <div class="dia-chip" data-dia="Sex" onclick="toggleDia(this)">Sex</div>
+        <div class="dia-chip" data-dia="Sab" onclick="toggleDia(this)">Sab</div>
+        <div class="dia-chip" data-dia="Dom" onclick="toggleDia(this)">Dom</div>
       </div>
     </div>
-
-    <!-- SEÇÃO 2: Frequência de Treino -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">📅</div>
-        <div class="form-section-title">Frequência de Treinamento</div>
-      </div>
-      <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label">Dias da semana <span class="required">*</span><span class="hint">Selecione um ou mais</span></label>
-        <div class="days-picker" id="daysPicker">
-          <div class="day-pick" data-day="Seg" onclick="toggleDay(this)">Seg</div>
-          <div class="day-pick" data-day="Ter" onclick="toggleDay(this)">Ter</div>
-          <div class="day-pick" data-day="Qua" onclick="toggleDay(this)">Qua</div>
-          <div class="day-pick" data-day="Qui" onclick="toggleDay(this)">Qui</div>
-          <div class="day-pick" data-day="Sex" onclick="toggleDay(this)">Sex</div>
-          <div class="day-pick" data-day="Sab" onclick="toggleDay(this)">Sáb</div>
-          <div class="day-pick" data-day="Dom" onclick="toggleDay(this)">Dom</div>
-        </div>
-        <div id="daysPreview" style="margin-top:8px;font-size:12px;color:var(--text-muted)">Nenhum dia selecionado</div>
-      </div>
-      <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label">Horário <span class="required">*</span></label>
-        <div class="time-row">
-          <input type="time" class="form-input" id="f-hora-inicio" value="07:00" />
-          <span class="time-separator">até</span>
-          <input type="time" class="form-input" id="f-hora-fim" value="08:30" />
-        </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Horario <span>*</span></label>
+        <input type="time" class="form-control" id="f-horario" value="09:00"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Duração calculada</label>
-        <div id="durationCalc" style="font-size:13px;font-weight:600;color:var(--primary);padding:4px 0">—</div>
+        <label class="form-label">Duracao</label>
+        <select class="form-control" id="f-duracao">
+          <option>30 min</option>
+          <option>45 min</option>
+          <option selected>1h</option>
+          <option>1h30</option>
+          <option>2h</option>
+          <option>2h30</option>
+        </select>
       </div>
     </div>
-
-    <!-- SEÇÃO 3: Vagas -->
-    <div class="form-section">
-      <div class="form-section-header">
-        <div class="form-section-icon">👥</div>
-        <div class="form-section-title">Vagas e Configurações</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Capacidade maxima</label>
+        <input type="number" class="form-control" id="f-capacidade" value="20" min="1" max="200"/>
       </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Capacidade máx. de atletas</label>
-          <input type="number" class="form-input" id="f-capacidade" placeholder="Ex: 25" min="1" max="200" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Valor da mensalidade (R$)</label>
-          <input type="number" class="form-input" id="f-valor" placeholder="Ex: 350,00" />
-        </div>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Permitir lista de espera</div>
-          <div class="toggle-sub">Atletas podem entrar na fila quando o grupo estiver lotado</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="f-espera" checked />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Grupo ativo</div>
-          <div class="toggle-sub">Grupos inativos não aparecem na matrícula</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="f-ativo" checked />
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="form-group">
+        <label class="form-label">Valor mensal (R$)</label>
+        <input type="number" class="form-control" id="f-valor" placeholder="Ex: 250"/>
       </div>
     </div>
-
+    <div class="form-group">
+      <label class="form-label">Professor responsavel</label>
+      <select class="form-control" id="f-professor">
+        <option value="">Selecionar...</option>
+        <option>Paula Costa</option>
+        <option>Rafael Torres</option>
+        <option>Ana Lima</option>
+        <option>Carlos Mendes</option>
+        <option>Fernanda Reis</option>
+      </select>
+    </div>
   </div>
-  <div class="panel-footer">
-    <button class="btn btn-secondary" onclick="closeFormPanel()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveGroup()">💾 Salvar Grupo</button>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeDrawer()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveTurma()">Salvar Turma</button>
   </div>
 </div>
 
-<!-- ════ MODAL: CONFIRMAR EXCLUSÃO ════ -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal">
-    <div class="modal-icon">🗑️</div>
-    <div class="modal-title">Excluir Grupo?</div>
-    <div class="modal-text" id="deleteModalText">Tem certeza que deseja excluir este grupo? Todos os atletas serão desvinculados. Esta ação não pode ser desfeita.</div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
-      <button class="btn btn-danger" onclick="confirmDelete()">Excluir</button>
-    </div>
-  </div>
-</div>
-
-<!-- ════ JS ════ -->
 <script>
-/* ──────────────────────────────────────────
-   DADOS MOCADOS
-────────────────────────────────────────── */
-const DAYS_ALL = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+/* PERFIS */
+const PROFILES = {
+  admin_escola: { nome:'Admin Escola',       ava:'AD', canEdit:true,  canSee:true  },
+  coordenador:  { nome:'Coordenador',        ava:'CO', canEdit:false, canSee:true  },
+  professor:    { nome:'Prof. Paula Costa',  ava:'PC', canEdit:false, canSee:true, professorName:'Paula Costa' },
+  financeiro:   { nome:'Financeiro',         ava:'FI', canEdit:false, canSee:false },
+  secretaria:   { nome:'Secretaria',         ava:'SE', canEdit:true,  canSee:true  },
+  saude:        { nome:'Saude',              ava:'SA', canEdit:false, canSee:false },
+  marketing:    { nome:'Marketing',          ava:'MK', canEdit:false, canSee:false },
+};
+let currentProfile = 'admin_escola';
 
-const groups = [
-  {
-    id: 1,
-    nome: 'Sub-13 Futebol',
-    esporte: 'Futebol',
-    categoria: 'Sub-13',
-    escola: 'Santos FC',
-    professor: 'Carlos Silva',
-    local: 'Campo Principal',
-    descricao: 'Grupo focado no desenvolvimento técnico-tático para atletas sub-13. Ênfase em fundamentos e jogo coletivo.',
-    dias: ['Ter','Qui'],
-    horaInicio: '16:00', horaFim: '17:30',
-    capacidade: 22, atletas: 18,
-    valorMensalidade: 380,
-    espera: true, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-futebol', emoji: '⚽',
-    atletasList: [
-      {nome:'Lucas Oliveira', av:'LO', cor:'#1a56db', grupos:'Sub-13 Futebol · Sub-15 Futebol'},
-      {nome:'Pedro Alves', av:'PA', cor:'#7c3aed', grupos:'Sub-13 Futebol'},
-      {nome:'Gabriel Santos', av:'GS', cor:'#059669', grupos:'Sub-13 Futebol'},
-      {nome:'Mateus Lima', av:'ML', cor:'#d97706', grupos:'Sub-13 Futebol · Atletismo Elite'},
-      {nome:'Felipe Costa', av:'FC', cor:'#dc2626', grupos:'Sub-13 Futebol'},
-    ]
-  },
-  {
-    id: 2,
-    nome: 'Sub-15 Futebol',
-    esporte: 'Futebol',
-    categoria: 'Sub-15',
-    escola: 'Santos FC',
-    professor: 'Carlos Silva',
-    local: 'Campo Auxiliar',
-    descricao: 'Preparação competitiva para atletas sub-15. Foco em tática e preparação física.',
-    dias: ['Seg','Qua','Sex'],
-    horaInicio: '15:00', horaFim: '17:00',
-    capacidade: 25, atletas: 25,
-    valorMensalidade: 420,
-    espera: true, ativo: true,
-    status: 'Lotado',
-    cor: 'sport-futebol', emoji: '⚽',
-    atletasList: [
-      {nome:'Lucas Oliveira', av:'LO', cor:'#1a56db', grupos:'Sub-13 Futebol · Sub-15 Futebol'},
-      {nome:'Thiago Martins', av:'TM', cor:'#0ea5e9', grupos:'Sub-15 Futebol'},
-      {nome:'Bruno Ferreira', av:'BF', cor:'#059669', grupos:'Sub-15 Futebol'},
-    ]
-  },
-  {
-    id: 3,
-    nome: 'Natação Avançado',
-    esporte: 'Natação',
-    categoria: 'Adulto',
-    escola: 'Clube Aquático Azul',
-    professor: 'Ana Souza',
-    local: 'Piscina Olímpica',
-    descricao: 'Grupo de alto rendimento para nadadores adultos. Treinos diários com periodização mensal.',
-    dias: ['Seg','Ter','Qua','Qui','Sex'],
-    horaInicio: '07:00', horaFim: '08:30',
-    capacidade: 15, atletas: 12,
-    valorMensalidade: 650,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-natacao', emoji: '🏊',
-    atletasList: [
-      {nome:'Carla Mendes', av:'CM', cor:'#0ea5e9', grupos:'Natação Avançado'},
-      {nome:'Rafael Nunes', av:'RN', cor:'#1a56db', grupos:'Natação Avançado · Atletismo Elite'},
-      {nome:'Juliana Rocha', av:'JR', cor:'#7c3aed', grupos:'Natação Avançado'},
-    ]
-  },
-  {
-    id: 4,
-    nome: 'Natação Infantil',
-    esporte: 'Natação',
-    categoria: 'Infantil (5–10 anos)',
-    escola: 'Clube Aquático Azul',
-    professor: 'Ana Souza',
-    local: 'Piscina Semi-olímpica',
-    descricao: 'Iniciação aquática para crianças de 5 a 10 anos. Abordagem lúdica e progressiva.',
-    dias: ['Ter','Qui','Sab'],
-    horaInicio: '09:00', horaFim: '10:00',
-    capacidade: 20, atletas: 17,
-    valorMensalidade: 320,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-natacao', emoji: '🏊',
-    atletasList: [
-      {nome:'Sofia Alves', av:'SA', cor:'#ec4899', grupos:'Natação Infantil'},
-      {nome:'Enzo Pereira', av:'EP', cor:'#0ea5e9', grupos:'Natação Infantil'},
-    ]
-  },
-  {
-    id: 5,
-    nome: 'Basquete Iniciante',
-    esporte: 'Basquete',
-    categoria: 'Iniciante',
-    escola: 'Arena Basquete SP',
-    professor: 'João Ferreira',
-    local: 'Quadra A',
-    descricao: 'Grupo para iniciantes no basquete. Ensino dos fundamentos: drible, passe, arremesso e posicionamento.',
-    dias: ['Sab'],
-    horaInicio: '09:00', horaFim: '11:00',
-    capacidade: 18, atletas: 14,
-    valorMensalidade: 290,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-basquete', emoji: '🏀',
-    atletasList: [
-      {nome:'André Castro', av:'AC', cor:'#d97706', grupos:'Basquete Iniciante'},
-      {nome:'Laura Vasconcelos', av:'LV', cor:'#ec4899', grupos:'Basquete Iniciante · Vôlei Adulto'},
-      {nome:'Diego Monteiro', av:'DM', cor:'#059669', grupos:'Basquete Iniciante'},
-    ]
-  },
-  {
-    id: 6,
-    nome: 'Basquete Avançado',
-    esporte: 'Basquete',
-    categoria: 'Adulto',
-    escola: 'Arena Basquete SP',
-    professor: 'João Ferreira',
-    local: 'Quadra A + B',
-    descricao: 'Treinamento competitivo para jogadores avançados. Foco em sistemas de jogo e condicionamento.',
-    dias: ['Ter','Qui'],
-    horaInicio: '19:30', horaFim: '21:30',
-    capacidade: 16, atletas: 15,
-    valorMensalidade: 450,
-    espera: true, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-basquete', emoji: '🏀',
-    atletasList: [
-      {nome:'Fernando Gomes', av:'FG', cor:'#d97706', grupos:'Basquete Avançado'},
-      {nome:'Renato Lopes', av:'RL', cor:'#1a56db', grupos:'Basquete Avançado'},
-    ]
-  },
-  {
-    id: 7,
-    nome: 'Futebol Feminino',
-    esporte: 'Futebol',
-    categoria: 'Adulto Feminino',
-    escola: 'Academia Olimpo',
-    professor: 'Mariana Costa',
-    local: 'Campo Grama Sintética',
-    descricao: 'Grupo feminino adulto para desenvolvimento e competição. Parcerias com ligas regionais.',
-    dias: ['Ter','Qui','Sex'],
-    horaInicio: '17:00', horaFim: '18:30',
-    capacidade: 22, atletas: 20,
-    valorMensalidade: 390,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-futebol', emoji: '⚽',
-    atletasList: [
-      {nome:'Fernanda Lima', av:'FL', cor:'#ec4899', grupos:'Futebol Feminino'},
-      {nome:'Camila Sousa', av:'CS', cor:'#7c3aed', grupos:'Futebol Feminino'},
-      {nome:'Larissa Andrade', av:'LA', cor:'#059669', grupos:'Futebol Feminino'},
-    ]
-  },
-  {
-    id: 8,
-    nome: 'Atletismo Elite',
-    esporte: 'Atletismo',
-    categoria: 'Elite',
-    escola: 'Instituto Atletismo BR',
-    professor: 'Rafael Nunes',
-    local: 'Pista de Atletismo',
-    descricao: 'Grupo de elite para atletas com nível de competição nacional. Provas de velocidade e resistência.',
-    dias: ['Seg','Qua','Sex','Sab'],
-    horaInicio: '06:00', horaFim: '08:00',
-    capacidade: 12, atletas: 11,
-    valorMensalidade: 750,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-atletismo', emoji: '🏃',
-    atletasList: [
-      {nome:'Rafael Nunes', av:'RN', cor:'#1a56db', grupos:'Atletismo Elite · Natação Avançado'},
-      {nome:'Mateus Lima', av:'ML', cor:'#d97706', grupos:'Sub-13 Futebol · Atletismo Elite'},
-      {nome:'Vanessa Torres', av:'VT', cor:'#ec4899', grupos:'Atletismo Elite'},
-    ]
-  },
-  {
-    id: 9,
-    nome: 'Vôlei Adulto',
-    esporte: 'Vôlei',
-    categoria: 'Adulto',
-    escola: 'Esporte Total',
-    professor: 'Patrícia Lima',
-    local: 'Quadra Coberta',
-    descricao: 'Treinos recreativos e competitivos para adultos. Participação em campeonatos municipais.',
-    dias: ['Seg','Qua'],
-    horaInicio: '20:00', horaFim: '21:30',
-    capacidade: 20, atletas: 16,
-    valorMensalidade: 300,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-volei', emoji: '🏐',
-    atletasList: [
-      {nome:'Laura Vasconcelos', av:'LV', cor:'#ec4899', grupos:'Basquete Iniciante · Vôlei Adulto'},
-      {nome:'Paulo Henrique', av:'PH', cor:'#7c3aed', grupos:'Vôlei Adulto'},
-    ]
-  },
-  {
-    id: 10,
-    nome: 'Tênis Sub-12',
-    esporte: 'Tênis',
-    categoria: 'Sub-12',
-    escola: 'Academia Olimpo',
-    professor: 'Patrícia Lima',
-    local: 'Quadras de Tênis (1–3)',
-    descricao: 'Iniciação e desenvolvimento no tênis para crianças até 12 anos. Metodologia ITF Kids.',
-    dias: ['Ter','Qui','Sab'],
-    horaInicio: '14:00', horaFim: '15:30',
-    capacidade: 16, atletas: 13,
-    valorMensalidade: 520,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-tenis', emoji: '🎾',
-    atletasList: [
-      {nome:'Isadora Moura', av:'IM', cor:'#0d9488', grupos:'Tênis Sub-12'},
-      {nome:'Caio Brito', av:'CB', cor:'#1a56db', grupos:'Tênis Sub-12'},
-    ]
-  },
-  {
-    id: 11,
-    nome: 'Futebol Society',
-    esporte: 'Futebol',
-    categoria: 'Adulto Recreativo',
-    escola: 'Esporte Total',
-    professor: 'Carlos Silva',
-    local: 'Campo Society',
-    descricao: 'Grupo recreativo para adultos apaixonados por futebol. Sem obrigação competitiva, foco na saúde.',
-    dias: ['Sex'],
-    horaInicio: '19:00', horaFim: '20:30',
-    capacidade: 30, atletas: 22,
-    valorMensalidade: 200,
-    espera: false, ativo: true,
-    status: 'Ativo',
-    cor: 'sport-futebol', emoji: '⚽',
-    atletasList: [
-      {nome:'Roberto Silva', av:'RS', cor:'#059669', grupos:'Futebol Society'},
-      {nome:'Marcelo Duarte', av:'MD', cor:'#1a56db', grupos:'Futebol Society'},
-    ]
-  },
-  {
-    id: 12,
-    nome: 'Atletismo Juvenil',
-    esporte: 'Atletismo',
-    categoria: 'Sub-17',
-    escola: 'Instituto Atletismo BR',
-    professor: 'Rafael Nunes',
-    local: 'Pista + Sala de Musculação',
-    descricao: 'Formação de base para jovens atletas. Provas múltiplas e polivalência atlética.',
-    dias: ['Seg','Ter','Qua','Qui','Sex'],
-    horaInicio: '07:30', horaFim: '09:00',
-    capacidade: 20, atletas: 4,
-    valorMensalidade: 480,
-    espera: false, ativo: false,
-    status: 'Inativo',
-    cor: 'sport-atletismo', emoji: '🏃',
-    atletasList: [
-      {nome:'Gabriel Andrade', av:'GA', cor:'#dc2626', grupos:'Atletismo Juvenil'},
-    ]
-  },
+/* TURMAS DATA */
+const TURMAS = [
+  {id:1,nome:'Futebol U11', modalidade:'Futebol', cor:'#20C997',dias:'Seg/Qua/Sex',horario:'09:00',duracao:'1h',   professor:'Paula Costa',   atletas:5,capacidade:20,status:'ativa'},
+  {id:2,nome:'Futebol U13', modalidade:'Futebol', cor:'#17a57a',dias:'Ter/Qui/Sab',horario:'09:00',duracao:'1h',   professor:'Paula Costa',   atletas:6,capacidade:20,status:'ativa'},
+  {id:3,nome:'Futebol U15', modalidade:'Futebol', cor:'#5BC0EB',dias:'Seg/Qua/Sex',horario:'10:00',duracao:'1h30', professor:'Paula Costa',   atletas:6,capacidade:20,status:'ativa'},
+  {id:4,nome:'Futebol U17', modalidade:'Futebol', cor:'#0369a1',dias:'Ter/Qui',    horario:'17:00',duracao:'2h',   professor:'Rafael Torres', atletas:5,capacidade:20,status:'ativa'},
+  {id:5,nome:'Natacao',     modalidade:'Natacao',  cor:'#06b6d4',dias:'Seg-Sex',   horario:'08:00',duracao:'1h',   professor:'Ana Lima',      atletas:6,capacidade:20,status:'ativa'},
+  {id:6,nome:'Futsal',      modalidade:'Futsal',   cor:'#FFA552',dias:'Seg/Qua',   horario:'14:00',duracao:'1h30', professor:'Carlos Mendes', atletas:5,capacidade:20,status:'ativa'},
+  {id:7,nome:'Ginastica',   modalidade:'Ginastica',cor:'#8b5cf6',dias:'Ter/Qui/Sab',horario:'10:00',duracao:'1h', professor:'Fernanda Reis', atletas:6,capacidade:20,status:'ativa'},
 ];
 
-let currentGroupId = null;
-let deleteTargetId = null;
-let isEditing = false;
+function barColor(p){ return p>=90?'#ef4444':p>=70?'#FFA552':'#20C997'; }
 
-/* ──────────────────────────────────────────
-   RENDER TABLE
-────────────────────────────────────────── */
-function formatDays(days) {
-  return DAYS_ALL.map(d => {
-    const on = days.includes(d);
-    return `<div class="day-chip ${on?'on':'off'}">${d.slice(0,1)}</div>`;
-  }).join('');
-}
-
-function formatTime(h1, h2) {
-  return `${h1} – ${h2}`;
-}
-
-function calcDuration(h1, h2) {
-  const [a,b] = h1.split(':').map(Number);
-  const [c,d] = h2.split(':').map(Number);
-  const mins = (c*60+d)-(a*60+b);
-  if (mins <= 0) return '—';
-  const hh = Math.floor(mins/60), mm = mins%60;
-  return hh > 0 ? (mm > 0 ? `${hh}h${mm}min` : `${hh}h`) : `${mm}min`;
-}
-
-function statusBadge(s) {
-  if (s==='Ativo')   return `<span class="badge badge-active">● Ativo</span>`;
-  if (s==='Lotado')  return `<span class="badge badge-full">⚠ Lotado</span>`;
-  return `<span class="badge badge-inactive">Inativo</span>`;
-}
-
-function occupancyBar(atletas, cap) {
-  const pct = cap > 0 ? Math.round(atletas/cap*100) : 0;
-  const color = pct >= 100 ? 'var(--warning)' : pct >= 80 ? 'var(--secondary)' : 'var(--primary)';
-  return `
-    <div style="min-width:90px">
-      <div style="font-size:11px;font-weight:600;margin-bottom:3px;color:var(--text)">${atletas}/${cap}</div>
-      <div class="progress-bar-wrap" style="height:4px">
-        <div class="progress-bar" style="width:${pct}%;background:${color}"></div>
-      </div>
-    </div>`;
-}
-
-function renderTable(data) {
-  const tbody = document.getElementById('groupsTbody');
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="es-icon">🏃</div><div class="es-text">Nenhum grupo encontrado</div></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.map(g => `
-    <tr onclick="openView(${g.id})">
-      <td>
-        <div class="group-cell">
-          <div class="group-icon-sm ${g.cor}">${g.emoji}</div>
-          <div>
-            <div class="group-name">${g.nome}</div>
-            <div class="group-school">${g.escola}</div>
-          </div>
-        </div>
-      </td>
-      <td><div class="days-wrap">${formatDays(g.dias)}</div></td>
-      <td style="color:var(--text-muted);font-size:12px">${formatTime(g.horaInicio,g.horaFim)}<br><span style="font-size:10px">${calcDuration(g.horaInicio,g.horaFim)}</span></td>
-      <td style="font-size:13px">${g.professor}</td>
-      <td style="font-weight:600">${g.atletas}</td>
-      <td>${occupancyBar(g.atletas, g.capacidade)}</td>
-      <td>${statusBadge(g.status)}</td>
-      <td onclick="event.stopPropagation()">
-        <div class="row-actions">
-          <button class="action-btn" title="Visualizar" onclick="openView(${g.id})">👁</button>
-          <button class="action-btn" title="Editar" onclick="openEditById(${g.id})">✏️</button>
-          <button class="action-btn danger" title="Excluir" onclick="askDelete(${g.id})">🗑</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-/* ──────────────────────────────────────────
-   FILTERS
-────────────────────────────────────────── */
-let searchQuery = '';
-
-function filterTable(q) {
-  searchQuery = q.toLowerCase();
-  applyFilters();
-}
-
-function applyFilters() {
-  const esporte = document.getElementById('filterEsporte').value;
-  const status  = document.getElementById('filterStatus').value;
-  const dia     = document.getElementById('filterDia').value;
-  let data = groups.filter(g => {
-    const matchSearch = !searchQuery || g.nome.toLowerCase().includes(searchQuery) || g.escola.toLowerCase().includes(searchQuery) || g.professor.toLowerCase().includes(searchQuery);
-    const matchEsporte = !esporte || g.esporte === esporte;
-    const matchStatus  = !status  || g.status === status;
-    const matchDia     = !dia     || g.dias.includes(dia);
-    return matchSearch && matchEsporte && matchStatus && matchDia;
+function getFilteredTurmas(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const mod=document.getElementById('filterModalidade').value;
+  const stat=document.getElementById('filterStatus').value;
+  const prof=PROFILES[currentProfile];
+  return TURMAS.filter(t=>{
+    if(!prof.canSee) return false;
+    if(currentProfile==='professor'&&t.professor!==prof.professorName) return false;
+    if(q&&!t.nome.toLowerCase().includes(q)&&!t.professor.toLowerCase().includes(q)) return false;
+    if(mod&&t.modalidade!==mod) return false;
+    if(stat&&t.status!==stat) return false;
+    return true;
   });
-  renderTable(data);
-  document.getElementById('paginationInfo').textContent = `Mostrando 1–${data.length} de ${data.length} grupos`;
 }
 
-/* ──────────────────────────────────────────
-   SIDEBAR
-────────────────────────────────────────── */
-function toggleSidebar() {
+function renderCards(){
+  const grid=document.getElementById('turmasGrid');
+  const empty=document.getElementById('emptyState');
+  const data=getFilteredTurmas();
+  grid.innerHTML='';
+  if(data.length===0){ empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  const canEdit=PROFILES[currentProfile].canEdit;
+  data.forEach(t=>{
+    const p=Math.round(t.atletas/t.capacidade*100);
+    const bc=barColor(p);
+    const card=document.createElement('div');
+    card.className='turma-card';
+    const editBtn=canEdit?'<button class="action-btn primary-action" onclick="openDrawer('+t.id+')">Editar</button>':'';
+    card.innerHTML=
+      '<div class="turma-color-bar" style="background:'+t.cor+'"></div>'+
+      '<div class="turma-body">'+
+        '<div class="turma-head">'+
+          '<div class="turma-name">'+t.nome+'</div>'+
+          '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">'+
+            '<span class="turma-badge" style="background:'+t.cor+'22;color:'+t.cor+'">'+t.modalidade+'</span>'+
+            '<span class="turma-status-badge '+t.status+'">'+(t.status==='ativa'?'Ativa':'Pausada')+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="turma-meta-list">'+
+          '<div class="turma-meta-item"><span class="mi">&#128197;</span> <strong>'+t.dias+'</strong> as '+t.horario+' &middot; '+t.duracao+'</div>'+
+          '<div class="turma-meta-item"><span class="mi">&#128104;&#8205;&#127979;</span> <strong>'+t.professor+'</strong></div>'+
+        '</div>'+
+        '<div class="progress-wrap">'+
+          '<div class="progress-label"><span class="pl-left">Atletas</span><span class="pl-right" style="color:'+bc+'">'+t.atletas+' / '+t.capacidade+' &middot; '+p+'%</span></div>'+
+          '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:'+p+'%;background:'+bc+'"></div></div>'+
+        '</div>'+
+        '<div class="turma-actions">'+
+          editBtn+
+          '<button class="action-btn" onclick="alert(\'Ver atletas: '+t.nome+'\')">Atletas</button>'+
+          '<button class="action-btn" onclick="alert(\'Ver chamadas: '+t.nome+'\')">Chamadas</button>'+
+        '</div>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function filterCards(){ renderCards(); }
+
+/* DRAWER */
+let selectedColor='#20C997';
+let editingId=null;
+
+function openDrawer(id){
+  editingId=id;
+  document.querySelectorAll('.dia-chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color==='#20C997'));
+  selectedColor='#20C997';
+  if(id){
+    const t=TURMAS.find(x=>x.id===id);
+    if(!t)return;
+    document.getElementById('drawerTitle').textContent='Editar Turma';
+    document.getElementById('f-nome').value=t.nome;
+    document.getElementById('f-modalidade').value=t.modalidade;
+    document.getElementById('f-horario').value=t.horario;
+    document.getElementById('f-duracao').value=t.duracao;
+    document.getElementById('f-capacidade').value=t.capacidade;
+    document.getElementById('f-professor').value=t.professor;
+    document.getElementById('f-valor').value='';
+    selectedColor=t.cor;
+    document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color===t.cor));
+    const diasArr=t.dias.split(/[\/\-,]/);
+    document.querySelectorAll('.dia-chip').forEach(c=>{if(diasArr.includes(c.dataset.dia))c.classList.add('selected');});
+  } else {
+    document.getElementById('drawerTitle').textContent='Nova Turma';
+    document.getElementById('f-nome').value='';
+    document.getElementById('f-modalidade').value='';
+    document.getElementById('f-horario').value='09:00';
+    document.getElementById('f-duracao').value='1h';
+    document.getElementById('f-capacidade').value=20;
+    document.getElementById('f-professor').value='';
+    document.getElementById('f-valor').value='';
+  }
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('show');
+}
+
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerBackdrop').classList.remove('show');
+}
+
+function selectColor(el){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor=el.dataset.color;
+}
+
+function toggleDia(el){ el.classList.toggle('selected'); }
+
+function saveTurma(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){alert('Informe o nome da turma.');return;}
+  const diasSel=[...document.querySelectorAll('.dia-chip.selected')].map(c=>c.dataset.dia);
+  if(!diasSel.length){alert('Selecione pelo menos um dia da semana.');return;}
+  const dias=diasSel.join('/');
+  const modalidade=document.getElementById('f-modalidade').value||'Futebol';
+  const horario=document.getElementById('f-horario').value;
+  const duracao=document.getElementById('f-duracao').value;
+  const capacidade=parseInt(document.getElementById('f-capacidade').value)||20;
+  const professor=document.getElementById('f-professor').value||'--';
+  if(editingId){
+    const t=TURMAS.find(x=>x.id===editingId);
+    if(t){t.nome=nome;t.modalidade=modalidade;t.cor=selectedColor;t.dias=dias;t.horario=horario;t.duracao=duracao;t.capacidade=capacidade;t.professor=professor;}
+  } else {
+    TURMAS.push({id:Date.now(),nome,modalidade,cor:selectedColor,dias,horario,duracao,professor,atletas:0,capacidade,status:'ativa'});
+  }
+  closeDrawer();
+  renderCards();
+  showToast(editingId?'Turma atualizada!':'Nova turma criada!','success');
+}
+
+/* PERFIL */
+function setProfile(profile,btn){
+  currentProfile=profile;
+  document.querySelectorAll('.demo-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const prof=PROFILES[profile];
+  document.getElementById('sidebarAva').textContent=prof.ava;
+  document.getElementById('sidebarName').textContent=prof.nome;
+  document.getElementById('sidebarRole').textContent=profile;
+  document.getElementById('topbarAva').textContent=prof.ava;
+  document.getElementById('accessOverlay').classList.toggle('show',!prof.canSee);
+  document.getElementById('btnNovaTurma').classList.toggle('hidden',!prof.canEdit);
+  renderCards();
+}
+
+/* SIDEBAR */
+function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
 }
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
 
-/* ──────────────────────────────────────────
-   PANEL HELPERS
-────────────────────────────────────────── */
-function openPanel(id) {
-  document.getElementById('panelOverlay').classList.add('show');
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closePanel() {
-  ['viewPanel','formPanel'].forEach(id => document.getElementById(id).classList.remove('open'));
-  document.getElementById('panelOverlay').classList.remove('show');
-  document.body.style.overflow = '';
-  currentGroupId = null;
-  isEditing = false;
-}
-function closeFormPanel() {
-  document.getElementById('formPanel').classList.remove('open');
-  if (!document.getElementById('viewPanel').classList.contains('open')) {
-    document.getElementById('panelOverlay').classList.remove('show');
-    document.body.style.overflow = '';
+/* TOAST */
+let toastEl;
+function showToast(msg,type){
+  if(!toastEl){
+    toastEl=document.createElement('div');
+    toastEl.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1B1B1B;color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;z-index:9998;transition:opacity .3s;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;';
+    document.body.appendChild(toastEl);
   }
-  isEditing = false;
+  const icon=type==='success'?'OK: ':type==='error'?'ERR: ':'INFO: ';
+  toastEl.textContent=icon+msg;
+  toastEl.style.opacity='1';
+  clearTimeout(toastEl._t);
+  toastEl._t=setTimeout(()=>{toastEl.style.opacity='0';},3000);
 }
 
-/* ──────────────────────────────────────────
-   VIEW PANEL
-────────────────────────────────────────── */
-function openView(id) {
-  const g = groups.find(x => x.id === id);
-  if (!g) return;
-  currentGroupId = id;
-
-  document.getElementById('vp-title').textContent = g.nome;
-  document.getElementById('vp-sub').textContent   = `${g.escola} · ${g.esporte}`;
-  document.getElementById('vp-hero-name').textContent = g.nome;
-  document.getElementById('vp-hero-meta').textContent = `${g.escola} · Prof. ${g.professor}`;
-  document.getElementById('vp-hero-icon').className = `group-hero-icon ${g.cor}`;
-  document.getElementById('vp-hero-icon').textContent = g.emoji;
-
-  // badges
-  const badges = document.getElementById('vp-hero-badges');
-  badges.innerHTML = statusBadge(g.status) +
-    `<span class="chip chip-blue">R$ ${g.valorMensalidade}/mês</span>` +
-    (g.espera ? `<span class="chip chip-gray">Lista de espera</span>` : '');
-
-  // schedule
-  const schedDays = document.getElementById('vp-sched-days');
-  schedDays.innerHTML = DAYS_ALL.map(d =>
-    `<div class="sched-day ${g.dias.includes(d)?'on':'off'}">${d}</div>`
-  ).join('');
-  document.getElementById('vp-sched-time').textContent =
-    `${formatTime(g.horaInicio, g.horaFim)} (${calcDuration(g.horaInicio, g.horaFim)})`;
-
-  // info fields
-  document.getElementById('vp-esporte').textContent   = g.esporte;
-  document.getElementById('vp-categoria').textContent = g.categoria || '—';
-  document.getElementById('vp-escola').textContent    = g.escola;
-  document.getElementById('vp-professor').textContent = g.professor;
-  document.getElementById('vp-local').textContent     = g.local || '—';
-  document.getElementById('vp-capacidade').textContent= `${g.capacidade} atletas`;
-  document.getElementById('vp-descricao').textContent = g.descricao || '—';
-
-  // occupancy
-  const pct = Math.round(g.atletas / g.capacidade * 100);
-  document.getElementById('vp-ocp-label').textContent = `${g.atletas} / ${g.capacidade} atletas`;
-  document.getElementById('vp-ocp-pct').textContent   = `${pct}%`;
-  document.getElementById('vp-prog').style.width      = `${pct}%`;
-
-  // atletas tab count
-  document.getElementById('vp-count-tab').textContent = `(${g.atletas})`;
-
-  // atletas list
-  const atList = document.getElementById('vp-atletas-list');
-  if (g.atletasList && g.atletasList.length) {
-    atList.innerHTML = g.atletasList.map(a => `
-      <div class="athlete-row">
-        <div class="athlete-av" style="background:${a.cor}">${a.av}</div>
-        <div>
-          <div class="athlete-name">${a.nome}</div>
-          <div class="athlete-groups">📌 ${a.grupos}</div>
-        </div>
-        <div class="athlete-status"><span class="badge badge-active">Ativo</span></div>
-      </div>
-    `).join('');
-  } else {
-    atList.innerHTML = `<div class="empty-state"><div class="es-icon">👥</div><div class="es-text">Nenhum atleta neste grupo ainda</div></div>`;
-  }
-
-  // frequência mock
-  const freqList = document.getElementById('vp-freq-list');
-  const presencas = g.atletasList ? g.atletasList.map(a => ({
-    nome: a.nome,
-    av: a.av,
-    cor: a.cor,
-    pct: Math.floor(Math.random()*31)+70
-  })) : [];
-  if (presencas.length) {
-    freqList.innerHTML = presencas.map(a => `
-      <div style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <div class="athlete-av" style="background:${a.cor};width:24px;height:24px;font-size:9px">${a.av}</div>
-          <span style="font-size:13px;font-weight:500;flex:1">${a.nome}</span>
-          <span style="font-size:12px;font-weight:700;color:${a.pct>=80?'var(--success)':'var(--warning)'}">${a.pct}%</span>
-        </div>
-        <div class="progress-bar-wrap" style="height:5px">
-          <div class="progress-bar" style="width:${a.pct}%;background:${a.pct>=80?'var(--success)':'var(--warning)'}"></div>
-        </div>
-      </div>
-    `).join('');
-  } else {
-    freqList.innerHTML = `<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Sem dados de frequência</div></div>`;
-  }
-
-  // reset tabs
-  document.querySelectorAll('#viewPanel .tab-item').forEach((t,i) => t.classList.toggle('active', i===0));
-  document.querySelectorAll('#viewPanel .tab-content').forEach((t,i) => t.classList.toggle('active', i===0));
-
-  openPanel('viewPanel');
-}
-
-/* ──────────────────────────────────────────
-   CREATE PANEL
-────────────────────────────────────────── */
-function openCreate() {
-  isEditing = false;
-  document.getElementById('fp-title').textContent = 'Novo Grupo';
-  document.getElementById('fp-sub').textContent   = 'Preencha os dados do grupo de treinamento';
-  clearForm();
-  closePanel();
-  openPanel('formPanel');
-}
-
-function clearForm() {
-  ['f-nome','f-esporte','f-escola','f-professor','f-local','f-descricao','f-categoria','f-capacidade','f-valor'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('f-hora-inicio').value = '07:00';
-  document.getElementById('f-hora-fim').value    = '08:30';
-  document.getElementById('f-ativo').checked  = true;
-  document.getElementById('f-espera').checked = true;
-  document.querySelectorAll('.day-pick').forEach(d => d.classList.remove('selected'));
-  updateDaysPreview();
-  updateDuration();
-}
-
-/* ──────────────────────────────────────────
-   EDIT PANEL
-────────────────────────────────────────── */
-function openEdit() {
-  if (!currentGroupId) return;
-  openEditById(currentGroupId);
-}
-
-function openEditById(id) {
-  const g = groups.find(x => x.id === id);
-  if (!g) return;
-  currentGroupId = id;
-  isEditing = true;
-
-  document.getElementById('fp-title').textContent = 'Editar Grupo';
-  document.getElementById('fp-sub').textContent   = g.nome;
-
-  document.getElementById('f-nome').value      = g.nome;
-  document.getElementById('f-esporte').value   = g.esporte;
-  document.getElementById('f-escola').value    = g.escola;
-  document.getElementById('f-professor').value = g.professor;
-  document.getElementById('f-local').value     = g.local;
-  document.getElementById('f-descricao').value = g.descricao;
-  document.getElementById('f-categoria').value = g.categoria;
-  document.getElementById('f-capacidade').value= g.capacidade;
-  document.getElementById('f-valor').value     = g.valorMensalidade;
-  document.getElementById('f-hora-inicio').value = g.horaInicio;
-  document.getElementById('f-hora-fim').value    = g.horaFim;
-  document.getElementById('f-ativo').checked  = g.ativo;
-  document.getElementById('f-espera').checked = g.espera;
-
-  document.querySelectorAll('.day-pick').forEach(d => {
-    d.classList.toggle('selected', g.dias.includes(d.dataset.day));
-  });
-  updateDaysPreview();
-  updateDuration();
-
-  closePanel();
-  openPanel('formPanel');
-}
-
-/* ──────────────────────────────────────────
-   DAYS PICKER
-────────────────────────────────────────── */
-function toggleDay(el) {
-  el.classList.toggle('selected');
-  updateDaysPreview();
-}
-
-function updateDaysPreview() {
-  const selected = [...document.querySelectorAll('.day-pick.selected')].map(d => d.dataset.day);
-  const preview  = document.getElementById('daysPreview');
-  if (!selected.length) {
-    preview.textContent = 'Nenhum dia selecionado';
-    preview.style.color = 'var(--danger)';
-  } else if (selected.length === 7) {
-    preview.innerHTML = '✅ <strong>Todos os dias</strong>';
-    preview.style.color = 'var(--success)';
-  } else if (selected.length === 5 && !selected.includes('Sab') && !selected.includes('Dom')) {
-    preview.innerHTML = '✅ <strong>Dias úteis</strong> (Seg a Sex)';
-    preview.style.color = 'var(--success)';
-  } else {
-    preview.innerHTML = `✅ <strong>${selected.join(', ')}</strong>`;
-    preview.style.color = 'var(--success)';
-  }
-}
-
-/* ──────────────────────────────────────────
-   DURATION CALCULATOR
-────────────────────────────────────────── */
-function updateDuration() {
-  const h1 = document.getElementById('f-hora-inicio').value;
-  const h2 = document.getElementById('f-hora-fim').value;
-  const el = document.getElementById('durationCalc');
-  if (!h1 || !h2) { el.textContent = '—'; return; }
-  const dur = calcDuration(h1, h2);
-  el.textContent = dur === '—' ? 'Horário inválido' : `⏱ ${dur} por sessão`;
-}
-
-document.getElementById('f-hora-inicio').addEventListener('change', updateDuration);
-document.getElementById('f-hora-fim').addEventListener('change', updateDuration);
-
-/* ──────────────────────────────────────────
-   SAVE
-────────────────────────────────────────── */
-function saveGroup() {
-  const nome = document.getElementById('f-nome').value.trim();
-  const esporte = document.getElementById('f-esporte').value;
-  const escola = document.getElementById('f-escola').value;
-  const professor = document.getElementById('f-professor').value;
-  const dias = [...document.querySelectorAll('.day-pick.selected')].map(d => d.dataset.day);
-
-  if (!nome || !esporte || !escola || !professor || !dias.length) {
-    alert('Preencha todos os campos obrigatórios e selecione ao menos um dia de treino.');
-    return;
-  }
-
-  const data = {
-    nome,
-    esporte,
-    categoria: document.getElementById('f-categoria').value,
-    escola,
-    professor,
-    local: document.getElementById('f-local').value,
-    descricao: document.getElementById('f-descricao').value,
-    dias,
-    horaInicio: document.getElementById('f-hora-inicio').value,
-    horaFim: document.getElementById('f-hora-fim').value,
-    capacidade: parseInt(document.getElementById('f-capacidade').value) || 20,
-    valorMensalidade: parseFloat(document.getElementById('f-valor').value) || 0,
-    espera: document.getElementById('f-espera').checked,
-    ativo: document.getElementById('f-ativo').checked,
-  };
-
-  if (isEditing && currentGroupId) {
-    const idx = groups.findIndex(g => g.id === currentGroupId);
-    if (idx !== -1) {
-      groups[idx] = { ...groups[idx], ...data, status: data.ativo ? (groups[idx].atletas >= data.capacidade ? 'Lotado' : 'Ativo') : 'Inativo' };
-    }
-  } else {
-    const sportMap = { Futebol:'sport-futebol',Natação:'sport-natacao',Basquete:'sport-basquete',Vôlei:'sport-volei',Atletismo:'sport-atletismo',Tênis:'sport-tenis' };
-    const emojiMap = { Futebol:'⚽',Natação:'🏊',Basquete:'🏀',Vôlei:'🏐',Atletismo:'🏃',Tênis:'🎾',Outro:'🏋️' };
-    groups.push({
-      id: Date.now(),
-      ...data,
-      atletas: 0,
-      status: data.ativo ? 'Ativo' : 'Inativo',
-      cor: sportMap[esporte] || 'sport-futebol',
-      emoji: emojiMap[esporte] || '🏅',
-      atletasList: [],
-    });
-    document.getElementById('sb-count').textContent = groups.filter(g=>g.ativo).length;
-  }
-
-  applyFilters();
-  closeFormPanel();
-  closePanel();
-}
-
-/* ──────────────────────────────────────────
-   DELETE
-────────────────────────────────────────── */
-function askDelete(id) {
-  const g = groups.find(x => x.id === id);
-  deleteTargetId = id;
-  document.getElementById('deleteModalText').textContent =
-    `Tem certeza que deseja excluir o grupo "${g.nome}"? Todos os atletas serão desvinculados. Esta ação não pode ser desfeita.`;
-  document.getElementById('deleteModal').classList.add('show');
-}
-
-function confirmDelete() {
-  const idx = groups.findIndex(g => g.id === deleteTargetId);
-  if (idx !== -1) groups.splice(idx, 1);
-  closeModal('deleteModal');
-  closePanel();
-  applyFilters();
-  document.getElementById('sb-count').textContent = groups.filter(g=>g.ativo).length;
-  deleteTargetId = null;
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-
-/* ──────────────────────────────────────────
-   TABS
-──────────────────────���─────────────────── */
-function switchTab(btn, contentId) {
-  const panel = btn.closest('.side-panel') || btn.closest('.panel-body')?.parentElement;
-  const tabs   = btn.closest('.tabs');
-  const bodies = tabs.parentElement.querySelectorAll('.tab-content');
-  tabs.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  bodies.forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(contentId).classList.add('active');
-}
-
-/* ──────────────────────────────────────────
-   INIT
-────────────────────────────────────────── */
-renderTable(groups);
-updateDaysPreview();
-updateDuration();
+/* INIT */
+document.addEventListener('DOMContentLoaded',()=>{ renderCards(); });
 </script>
+<script>window.ESCOLA_PAGE = 'grupos';</script>
+<script src="escola-sidebar.js"></script>
 </body>
 </html>

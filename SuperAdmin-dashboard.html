@@ -13,32 +13,35 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #1a56db;
-      --primary-dark: #1e429f;
-      --primary-light: #ebf5ff;
-      --secondary: #0ea5e9;
-      --success: #059669;
-      --success-light: #d1fae5;
-      --warning: #d97706;
-      --warning-light: #fef3c7;
-      --danger: #dc2626;
-      --danger-light: #fee2e2;
-      --purple: #7c3aed;
-      --purple-light: #ede9fe;
-      --bg: #f1f5f9;
-      --sidebar-w: 260px;
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
-      --card: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --topbar-h: 56px;
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
     }
 
     html { scroll-behavior: smooth; }
@@ -149,22 +152,16 @@
       flex-shrink: 0;
     }
 
-    .user-avatar-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px; border-radius: 8px; cursor: pointer;
-      transition: background .15s;
-    }
-    .user-avatar-row:hover { background: var(--sidebar-hover); }
-
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed, #1a56db);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0;
-    }
-
-    .user-info .user-name { color: #fff; font-size: 13px; font-weight: 600; }
-    .user-info .user-role { color: rgba(255,255,255,.4); font-size: 11px; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+    .nav-item .nav-icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.stub { opacity:.45;cursor:default; }
+    .nav-item.stub:hover { background:transparent;color:rgba(255,255,255,.55); }
+    .nav-badge { margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
 
     /* ═══════════════════════════════════════
        MAIN WRAPPER
@@ -732,60 +729,20 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="brand">
-      <div class="logo-icon">⚽</div>
+      <div class="logo-icon">🛡️</div>
       <div class="brand-text">
         <div class="name">Esportes Academy</div>
-        <div class="sub">PORTAL ADMIN</div>
+        <div class="sub">SUPER ADMIN</div>
       </div>
     </div>
   </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <a class="nav-item active" href="admin-dashboard.html" onclick="closeSidebar()">
-      <span class="icon">🏠</span> Dashboard
-    </a>
-    <a class="nav-item" href="schools.html" onclick="closeSidebar()">
-      <span class="icon">🏫</span> Escolas
-      <span class="nav-badge">24</span>
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">👤</span> Usuários
-    </a>
-
-    <div class="nav-section-label">Financeiro</div>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">💳</span> Cobranças
-    </a>
-    <a class="nav-item" href="planos.html" onclick="closeSidebar()">
-      <span class="icon">📦</span> Planos & Licenças
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">📊</span> Relatórios
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🧾</span> Notas Fiscais
-    </a>
-
-    <div class="nav-section-label">Sistema</div>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">⚙️</span> Configurações
-    </a>
-    <a class="nav-item" href="notificacoes.html" onclick="closeSidebar()">
-      <span class="icon">🔔</span> Notificações
-      <span class="nav-badge">5</span>
-    </a>
-    <a class="nav-item" href="#" onclick="closeSidebar()">
-      <span class="icon">🛡️</span> Permissões
-    </a>
-  </nav>
-
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   <div class="sidebar-footer">
-    <div class="user-avatar-row">
-      <div class="avatar">WA</div>
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
       <div class="user-info">
-        <div class="user-name">Willianm Admin</div>
-        <div class="user-role">Super Administrador</div>
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
       </div>
     </div>
   </div>
@@ -827,7 +784,7 @@
       <div class="welcome-text">
         <div class="greeting">Bom dia, Willianm 👋</div>
         <div class="headline">Bem-vindo ao Portal Admin</div>
-        <div class="sub">Plataforma atualizada · 24 escolas ativas · Março 2026</div>
+        <div class="sub" id="welcome-sub">Plataforma atualizada · Carregando...</div>
       </div>
       <div class="welcome-actions">
         <button class="btn btn-banner-ghost">📊 Relatório</button>
@@ -842,9 +799,9 @@
           <div class="kpi-icon blue">🏫</div>
           <div class="kpi-trend up">▲ 12%</div>
         </div>
-        <div class="kpi-value">24</div>
+        <div class="kpi-value" id="kpi-escolas">—</div>
         <div class="kpi-label">Escolas Cadastradas</div>
-        <div class="kpi-sub">21 ativas · 3 em avaliação</div>
+        <div class="kpi-sub" id="kpi-escolas-sub">Carregando...</div>
       </div>
 
       <div class="kpi-card green">
@@ -852,9 +809,9 @@
           <div class="kpi-icon green">👨‍🎓</div>
           <div class="kpi-trend up">▲ 8%</div>
         </div>
-        <div class="kpi-value">1.248</div>
+        <div class="kpi-value" id="kpi-alunos">—</div>
         <div class="kpi-label">Alunos Ativos</div>
-        <div class="kpi-sub">+94 novos em março</div>
+        <div class="kpi-sub" id="kpi-alunos-sub">Carregando...</div>
       </div>
 
       <div class="kpi-card orange">
@@ -862,9 +819,9 @@
           <div class="kpi-icon orange">💰</div>
           <div class="kpi-trend up">▲ 18%</div>
         </div>
-        <div class="kpi-value">R$48,7k</div>
+        <div class="kpi-value" id="kpi-mrr">—</div>
         <div class="kpi-label">Receita Mensal</div>
-        <div class="kpi-sub">R$38,2k mês anterior</div>
+        <div class="kpi-sub" id="kpi-mrr-sub">Carregando...</div>
       </div>
 
       <div class="kpi-card purple">
@@ -872,9 +829,9 @@
           <div class="kpi-icon purple">📈</div>
           <div class="kpi-trend down">▼ 2%</div>
         </div>
-        <div class="kpi-value">94,3%</div>
+        <div class="kpi-value" id="kpi-retencao">—</div>
         <div class="kpi-label">Taxa de Retenção</div>
-        <div class="kpi-sub">Média anual: 96,1%</div>
+        <div class="kpi-sub" id="kpi-retencao-sub">Carregando...</div>
       </div>
     </div>
 
@@ -917,20 +874,20 @@
           <div class="mini-stat-row">
             <span style="width:9px;height:9px;border-radius:50%;background:#1a56db;flex-shrink:0;display:inline-block;"></span>
             <span class="mini-stat-label">Ativas</span>
-            <span class="mini-stat-value">21</span>
-            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:87.5%"></div></div></div>
+            <span class="mini-stat-value" id="ms-ativas">—</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" id="ms-ativas-bar" style="width:0%"></div></div></div>
           </div>
           <div class="mini-stat-row">
             <span style="width:9px;height:9px;border-radius:50%;background:#d97706;flex-shrink:0;display:inline-block;"></span>
             <span class="mini-stat-label">Trial</span>
-            <span class="mini-stat-value">2</span>
-            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:8%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div></div>
+            <span class="mini-stat-value" id="ms-trial">—</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" id="ms-trial-bar" style="width:0%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div></div>
           </div>
           <div class="mini-stat-row">
             <span style="width:9px;height:9px;border-radius:50%;background:#7c3aed;flex-shrink:0;display:inline-block;"></span>
-            <span class="mini-stat-label">Pendente</span>
-            <span class="mini-stat-value">1</span>
-            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" style="width:4%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div></div>
+            <span class="mini-stat-label">Em atraso</span>
+            <span class="mini-stat-value" id="ms-atraso">—</span>
+            <div class="mini-stat-bar"><div class="progress-bar-wrap"><div class="progress-bar" id="ms-atraso-bar" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div></div>
           </div>
         </div>
       </div>
@@ -1247,7 +1204,7 @@
             </div>
             <span class="badge badge-active">5 novos</span>
           </div>
-          <div class="alerts-list">
+          <div class="alerts-list" id="alerts-list">
             <div class="alert-item">
               <div class="alert-dot warning"></div>
               <div>
@@ -1296,7 +1253,7 @@
   rGrad.addColorStop(0,'rgba(26,86,219,.22)');
   rGrad.addColorStop(1,'rgba(26,86,219,0)');
 
-  new Chart(rCtx,{
+  window._revChart = new Chart(rCtx,{
     type:'line',
     data:{
       labels:['Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar'],
@@ -1330,7 +1287,7 @@
   });
 
   // Doughnut
-  new Chart(document.getElementById('statusChart'),{
+  window._statusChart = new Chart(document.getElementById('statusChart'),{
     type:'doughnut',
     data:{
       labels:['Ativas','Trial','Pendente'],
@@ -1346,7 +1303,7 @@
   });
 
   // Students Bar
-  new Chart(document.getElementById('studentsChart'),{
+  window._studentsChart = new Chart(document.getElementById('studentsChart'),{
     type:'bar',
     data:{
       labels:['Out','Nov','Dez','Jan','Fev','Mar'],
@@ -1368,7 +1325,7 @@
   });
 
   // Sports Horizontal Bar
-  new Chart(document.getElementById('sportsChart'),{
+  window._sportsChart = new Chart(document.getElementById('sportsChart'),{
     type:'bar',
     data:{
       labels:['Futebol','Natação','Tennis','Basquete','Judô','CrossFit'],
@@ -1387,7 +1344,7 @@
   });
 
   // Region Pie
-  new Chart(document.getElementById('regionChart'),{
+  window._regionChart = new Chart(document.getElementById('regionChart'),{
     type:'pie',
     data:{
       labels:['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'],
@@ -1443,5 +1400,245 @@
     }
   });
 </script>
+<!-- SUPABASE BLOCK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+  var db = null;
+
+  function set(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+
+  function fmtK(v){ return v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : 'R$'+v.toLocaleString('pt-BR'); }
+
+  function monthName(d){
+    return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()];
+  }
+
+  function updateKPIs(escolas, fcData) {
+    var total   = escolas.length;
+    var ativas  = escolas.filter(function(e){ return e.status_pagamento === 'ativa'; }).length;
+    var trials  = escolas.filter(function(e){ return e.status_pagamento === 'trial'; }).length;
+    var atraso  = escolas.filter(function(e){ return e.status_pagamento === 'inadimplente'; }).length;
+    var totalAlunos = escolas.reduce(function(s,e){ return s + (Number(e.total_alunos)||0); }, 0);
+    var mrr     = escolas.filter(function(e){ return e.status_pagamento !== 'cancelada'; })
+                         .reduce(function(s,e){ return s + (Number(e.mensalidade)||0); }, 0);
+
+    // MRR previous month from fluxo_caixa
+    var today = new Date();
+    var prevFrom = new Date(today.getFullYear(), today.getMonth()-1, 1).toISOString().slice(0,10);
+    var prevTo   = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().slice(0,10);
+    var prevMRR  = fcData.filter(function(r){ return r.tipo==='receita'&&r.status==='realizado'&&r.data>=prevFrom&&r.data<=prevTo; })
+                         .reduce(function(s,r){ return s+(Number(r.valor)||0); }, 0);
+    var mrrDelta = prevMRR > 0 ? Math.round((mrr-prevMRR)/prevMRR*100) : 0;
+
+    var retencao = total > 0 ? Math.max(0, Math.round(((total-atraso)/total)*1000)/10) : 0;
+
+    var months = ['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    var curMonth = months[today.getMonth()];
+
+    set('kpi-escolas', total);
+    set('kpi-escolas-sub', ativas+' ativas \u00b7 '+trials+' trial \u00b7 '+atraso+' atraso');
+    set('kpi-alunos', totalAlunos.toLocaleString('pt-BR'));
+    set('kpi-alunos-sub', 'Total de atletas cadastrados');
+    set('kpi-mrr', fmtK(mrr));
+    set('kpi-mrr-sub', prevMRR>0 ? fmtK(prevMRR)+' m\u00eas anterior' : 'MRR calculado das assinaturas');
+    set('kpi-retencao', retencao.toFixed(1)+'%');
+    set('kpi-retencao-sub', 'M\u00e9dia baseada em status de pagamento');
+    set('welcome-sub', 'Plataforma atualizada \u00b7 '+total+' escolas ativas \u00b7 '+curMonth.charAt(0).toUpperCase()+curMonth.slice(1)+' '+today.getFullYear());
+
+    // Mini stats
+    set('ms-ativas', ativas);
+    set('ms-trial', trials);
+    set('ms-atraso', atraso);
+    if (total > 0) {
+      var barEl;
+      barEl = document.getElementById('ms-ativas-bar'); if(barEl) barEl.style.width = Math.round(ativas/total*100)+'%';
+      barEl = document.getElementById('ms-trial-bar');  if(barEl) barEl.style.width = Math.round(trials/total*100)+'%';
+      barEl = document.getElementById('ms-atraso-bar'); if(barEl) barEl.style.width = Math.round(atraso/total*100)+'%';
+    }
+
+    // KPI trend badges
+    var trends = document.querySelectorAll('.kpi-card .kpi-trend');
+    if (trends[2]) { // MRR trend
+      trends[2].textContent = (mrrDelta>=0?'\u25b2 +':'\u25bc ')+Math.abs(mrrDelta)+'%';
+      trends[2].className = 'kpi-trend '+(mrrDelta>=0?'up':'down');
+    }
+  }
+
+  function updateRevenueChart(fcData) {
+    var today = new Date();
+    var labels=[], realData=[], metaData=[];
+    for (var i=11; i>=0; i--) {
+      var d = new Date(today.getFullYear(), today.getMonth()-i, 1);
+      var from = d.toISOString().slice(0,10);
+      var to   = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().slice(0,10);
+      var rec  = fcData.filter(function(r){ return r.tipo==='receita'&&r.status==='realizado'&&r.data>=from&&r.data<=to; })
+                        .reduce(function(s,r){ return s+(Number(r.valor)||0); }, 0);
+      labels.push(monthName(d)+(i===0?'':'/'+String(d.getFullYear()).slice(2)));
+      realData.push(rec);
+      metaData.push(Math.round(rec * 0.92) || 0);
+    }
+    if (window._revChart) { window._revChart.destroy(); window._revChart=null; }
+    var rCtx = document.getElementById('revenueChart').getContext('2d');
+    var rGrad = rCtx.createLinearGradient(0,0,0,240);
+    rGrad.addColorStop(0,'rgba(26,86,219,.22)');
+    rGrad.addColorStop(1,'rgba(26,86,219,0)');
+    window._revChart = new Chart(rCtx,{
+      type:'line',
+      data:{
+        labels: labels,
+        datasets:[{
+          label:'Receita (R$)', data:realData,
+          borderColor:'#1a56db', backgroundColor:rGrad,
+          borderWidth:2.5, pointBackgroundColor:'#1a56db',
+          pointRadius:4, pointHoverRadius:6, fill:true, tension:.4
+        },{
+          label:'Meta (R$)', data:metaData,
+          borderColor:'#e2e8f0', borderWidth:1.5, borderDash:[5,5],
+          pointRadius:0, fill:false, tension:.4
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,boxHeight:6,padding:14}},
+          tooltip:{mode:'index',intersect:false, callbacks:{label:function(c){ return c.dataset.label+': R$ '+c.raw.toLocaleString('pt-BR'); }}}},
+        scales:{x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:function(v){ return 'R$'+(v/1000).toFixed(0)+'k'; }}}}
+      }
+    });
+  }
+
+  function updateStatusChart(escolas) {
+    var ativas  = escolas.filter(function(e){ return e.status_pagamento==='ativa'; }).length;
+    var trials  = escolas.filter(function(e){ return e.status_pagamento==='trial'; }).length;
+    var atraso  = escolas.filter(function(e){ return e.status_pagamento==='inadimplente'; }).length;
+    if (window._statusChart) { window._statusChart.destroy(); window._statusChart=null; }
+    window._statusChart = new Chart(document.getElementById('statusChart'),{
+      type:'doughnut',
+      data:{ labels:['Ativas','Trial','Em atraso'], datasets:[{data:[ativas,trials,atraso], backgroundColor:['#1a56db','#d97706','#dc2626'], borderWidth:0, hoverOffset:4}]},
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'72%',
+        plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.label+': '+c.raw+' escolas'; }}}}}
+    });
+  }
+
+  function updateRegionChart(escolas) {
+    var regions = { SE:0, S:0, NE:0, N:0, CO:0 };
+    var seStates  = ['SP','RJ','MG','ES'];
+    var sStates   = ['PR','SC','RS'];
+    var neStates  = ['BA','SE','AL','PE','PB','RN','CE','PI','MA'];
+    var nStates   = ['AM','PA','AC','RO','RR','AP','TO'];
+    escolas.forEach(function(e){
+      var s = (e.estado||'').toUpperCase();
+      if (seStates.indexOf(s)>-1) regions.SE++;
+      else if (sStates.indexOf(s)>-1) regions.S++;
+      else if (neStates.indexOf(s)>-1) regions.NE++;
+      else if (nStates.indexOf(s)>-1) regions.N++;
+      else regions.CO++;
+    });
+    if (window._regionChart) { window._regionChart.destroy(); window._regionChart=null; }
+    window._regionChart = new Chart(document.getElementById('regionChart'),{
+      type:'pie',
+      data:{ labels:['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'],
+        datasets:[{ data:[regions.SE,regions.S,regions.NE,regions.N,regions.CO],
+          backgroundColor:['#1a56db','#0ea5e9','#059669','#d97706','#7c3aed'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'bottom', labels:{usePointStyle:true,pointStyleWidth:8,boxHeight:6,padding:9,font:{size:11}}}}}
+    });
+  }
+
+  function updateAlerts(escolas) {
+    var today   = new Date();
+    var todayStr = today.toISOString().slice(0,10);
+    var in14Str  = new Date(today.getTime()+14*86400000).toISOString().slice(0,10);
+    var alerts  = [];
+
+    // Overdue
+    var overdue = escolas.filter(function(e){ return e.status_pagamento==='inadimplente'; });
+    overdue.forEach(function(e){
+      var daysAgo = e.proximo_vencimento ? Math.round((new Date(todayStr)-new Date(e.proximo_vencimento))/86400000) : 0;
+      alerts.push({ dot:'danger', text:'Pagamento em atraso: '+(e.nome_fantasia||e.razao_social), time: daysAgo>0?daysAgo+'d de atraso':'Vence hoje' });
+    });
+
+    // Trials expiring
+    var expiring = escolas.filter(function(e){ return e.status_pagamento==='trial' && e.proximo_vencimento && e.proximo_vencimento<=in14Str; });
+    expiring.forEach(function(e){
+      var days = Math.round((new Date(e.proximo_vencimento)-new Date(todayStr))/86400000);
+      alerts.push({ dot:'warning', text:'Trial expirando: '+(e.nome_fantasia||e.razao_social), time:'Em '+days+' dias' });
+    });
+
+    // Recent new schools
+    var weekAgo = new Date(today.getTime()-7*86400000).toISOString().slice(0,10);
+    var newSchools = escolas.filter(function(e){ return (e.created_at||'').slice(0,10)>=weekAgo; });
+    newSchools.forEach(function(e){
+      alerts.push({ dot:'info', text:'Nova escola cadastrada: '+(e.nome_fantasia||e.razao_social), time:'Recente' });
+    });
+
+    // MRR positive
+    var mrr = escolas.filter(function(e){ return e.status_pagamento!=='cancelada'; })
+                     .reduce(function(s,e){ return s+(Number(e.mensalidade)||0); }, 0);
+    if (mrr > 0) {
+      alerts.push({ dot:'success', text:'MRR atual: '+fmtK(mrr), time:'Receita mensal recorrente' });
+    }
+
+    if (!alerts.length) alerts.push({ dot:'success', text:'Nenhum alerta no momento', time:'Tudo certo!' });
+
+    var alertsList = document.getElementById('alerts-list');
+    if (!alertsList) return;
+    alertsList.innerHTML = alerts.slice(0,5).map(function(a){
+      return '<div class="alert-item"><div class="alert-dot '+a.dot+'"></div><div>'
+        +'<div class="alert-text">'+a.text+'</div>'
+        +'<div class="alert-time">'+a.time+'</div>'
+        +'</div></div>';
+    }).join('');
+
+    var badge = alertsList.parentElement.querySelector('.badge');
+    if (badge) {
+      var crit = overdue.length + expiring.length;
+      badge.textContent = crit+' cr\u00edticos';
+      badge.className = crit>0 ? 'badge badge-overdue' : 'badge badge-active';
+    }
+    var subtitle = alertsList.parentElement.querySelector('.card-subtitle');
+    if (subtitle) subtitle.textContent = alerts.length+' itens requerem aten\u00e7\u00e3o';
+  }
+
+  function loadData() {
+    if (!db) return;
+    var escolas, fcData;
+
+    db.from('escolas')
+      .select('nome_fantasia,razao_social,status_pagamento,mensalidade,total_alunos,capacidade,estado,modalidades,proximo_vencimento,created_at')
+      .then(function(res) {
+        escolas = res.data || [];
+        return db.from('fluxo_caixa').select('data,tipo,status,valor').order('data');
+      })
+      .then(function(res) {
+        fcData = res.data || [];
+        updateKPIs(escolas, fcData);
+        updateRevenueChart(fcData);
+        updateStatusChart(escolas);
+        updateRegionChart(escolas);
+        updateAlerts(escolas);
+      });
+  }
+
+  function initDb() {
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ if(initDb()) loadData(); });
+  } else { if(initDb()) loadData(); }
+})();
+</script>
+
+<script>window.SUPERADMIN_PAGE = 'dashboard';</script>
+<script src="superadmin-sidebar.js"></script>
 </body>
 </html>

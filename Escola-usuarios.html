@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esportes Academy — Escola · Usuários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #20C997;
+      --primary-dark:  #17a57a;
+      --primary-light: #e6faf4;
+      --secondary:     #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:        #FFA552;
+      --accent-light:  #fff4e8;
+      --success:       #20C997;
+      --success-light: #e6faf4;
+      --warning:       #FFA552;
+      --warning-light: #fff4e8;
+      --danger:        #ef4444;
+      --danger-light:  #fee2e2;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --teal:          #0d9488;
+      --teal-light:    #ccfbf1;
+      --pink:          #ec4899;
+      --pink-light:    #fce7f3;
+      --bg:            #F7F9FA;
+      --card:          #ffffff;
+      --text:          #1B1B1B;
+      --text-muted:    #6b7280;
+      --border:        #e5e7eb;
+      --sidebar-w:     268px;
+      --sidebar-bg:    #0d2112;
+      --sidebar-hover: #162e1c;
+      --shadow:        0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:     0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:     0 10px 24px -3px rgba(0,0,0,.12);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --topbar-h:      60px;
+    }
+    body { font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden; }
+
+    /* OVERLAY */
+    .overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w);height:100dvh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .brand { display:flex;align-items:center;gap:10px; }
+    .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+    .school-chip { margin:10px 12px 0;padding:8px 10px;background:rgba(32,201,151,.1);border:1px solid rgba(32,201,151,.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer; }
+    .school-chip .sc-ava { width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .sc-name { color:rgba(255,255,255,.85);font-size:11px;font-weight:600; }
+    .sc-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .sidebar-nav { padding:8px 10px;flex:1; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+    .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.locked { color:rgba(255,255,255,.28);cursor:not-allowed; }
+    .nav-item.locked:hover { background:none; }
+    .lock-badge { margin-left:auto;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600; }
+    .lock-plan { background:rgba(255,165,82,.15);color:#FFA552; }
+    .sidebar-footer { padding:10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+
+    /* MAIN */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* TOPBAR */
+    .topbar { background:var(--card);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow); }
+    .menu-btn { display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;color:var(--text-muted); }
+    @media(min-width:1024px){ .menu-btn { display:none; } }
+    .breadcrumb { font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px; }
+    .breadcrumb span { color:var(--text);font-weight:600; }
+    .topbar-right { margin-left:auto;display:flex;align-items:center;gap:8px; }
+    .icon-btn { width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative; }
+    .notif-dot { width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:6px;right:6px;border:2px solid #fff; }
+    .topbar-ava { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer; }
+
+    /* PAGE */
+    .page { padding:24px 20px 100px;flex:1;position:relative; }
+    @media(min-width:1280px){ .page { padding:28px 32px 100px; } }
+
+    /* BUTTONS */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif; }
+    .btn-primary { background:var(--primary);color:#fff; }
+    .btn-primary:hover { background:var(--primary-dark); }
+    .btn-outline { background:var(--card);border:1px solid var(--border);color:var(--text); }
+    .btn-outline:hover { background:var(--bg); }
+    .btn-ghost { background:transparent;border:none;color:var(--text-muted);font-family:'Inter',sans-serif; }
+    .btn-ghost:hover { background:var(--bg);color:var(--text); }
+    .btn-sm { padding:6px 12px;font-size:12px; }
+    .btn-danger { background:var(--danger);color:#fff; }
+    .btn-danger:hover { background:#dc2626; }
+    .btn-danger-ghost { background:transparent;border:none;color:var(--danger);font-family:'Inter',sans-serif;padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600; }
+    .btn-danger-ghost:hover { background:var(--danger-light); }
+    .btn-warning { background:var(--warning);color:#fff; }
+
+    /* PAGE HEADER */
+    .page-header { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
+    .page-title h1 { font-size:22px;font-weight:800; }
+    .page-title p { color:var(--text-muted);font-size:13px;margin-top:3px; }
+
+    /* STATS */
+    .stats-row { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px; }
+    @media(min-width:640px){ .stats-row { grid-template-columns:repeat(4,1fr); } }
+    .stat-card { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px; }
+    .stat-label { font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px; }
+    .stat-value { font-size:24px;font-weight:800; }
+    .stat-sub { font-size:11.5px;color:var(--text-muted);margin-top:3px; }
+
+    /* PLAN QUOTA BAR */
+    .quota-bar-wrap { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
+    .quota-label { font-size:12.5px;font-weight:600;white-space:nowrap; }
+    .quota-bar { flex:1;min-width:100px;height:8px;background:var(--border);border-radius:4px;overflow:hidden; }
+    .quota-fill { height:100%;border-radius:4px;background:var(--primary);transition:width .4s; }
+    .quota-fill.warn { background:var(--warning); }
+    .quota-fill.danger { background:var(--danger); }
+    .quota-text { font-size:12px;color:var(--text-muted);white-space:nowrap; }
+
+    /* TOOLBAR */
+    .toolbar { display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px; }
+    .search-wrap { position:relative;flex:1;min-width:160px; }
+    .search-icon { position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted);pointer-events:none; }
+    .search-wrap input { width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text); }
+    .search-wrap input:focus { outline:none;border-color:var(--primary); }
+    .filter-select { padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);cursor:pointer; }
+
+    /* USERS TABLE */
+    .users-table { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
+    .table-header { display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 0.8fr auto;gap:12px;padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted); }
+    .user-row-table { display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 0.8fr auto;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s; }
+    .user-row-table:last-child { border-bottom:none; }
+    .user-row-table:hover { background:#fafafa; }
+    .user-row-table.selected { background:var(--primary-light); }
+    @media(max-width:900px){
+      .table-header { display:none; }
+      .user-row-table { grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:4px; }
+    }
+
+    /* USER CELL */
+    .user-cell { display:flex;align-items:center;gap:10px; }
+    .user-avatar { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;position:relative; }
+    .you-dot { position:absolute;bottom:-1px;right:-1px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:7px; }
+    .user-meta { min-width:0; }
+    .user-meta .u-name { font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px; }
+    .user-meta .u-email { font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .you-tag { font-size:9.5px;background:var(--primary-light);color:var(--primary-dark);padding:1px 6px;border-radius:10px;font-weight:700;border:1px solid rgba(32,201,151,.25); }
+
+    /* PROFILE BADGE */
+    .profile-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap; }
+    .pb-admin    { background:var(--primary-light);color:var(--primary-dark); }
+    .pb-coord    { background:var(--secondary-light);color:#0369a1; }
+    .pb-prof     { background:var(--accent-light);color:#92400e; }
+    .pb-fin      { background:var(--purple-light);color:#5b21b6; }
+    .pb-sec      { background:var(--teal-light);color:var(--teal); }
+    .pb-saude    { background:var(--danger-light);color:#991b1b; }
+    .pb-mkt      { background:var(--pink-light);color:#9d174d; }
+
+    /* STATUS BADGE */
+    .status-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600; }
+    .sb-ativo   { background:var(--success-light);color:var(--primary-dark); }
+    .sb-pendente { background:var(--warning-light);color:#92400e; }
+    .sb-inativo  { background:var(--bg);color:var(--text-muted);border:1px solid var(--border); }
+    .status-dot { width:6px;height:6px;border-radius:50%; }
+    .sd-ativo   { background:var(--primary); }
+    .sd-pendente { background:var(--warning); }
+    .sd-inativo  { background:var(--border); }
+
+    /* MULTI-ESCOLA BADGE */
+    .multi-escola-badge { display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--secondary);font-weight:600;background:var(--secondary-light);padding:2px 7px;border-radius:10px;white-space:nowrap; }
+
+    /* ACTION DOTS */
+    .action-menu-btn { width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text-muted);transition:all .15s; }
+    .action-menu-btn:hover { background:var(--bg);border-color:var(--primary);color:var(--primary); }
+
+    /* EMPTY STATE */
+    .empty-state { padding:60px 20px;text-align:center;color:var(--text-muted); }
+    .empty-state .ei { font-size:40px;margin-bottom:12px; }
+    .empty-state p { font-size:13px; }
+
+    /* ─── DETAIL PANEL ─── */
+    .detail-panel { position:fixed;top:0;right:0;width:420px;max-width:100vw;height:100dvh;background:var(--card);border-left:1px solid var(--border);z-index:95;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden; }
+    .detail-panel.open { transform:translateX(0); }
+    .panel-header { padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0; }
+    .panel-title { font-size:14px;font-weight:700;flex:1; }
+    .close-btn { width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text-muted); }
+    .panel-body { flex:1;overflow-y:auto;padding:18px; }
+
+    /* PANEL USER HERO */
+    .panel-user-hero { display:flex;align-items:center;gap:14px;padding:16px;background:var(--bg);border-radius:var(--radius);margin-bottom:18px; }
+    .panel-avatar { width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;flex-shrink:0; }
+    .panel-user-info { flex:1;min-width:0; }
+    .panel-user-info .p-name { font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px; }
+    .panel-user-info .p-email { font-size:12.5px;color:var(--text-muted);margin-top:2px; }
+    .panel-user-info .p-badges { display:flex;flex-wrap:wrap;gap:4px;margin-top:6px; }
+
+    /* PANEL SECTIONS */
+    .panel-section { margin-bottom:18px; }
+    .panel-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:6px; }
+    .info-row { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px; }
+    .info-row:last-child { border-bottom:none; }
+    .info-row .ir-label { color:var(--text-muted);font-size:12px; }
+    .info-row .ir-val { font-weight:600; }
+
+    /* MULTI-ESCOLA LIST */
+    .escola-item { display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:6px; }
+    .escola-ava { width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--secondary),var(--primary));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0; }
+    .escola-info .e-nome { font-size:12.5px;font-weight:600; }
+    .escola-info .e-perfil { font-size:11.5px;color:var(--text-muted); }
+    .escola-current-tag { margin-left:auto;font-size:10px;background:var(--primary-light);color:var(--primary-dark);padding:2px 7px;border-radius:10px;font-weight:700; }
+
+    /* PROFILE CHANGE */
+    .profile-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px; }
+    .profile-opt { border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 10px 8px;cursor:pointer;transition:all .15s; }
+    .profile-opt:hover { border-color:var(--primary); }
+    .profile-opt.selected { border-color:var(--primary);background:var(--primary-light); }
+    .profile-opt.disabled { opacity:.4;cursor:not-allowed;pointer-events:none; }
+    .po-icon { font-size:18px;margin-bottom:4px; }
+    .po-name { font-size:12px;font-weight:700; }
+    .po-desc { font-size:10.5px;color:var(--text-muted);margin-top:2px;line-height:1.4; }
+
+    /* PANEL ACTIONS */
+    .panel-actions { display:flex;flex-direction:column;gap:8px;padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card); }
+
+    /* ─── INVITE DRAWER ─── */
+    .drawer { position:fixed;top:0;right:0;width:500px;max-width:100vw;height:100dvh;background:var(--card);border-left:1px solid var(--border);z-index:110;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column; }
+    .drawer.open { transform:translateX(0); }
+    .drawer-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0; }
+    .drawer-title { font-size:15px;font-weight:700;flex:1; }
+    .drawer-body { flex:1;overflow-y:auto;padding:20px; }
+    .drawer-footer { padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0; }
+
+    /* STEP INDICATOR */
+    .step-indicator { display:flex;align-items:center;gap:0;margin-bottom:20px; }
+    .step { display:flex;flex-direction:column;align-items:center;gap:4px;flex:1; }
+    .step-circle { width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-muted);background:var(--card);transition:all .2s; }
+    .step-circle.done { background:var(--primary);border-color:var(--primary);color:#fff; }
+    .step-circle.active { border-color:var(--primary);color:var(--primary); }
+    .step-label { font-size:10.5px;font-weight:600;color:var(--text-muted); }
+    .step-label.active { color:var(--primary); }
+    .step-line { height:2px;flex:1;background:var(--border);margin-bottom:18px;transition:background .2s; }
+    .step-line.done { background:var(--primary); }
+
+    /* INVITE EMAIL STEP */
+    .email-lookup-box { margin-top:12px;padding:12px;border-radius:var(--radius-sm);display:none; }
+    .email-lookup-box.found { display:flex;align-items:center;gap:10px;background:var(--primary-light);border:1px solid rgba(32,201,151,.3); }
+    .email-lookup-box.new { display:flex;align-items:center;gap:10px;background:var(--secondary-light);border:1px solid rgba(91,192,235,.3); }
+    .email-lookup-box.searching { display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border); }
+    .lookup-avatar { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;background:var(--primary);flex-shrink:0; }
+    .lookup-info .l-name { font-size:13px;font-weight:600; }
+    .lookup-info .l-desc { font-size:11.5px;color:var(--text-muted); }
+
+    /* PROFILE SELECTION */
+    .profile-select-grid { display:grid;grid-template-columns:1fr;gap:8px; }
+    .profile-select-card { border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s; }
+    .profile-select-card:hover { border-color:var(--primary); }
+    .profile-select-card.selected { border-color:var(--primary);background:var(--primary-light); }
+    .psc-icon { font-size:22px;width:36px;text-align:center;flex-shrink:0; }
+    .psc-info { flex:1; }
+    .psc-name { font-size:13px;font-weight:700;margin-bottom:2px; }
+    .psc-desc { font-size:11.5px;color:var(--text-muted);line-height:1.4; }
+    .psc-badge { margin-left:auto; }
+    .psc-check { width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;flex-shrink:0; }
+    .profile-select-card.selected .psc-check { background:var(--primary);border-color:var(--primary);color:#fff; }
+
+    /* FIELDS */
+    .field { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
+    .field label { font-size:12.5px;font-weight:600; }
+    .field input, .field textarea { padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);transition:border .15s; }
+    .field input:focus, .field textarea:focus { outline:none;border-color:var(--primary); }
+    .field textarea { resize:vertical;min-height:70px; }
+    .hint { font-size:11px;color:var(--text-muted); }
+    .req { color:var(--danger); }
+    .form-section-title { font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px; }
+
+    /* ACCESS OVERLAY */
+    .access-overlay { display:none;position:absolute;inset:0;background:rgba(247,249,250,.93);z-index:30;align-items:center;justify-content:center;border-radius:var(--radius); }
+    .access-overlay.show { display:flex; }
+    .access-msg { text-align:center;padding:32px; }
+    .access-msg .lock { font-size:40px;margin-bottom:12px; }
+    .access-msg h3 { font-size:16px;font-weight:700;margin-bottom:6px; }
+    .access-msg p { font-size:13px;color:var(--text-muted);max-width:300px; }
+
+    /* CONFIRM MODAL */
+    .modal-backdrop { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center; }
+    .modal-backdrop.show { display:flex; }
+    .modal-box { background:var(--card);border-radius:var(--radius);padding:28px;width:360px;max-width:90vw;box-shadow:var(--shadow-lg); }
+    .modal-box h3 { font-size:16px;font-weight:700;margin-bottom:8px; }
+    .modal-box p { font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6; }
+    .modal-actions { display:flex;gap:8px;justify-content:flex-end; }
+
+    /* TOAST */
+    .toast { position:fixed;top:80px;right:20px;z-index:400;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);transform:translateX(120%);transition:transform .3s;max-width:320px; }
+    .toast.show { transform:translateX(0); }
+    .toast.success { background:#166534;border-left:4px solid var(--primary); }
+    .toast.error { background:#7f1d1d;border-left:4px solid var(--danger); }
+    .toast.info { background:#1e3a5f;border-left:4px solid var(--secondary); }
+    .toast.warning { background:#78350f;border-left:4px solid var(--warning); }
+
+    /* DEMO BAR */
+    .demo-bar { position:fixed;bottom:0;left:0;right:0;background:#1B1B1B;border-top:1px solid #333;z-index:200;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    @media(min-width:1024px){ .demo-bar { left:var(--sidebar-w); } }
+    .demo-label { color:rgba(255,255,255,.4);font-size:10.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap; }
+    .demo-profiles { display:flex;gap:5px;flex-wrap:wrap; }
+    .demo-btn { padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .15s; }
+    .demo-btn.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+    .demo-btn:not(.active) { background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.1); }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
+      </div>
+    </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">🏫</div>
+      <div>
+        <div class="sc-name">Academia Atlética SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">⇅</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="breadcrumb">Configurações · <span>Usuários</span></div>
+    <div class="topbar-right">
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="topbar-ava" id="topbarAva">AD</div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- ACCESS OVERLAY -->
+    <div class="access-overlay" id="accessOverlay">
+      <div class="access-msg">
+        <div class="lock">🔒</div>
+        <h3>Acesso restrito</h3>
+        <p>Apenas o <strong>Administrador da Escola</strong> pode gerenciar os usuários.</p>
+      </div>
+    </div>
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>👤 Usuários</h1>
+        <p>Gerencie quem tem acesso à escola. Um usuário pode ter perfis diferentes em cada escola.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openInviteDrawer()">✉️ Convidar usuário</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- QUOTA BAR -->
+    <div class="quota-bar-wrap" id="quota-bar-wrap"></div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar por nome ou e-mail..." oninput="renderUsers()"/>
+      </div>
+      <select class="filter-select" id="filter-perfil" onchange="renderUsers()">
+        <option value="">Todos os perfis</option>
+        <option value="admin_escola">Admin</option>
+        <option value="coordenador">Coordenador</option>
+        <option value="professor">Professor</option>
+        <option value="financeiro">Financeiro</option>
+        <option value="secretaria">Secretaria</option>
+        <option value="saude">Saúde</option>
+        <option value="marketing">Marketing</option>
+      </select>
+      <select class="filter-select" id="filter-status" onchange="renderUsers()">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativos</option>
+        <option value="pendente">Pendentes</option>
+        <option value="inativo">Inativos</option>
+      </select>
+      <span id="user-count" style="font-size:12px;color:var(--text-muted);white-space:nowrap;"></span>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="users-table" id="users-table">
+      <div class="table-header">
+        <div>Usuário</div>
+        <div>Perfil nesta escola</div>
+        <div>Status</div>
+        <div>Último acesso</div>
+        <div>Outras escolas</div>
+        <div></div>
+      </div>
+      <div id="users-tbody"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════ DETAIL PANEL ═══════════════ -->
+<div class="detail-panel" id="detail-panel">
+  <div class="panel-header">
+    <div class="panel-title" id="panel-title">Detalhes do usuário</div>
+    <button class="close-btn" onclick="closeDetailPanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+  <div class="panel-actions" id="panel-actions"></div>
+</div>
+
+<!-- ═══════════════ INVITE DRAWER ═══════════════ -->
+<div class="drawer" id="invite-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">✉️ Convidar Usuário</div>
+    <button class="close-btn" onclick="closeInviteDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Step Indicator -->
+    <div style="display:flex;align-items:center;margin-bottom:20px;">
+      <div class="step">
+        <div class="step-circle" id="step1-circle">1</div>
+        <div class="step-label" id="step1-label">E-mail</div>
+      </div>
+      <div class="step-line" id="step-line-1"></div>
+      <div class="step">
+        <div class="step-circle" id="step2-circle">2</div>
+        <div class="step-label" id="step2-label">Perfil</div>
+      </div>
+      <div class="step-line" id="step-line-2"></div>
+      <div class="step">
+        <div class="step-circle" id="step3-circle">3</div>
+        <div class="step-label" id="step3-label">Confirmar</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: EMAIL -->
+    <div id="invite-step1">
+      <div class="form-section-title">📧 E-mail do usuário</div>
+      <div class="field">
+        <label>E-mail <span class="req">*</span></label>
+        <input type="email" id="invite-email" placeholder="usuario@email.com" oninput="debounceLookup()"/>
+        <span class="hint">Se o e-mail já estiver cadastrado na plataforma, o usuário será identificado automaticamente.</span>
+      </div>
+
+      <!-- Lookup result -->
+      <div class="email-lookup-box" id="lookup-box">
+        <div class="lookup-avatar" id="lookup-ava">?</div>
+        <div class="lookup-info">
+          <div class="l-name" id="lookup-name">—</div>
+          <div class="l-desc" id="lookup-desc">—</div>
+        </div>
+      </div>
+
+      <!-- Already in school warning -->
+      <div id="already-in-school" style="display:none;margin-top:10px;padding:10px 12px;background:var(--warning-light);border:1px solid rgba(255,165,82,.3);border-radius:var(--radius-sm);font-size:12.5px;color:#92400e;">
+        ⚠️ Este usuário já tem acesso a esta escola. Para alterar o perfil, use a opção de edição na lista.
+      </div>
+    </div>
+
+    <!-- STEP 2: PROFILE -->
+    <div id="invite-step2" style="display:none;">
+      <div class="form-section-title">🎭 Selecionar perfil</div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">Escolha o nível de acesso que este usuário terá <strong>nesta escola</strong>. O mesmo usuário pode ter um perfil diferente em outras escolas.</p>
+      <div class="profile-select-grid" id="profile-select-grid"></div>
+    </div>
+
+    <!-- STEP 3: CONFIRM -->
+    <div id="invite-step3" style="display:none;">
+      <div class="form-section-title">✅ Confirmar convite</div>
+      <div id="invite-confirm-summary" style="background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:16px;"></div>
+      <div class="field">
+        <label>Mensagem personalizada (opcional)</label>
+        <textarea id="invite-msg" placeholder="Ex: Olá! Você foi convidado para acessar o portal da Academia Atlética SP como Professor. Clique no link abaixo para criar sua conta..."></textarea>
+        <span class="hint">Se em branco, será enviado o texto padrão do sistema.</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-outline" id="invite-back-btn" onclick="inviteBack()" style="display:none;">← Voltar</button>
+    <button class="btn btn-primary" id="invite-next-btn" onclick="inviteNext()" style="margin-left:auto;">Próximo →</button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Confirmar ação</h3>
+    <p id="modal-desc">Tem certeza?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-sm" id="modal-confirm-btn" onclick="modalConfirmAction()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- DEMO BAR -->
+<div class="demo-bar">
+  <div class="demo-label">Demo</div>
+  <div class="demo-profiles">
+    <button class="demo-btn active" onclick="setProfile('admin_escola',this)">Admin</button>
+    <button class="demo-btn" onclick="setProfile('coordenador',this)">Coordenador</button>
+    <button class="demo-btn" onclick="setProfile('professor',this)">Professor</button>
+    <button class="demo-btn" onclick="setProfile('financeiro',this)">Financeiro</button>
+    <button class="demo-btn" onclick="setProfile('secretaria',this)">Secretaria</button>
+    <button class="demo-btn" onclick="setProfile('saude',this)">Saúde</button>
+    <button class="demo-btn" onclick="setProfile('marketing',this)">Marketing</button>
+  </div>
+  <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.35);">Gestão de Usuários — apenas admin_escola</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const PLAN_LIMIT = 10; // Pro plan: up to 10 users
+
+const PROFILES_META = {
+  admin_escola: { label:'Administrador',  icon:'👑', cls:'pb-admin',  color:'#20C997', desc:'Acesso total à escola, configurações e usuários' },
+  coordenador:  { label:'Coordenador',    icon:'📚', cls:'pb-coord',  color:'#5BC0EB', desc:'Pedagógico: turmas, treinamentos, competições. Sem financeiro' },
+  professor:    { label:'Professor',      icon:'🏃', cls:'pb-prof',   color:'#FFA552', desc:'Somente suas turmas: presença, plano de aula e alertas de saúde' },
+  financeiro:   { label:'Financeiro',     icon:'💳', cls:'pb-fin',    color:'#8b5cf6', desc:'Exclusivo financeiro: cobranças, relatórios, inadimplência' },
+  secretaria:   { label:'Secretaria',     icon:'📋', cls:'pb-sec',    color:'#0d9488', desc:'Administrativo: atletas, turmas, comunicação. Sem financeiro' },
+  saude:        { label:'Saúde',          icon:'🏥', cls:'pb-saude',  color:'#ef4444', desc:'Módulo Saúde exclusivo: fichas médicas, lesões, restrições' },
+  marketing:    { label:'Marketing',      icon:'📢', cls:'pb-mkt',    color:'#ec4899', desc:'Eventos, comunicação avançada e galeria. Sem dados individuais' },
+};
+
+let USERS = [
+  { id:1,  nome:'Carlos Mendes',     email:'carlos@academiaatletica.com.br', perfil:'admin_escola', status:'ativo',    ultimo_acesso:'Hoje, 10:42',   membro_desde:'Jan 2024', outras_escolas:[], isYou:true  },
+  { id:2,  nome:'Ana Lima',          email:'ana.lima@email.com',             perfil:'coordenador',  status:'ativo',    ultimo_acesso:'Ontem, 14:30',  membro_desde:'Mar 2024', outras_escolas:[
+      { nome:'Academia Sul SP',        perfil:'coordenador' },
+      { nome:'Esporte Clube Norte',    perfil:'admin_escola' }
+    ]},
+  { id:3,  nome:'Roberto Santos',    email:'roberto.santos@email.com',       perfil:'professor',    status:'ativo',    ultimo_acesso:'Há 3 dias',     membro_desde:'Fev 2024', outras_escolas:[
+      { nome:'Clube dos Campeões RJ',  perfil:'professor' }
+    ]},
+  { id:4,  nome:'Fernanda Costa',    email:'fernanda.costa@email.com',       perfil:'professor',    status:'ativo',    ultimo_acesso:'Há 1 semana',   membro_desde:'Abr 2024', outras_escolas:[] },
+  { id:5,  nome:'Paulo Alves',       email:'paulo.alves@email.com',          perfil:'financeiro',   status:'ativo',    ultimo_acesso:'Há 2 dias',     membro_desde:'Jan 2024', outras_escolas:[] },
+  { id:6,  nome:'Mariana Silva',     email:'mariana.silva@email.com',        perfil:'secretaria',   status:'ativo',    ultimo_acesso:'Hoje, 08:15',   membro_desde:'Jun 2024', outras_escolas:[] },
+  { id:7,  nome:'Dr. Ricardo Rocha', email:'dr.rocha@email.com',             perfil:'saude',        status:'ativo',    ultimo_acesso:'Há 5 dias',     membro_desde:'Set 2024', outras_escolas:[] },
+  { id:8,  nome:'Julia Oliveira',    email:'julia.oliveira@email.com',       perfil:'marketing',    status:'inativo',  ultimo_acesso:'Há 2 meses',    membro_desde:'Mai 2024', outras_escolas:[] },
+  { id:9,  nome:'Thiago Fernandes',  email:'thiago.fernandes@email.com',     perfil:'professor',    status:'pendente', ultimo_acesso:'Nunca',         membro_desde:'—',        outras_escolas:[
+      { nome:'Escola de Futebol RS', perfil:'professor' }
+    ]},
+  { id:10, nome:'Beatriz Carvalho',  email:'beatriz.carvalho@email.com',     perfil:'coordenador',  status:'pendente', ultimo_acesso:'Nunca',         membro_desde:'—',        outras_escolas:[] },
+  { id:11, nome:'Sandra Moreira',    email:'sandra.moreira@email.com',       perfil:'secretaria',   status:'inativo',  ultimo_acesso:'Há 3 meses',    membro_desde:'Out 2023', outras_escolas:[] },
+];
+
+// Platform users for invite lookup simulation
+const PLATFORM_USERS = [
+  { email:'joao.silva@email.com',  nome:'João Silva',    ava:'JS', escolas:1 },
+  { email:'maria.costa@email.com', nome:'Maria Costa',   ava:'MC', escolas:2 },
+  { email:'lucas.lima@email.com',  nome:'Lucas Lima',    ava:'LL', escolas:0 },
+  { email:'ana.lima@email.com',    nome:'Ana Lima',      ava:'AL', escolas:2 }, // already in school
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let currentProfile = 'admin_escola';
+let selectedUserId = null;
+let inviteStep = 1;
+let inviteFoundUser = null;
+let inviteSelectedPerfil = null;
+let editingUserId = null;
+let pendingAction = null;
+let lookupTimer = null;
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderStats();
+  renderQuota();
+  renderUsers();
+  buildProfileSelectGrid();
+});
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function renderStats() {
+  const ativos   = USERS.filter(u => u.status === 'ativo').length;
+  const pendente = USERS.filter(u => u.status === 'pendente').length;
+  const perfis   = new Set(USERS.filter(u=>u.status==='ativo').map(u=>u.perfil)).size;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total de usuários</div>
+      <div class="stat-value">${USERS.length}</div>
+      <div class="stat-sub">${ativos} ativos nesta escola</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ativos</div>
+      <div class="stat-value" style="color:var(--primary)">${ativos}</div>
+      <div class="stat-sub">Com acesso liberado</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Convites pendentes</div>
+      <div class="stat-value" style="color:var(--warning)">${pendente}</div>
+      <div class="stat-sub">Aguardando aceite</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Perfis distintos</div>
+      <div class="stat-value" style="color:var(--secondary)">${perfis}</div>
+      <div class="stat-sub">Dos ${Object.keys(PROFILES_META).length} disponíveis</div>
+    </div>
+  `;
+}
+
+function renderQuota() {
+  const ativos = USERS.filter(u => u.status !== 'inativo').length;
+  const pct = Math.round(ativos / PLAN_LIMIT * 100);
+  const fillClass = pct >= 90 ? 'danger' : pct >= 70 ? 'warn' : '';
+  document.getElementById('quota-bar-wrap').innerHTML = `
+    <div class="quota-label">Vagas do plano Pro</div>
+    <div class="quota-bar"><div class="quota-fill ${fillClass}" style="width:${pct}%"></div></div>
+    <div class="quota-text">${ativos} / ${PLAN_LIMIT} usuários utilizados</div>
+    ${pct >= 90 ? '<span style="font-size:11.5px;color:var(--danger);font-weight:600;">⚠️ Limite quase atingido</span>' : ''}
+    <button class="btn btn-outline btn-sm" onclick="showToast('Upgrade para Enterprise: usuários ilimitados','info')" style="margin-left:auto;">Ver planos</button>
+  `;
+}
+
+// ═══════════════════════════════════════
+// USER LIST
+// ═══════════════════════════════════════
+function renderUsers() {
+  const q      = document.getElementById('search-input').value.trim().toLowerCase();
+  const pFilt  = document.getElementById('filter-perfil').value;
+  const sFilt  = document.getElementById('filter-status').value;
+
+  let list = USERS.filter(u => {
+    if(q && !u.nome.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+    if(pFilt && u.perfil !== pFilt) return false;
+    if(sFilt && u.status !== sFilt) return false;
+    return true;
+  });
+
+  document.getElementById('user-count').textContent = `${list.length} usuário${list.length!==1?'s':''} encontrado${list.length!==1?'s':''}`;
+
+  const tbody = document.getElementById('users-tbody');
+  if(list.length === 0) {
+    tbody.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>Nenhum usuário encontrado com os filtros aplicados.</p></div>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(u => {
+    const pm = PROFILES_META[u.perfil];
+    const multiTag = u.outras_escolas?.length > 0
+      ? `<span class="multi-escola-badge">🏫 +${u.outras_escolas.length} escola${u.outras_escolas.length>1?'s':''}</span>` : '—';
+    const isSelected = u.id === selectedUserId ? 'selected' : '';
+    return `
+      <div class="user-row-table ${isSelected}" onclick="openDetailPanel(${u.id})">
+        <div class="user-cell">
+          <div class="user-avatar" style="background:${pm.color};">
+            ${u.nome.split(' ').slice(0,2).map(n=>n[0]).join('')}
+            ${u.isYou ? '<div class="you-dot">✓</div>' : ''}
+          </div>
+          <div class="user-meta">
+            <div class="u-name">
+              ${u.nome}
+              ${u.isYou ? '<span class="you-tag">você</span>' : ''}
+            </div>
+            <div class="u-email">${u.email}</div>
+          </div>
+        </div>
+        <div>
+          <span class="profile-badge ${pm.cls}">${pm.icon} ${pm.label}</span>
+        </div>
+        <div>
+          ${renderStatusBadge(u.status)}
+        </div>
+        <div style="font-size:12.5px;color:var(--text-muted);">${u.ultimo_acesso}</div>
+        <div>${multiTag}</div>
+        <div>
+          <div class="action-menu-btn" onclick="event.stopPropagation();openDetailPanel(${u.id})" title="Ver detalhes">→</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStatusBadge(status) {
+  const map = {
+    ativo:    { cls:'sb-ativo',    dot:'sd-ativo',    label:'Ativo'    },
+    pendente: { cls:'sb-pendente', dot:'sd-pendente', label:'Pendente' },
+    inativo:  { cls:'sb-inativo',  dot:'sd-inativo',  label:'Inativo'  },
+  };
+  const m = map[status] || map.inativo;
+  return `<span class="status-badge ${m.cls}"><div class="status-dot ${m.dot}"></div>${m.label}</span>`;
+}
+
+// ═══════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════
+function openDetailPanel(userId) {
+  const u = USERS.find(x => x.id === userId);
+  if(!u) return;
+  selectedUserId = userId;
+  renderUsers();
+
+  const pm = PROFILES_META[u.perfil];
+
+  // Other schools list
+  const outrasHtml = u.outras_escolas?.length > 0 ? u.outras_escolas.map(e => {
+    const ep = PROFILES_META[e.perfil];
+    return `
+      <div class="escola-item">
+        <div class="escola-ava">🏫</div>
+        <div class="escola-info">
+          <div class="e-nome">${e.nome}</div>
+          <div class="e-perfil">${ep.icon} ${ep.label}</div>
+        </div>
+      </div>
+    `;
+  }).join('') : `<p style="font-size:12.5px;color:var(--text-muted);">Este usuário está somente nesta escola.</p>`;
+
+  document.getElementById('panel-title').textContent = u.nome;
+
+  document.getElementById('panel-body').innerHTML = `
+    <!-- HERO -->
+    <div class="panel-user-hero">
+      <div class="panel-avatar" style="background:${pm.color};">
+        ${u.nome.split(' ').slice(0,2).map(n=>n[0]).join('')}
+      </div>
+      <div class="panel-user-info">
+        <div class="p-name">
+          ${u.nome}
+          ${u.isYou ? '<span class="you-tag">você</span>' : ''}
+        </div>
+        <div class="p-email">${u.email}</div>
+        <div class="p-badges">
+          <span class="profile-badge ${pm.cls}">${pm.icon} ${pm.label}</span>
+          ${renderStatusBadge(u.status)}
+          ${u.outras_escolas?.length > 0 ? `<span class="multi-escola-badge">🏫 ${u.outras_escolas.length} outras escola${u.outras_escolas.length>1?'s':''}</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCESS INFO -->
+    <div class="panel-section">
+      <div class="panel-section-title">📋 Acesso nesta escola</div>
+      <div class="info-row"><span class="ir-label">Perfil atual</span><span class="ir-val"><span class="profile-badge ${pm.cls}">${pm.icon} ${pm.label}</span></span></div>
+      <div class="info-row"><span class="ir-label">Status</span><span class="ir-val">${renderStatusBadge(u.status)}</span></div>
+      <div class="info-row"><span class="ir-label">Membro desde</span><span class="ir-val">${u.membro_desde}</span></div>
+      <div class="info-row"><span class="ir-label">Último acesso</span><span class="ir-val">${u.ultimo_acesso}</span></div>
+      <div class="info-row"><span class="ir-label">E-mail</span><span class="ir-val" style="font-size:12px;">${u.email}</span></div>
+    </div>
+
+    <!-- WHAT THIS PROFILE CAN DO -->
+    <div class="panel-section">
+      <div class="panel-section-title">🔑 O que ${pm.label} pode fazer</div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-size:12.5px;color:var(--text-muted);line-height:1.7;">
+        ${getProfileDetails(u.perfil)}
+      </div>
+    </div>
+
+    <!-- OUTRAS ESCOLAS -->
+    <div class="panel-section">
+      <div class="panel-section-title">🌐 Outras escolas na plataforma</div>
+      <div class="escola-item" style="border:1.5px solid rgba(32,201,151,.2);background:var(--primary-light);">
+        <div class="escola-ava" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🏫</div>
+        <div class="escola-info">
+          <div class="e-nome">Academia Atlética SP</div>
+          <div class="e-perfil">${pm.icon} ${pm.label}</div>
+        </div>
+        <span class="escola-current-tag">atual</span>
+      </div>
+      ${outrasHtml}
+    </div>
+
+    <!-- CHANGE PROFILE (inline) -->
+    ${!u.isYou ? `
+    <div class="panel-section" id="change-profile-section" style="display:none;">
+      <div class="panel-section-title">🎭 Alterar perfil nesta escola</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">A alteração afeta apenas o acesso a <strong>esta escola</strong>. Outras escolas não são afetadas.</p>
+      <div class="profile-grid" id="inline-profile-grid">
+        ${Object.entries(PROFILES_META).map(([key, pm]) => `
+          <div class="profile-opt ${key === u.perfil ? 'selected' : ''} ${key === 'admin_escola' ? '' : ''}"
+               data-perfil="${key}" onclick="selectInlineProfile('${key}', ${u.id}, this)">
+            <div class="po-icon">${pm.icon}</div>
+            <div class="po-name">${pm.label}</div>
+            <div class="po-desc">${pm.desc.substring(0,45)}...</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary btn-sm" onclick="saveProfileChange(${u.id})">Salvar alteração</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelProfileChange()">Cancelar</button>
+      </div>
+    </div>
+    ` : ''}
+  `;
+
+  // Actions
+  let actions = '';
+  if(!u.isYou) {
+    if(u.status === 'pendente') {
+      actions += `<button class="btn btn-outline" onclick="resendInvite(${u.id})" style="width:100%;">📨 Reenviar convite</button>`;
+    }
+    actions += `<button class="btn btn-outline" onclick="toggleChangeProfile()" style="width:100%;">🎭 Alterar perfil nesta escola</button>`;
+    if(u.status === 'ativo' || u.status === 'pendente') {
+      actions += `<button class="btn btn-danger-ghost" onclick="confirmDeactivate(${u.id})" style="width:100%;border:1px solid var(--danger);">🚫 Desativar acesso</button>`;
+    } else {
+      actions += `<button class="btn btn-outline" onclick="confirmReactivate(${u.id})" style="width:100%;border-color:var(--primary);color:var(--primary);">✅ Reativar acesso</button>`;
+    }
+    actions += `<button class="btn btn-danger-ghost btn-sm" onclick="confirmRemove(${u.id})" style="text-align:center;width:100%;">🗑️ Remover da escola</button>`;
+  } else {
+    actions += `<p style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">Você não pode alterar seu próprio acesso.</p>`;
+  }
+  document.getElementById('panel-actions').innerHTML = actions;
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function getProfileDetails(perfil) {
+  const details = {
+    admin_escola: '✅ Acesso total a todos os módulos<br>✅ Gerencia usuários e convites<br>✅ Configurações da escola e integração Asaas<br>✅ Relatórios completos',
+    coordenador:  '✅ Treinamentos, metodologia e competições<br>✅ Turmas e atletas (leitura)<br>✅ Comunicação e eventos<br>❌ Financeiro e configurações',
+    professor:    '✅ Suas turmas apenas<br>✅ Chamada de presença<br>✅ Alertas de saúde dos seus atletas<br>❌ Financeiro, outros turmas ou dados globais',
+    financeiro:   '✅ Cobranças, inadimplência e relatórios financeiros<br>✅ Emissão de boletos e estorno<br>❌ Dados pedagógicos, turmas ou saúde',
+    secretaria:   '✅ Cadastro de atletas e turmas<br>✅ Comunicação e eventos básicos<br>❌ Financeiro e módulo Saúde',
+    saude:        '✅ Fichas de saúde, lesões e restrições<br>✅ Leitura de dados de treinamento<br>❌ Financeiro, turmas completas ou comunicação em massa',
+    marketing:    '✅ Eventos, comunicação avançada e galeria<br>✅ Leitura básica de turmas para segmentação<br>❌ Financeiro, saúde ou dados individuais',
+  };
+  return details[perfil] || '—';
+}
+
+function closeDetailPanel() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  selectedUserId = null;
+  renderUsers();
+}
+
+function toggleChangeProfile() {
+  const sec = document.getElementById('change-profile-section');
+  if(sec) sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectInlineProfile(perfil, userId, el) {
+  document.querySelectorAll('#inline-profile-grid .profile-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  editingUserId = userId;
+}
+
+let pendingNewPerfil = null;
+function selectInlineProfile(perfil, userId, el) {
+  document.querySelectorAll('#inline-profile-grid .profile-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  pendingNewPerfil = perfil;
+}
+
+function saveProfileChange(userId) {
+  if(!pendingNewPerfil) { showToast('Selecione um perfil','error'); return; }
+  const u = USERS.find(x => x.id === userId);
+  const oldPerfil = u.perfil;
+  if(pendingNewPerfil === oldPerfil) { showToast('O perfil já é o mesmo','info'); return; }
+  u.perfil = pendingNewPerfil;
+  renderStats();
+  renderUsers();
+  openDetailPanel(userId);
+  showToast(`✅ Perfil de ${u.nome} alterado para ${PROFILES_META[pendingNewPerfil].label}`, 'success');
+  pendingNewPerfil = null;
+}
+
+function cancelProfileChange() {
+  const sec = document.getElementById('change-profile-section');
+  if(sec) sec.style.display = 'none';
+  pendingNewPerfil = null;
+}
+
+// ═══════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════
+function resendInvite(userId) {
+  const u = USERS.find(x => x.id === userId);
+  showToast(`📨 Convite reenviado para ${u.email}`, 'success');
+}
+
+function confirmDeactivate(userId) {
+  const u = USERS.find(x => x.id === userId);
+  showModal(
+    '🚫 Desativar acesso',
+    `<strong>${u.nome}</strong> perderá o acesso a esta escola. Os dados são preservados e o acesso pode ser reativado depois. <br><br>O acesso em outras escolas <strong>não será afetado</strong>.`,
+    'btn-danger', 'Desativar', () => {
+      u.status = 'inativo';
+      renderStats(); renderQuota(); renderUsers();
+      openDetailPanel(userId);
+      showToast(`${u.nome} foi desativado`, 'warning');
+    }
+  );
+}
+
+function confirmReactivate(userId) {
+  const u = USERS.find(x => x.id === userId);
+  showModal(
+    '✅ Reativar acesso',
+    `<strong>${u.nome}</strong> voltará a ter acesso a esta escola com o perfil <strong>${PROFILES_META[u.perfil].label}</strong>.`,
+    'btn-primary', 'Reativar', () => {
+      u.status = 'ativo';
+      renderStats(); renderQuota(); renderUsers();
+      openDetailPanel(userId);
+      showToast(`${u.nome} foi reativado`, 'success');
+    }
+  );
+}
+
+function confirmRemove(userId) {
+  const u = USERS.find(x => x.id === userId);
+  showModal(
+    '🗑️ Remover da escola',
+    `<strong>${u.nome}</strong> será <strong>removido permanentemente</strong> desta escola. O histórico e o acesso em outras escolas serão preservados. Esta ação não pode ser desfeita.`,
+    'btn-danger', 'Remover', () => {
+      USERS = USERS.filter(x => x.id !== userId);
+      closeDetailPanel();
+      renderStats(); renderQuota(); renderUsers();
+      showToast(`${u.nome} foi removido da escola`, 'warning');
+    }
+  );
+}
+
+// ═══════════════════════════════════════
+// INVITE DRAWER
+// ═══════════════════════════════════════
+function openInviteDrawer() {
+  inviteStep = 1;
+  inviteFoundUser = null;
+  inviteSelectedPerfil = null;
+  document.getElementById('invite-email').value = '';
+  document.getElementById('lookup-box').className = 'email-lookup-box';
+  document.getElementById('already-in-school').style.display = 'none';
+  document.getElementById('invite-msg').value = '';
+  updateInviteStepUI();
+  document.getElementById('invite-drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeInviteDrawer() {
+  document.getElementById('invite-drawer').classList.remove('open');
+  const panelOpen = document.getElementById('detail-panel').classList.contains('open');
+  if(!panelOpen) document.getElementById('overlay').classList.remove('show');
+}
+
+function updateInviteStepUI() {
+  [1,2,3].forEach(i => {
+    document.getElementById(`invite-step${i}`).style.display = i === inviteStep ? 'block' : 'none';
+    document.getElementById(`step${i}-circle`).className = 'step-circle' +
+      (i < inviteStep ? ' done' : i === inviteStep ? ' active' : '');
+    document.getElementById(`step${i}-label`).className = 'step-label' + (i === inviteStep ? ' active' : '');
+  });
+  document.getElementById('step-line-1').className = 'step-line' + (inviteStep > 1 ? ' done' : '');
+  document.getElementById('step-line-2').className = 'step-line' + (inviteStep > 2 ? ' done' : '');
+
+  const backBtn = document.getElementById('invite-back-btn');
+  const nextBtn = document.getElementById('invite-next-btn');
+  backBtn.style.display = inviteStep > 1 ? '' : 'none';
+
+  if(inviteStep === 3) {
+    nextBtn.textContent = '✉️ Enviar convite';
+    nextBtn.className = 'btn btn-primary';
+  } else {
+    nextBtn.textContent = 'Próximo →';
+    nextBtn.className = 'btn btn-primary';
+  }
+}
+
+function buildProfileSelectGrid() {
+  document.getElementById('profile-select-grid').innerHTML = Object.entries(PROFILES_META).map(([key, pm]) => `
+    <div class="profile-select-card" data-perfil="${key}" onclick="selectInvitePerfil('${key}', this)">
+      <div class="psc-icon">${pm.icon}</div>
+      <div class="psc-info">
+        <div class="psc-name">${pm.label}</div>
+        <div class="psc-desc">${pm.desc}</div>
+      </div>
+      <div class="psc-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function selectInvitePerfil(perfil, el) {
+  document.querySelectorAll('.profile-select-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  inviteSelectedPerfil = perfil;
+}
+
+function debounceLookup() {
+  clearTimeout(lookupTimer);
+  const email = document.getElementById('invite-email').value.trim();
+  if(email.length < 3) {
+    document.getElementById('lookup-box').className = 'email-lookup-box';
+    return;
+  }
+  // Show searching state
+  document.getElementById('lookup-box').className = 'email-lookup-box searching';
+  document.getElementById('lookup-box').innerHTML = '<span style="font-size:12.5px;color:var(--text-muted);">⏳ Verificando...</span>';
+  lookupTimer = setTimeout(() => performLookup(email), 700);
+}
+
+function performLookup(email) {
+  const box = document.getElementById('lookup-box');
+  const alreadyWarn = document.getElementById('already-in-school');
+
+  // Check if already in THIS school
+  const existsInSchool = USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if(existsInSchool) {
+    alreadyWarn.style.display = 'block';
+    box.className = 'email-lookup-box';
+    inviteFoundUser = null;
+    return;
+  }
+  alreadyWarn.style.display = 'none';
+
+  // Check platform users
+  const platformUser = PLATFORM_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if(platformUser) {
+    inviteFoundUser = platformUser;
+    box.className = 'email-lookup-box found';
+    box.innerHTML = `
+      <div class="lookup-avatar" style="background:var(--primary);">${platformUser.ava}</div>
+      <div class="lookup-info">
+        <div class="l-name">✓ ${platformUser.nome}</div>
+        <div class="l-desc">Usuário encontrado · já está em ${platformUser.escolas} outra${platformUser.escolas !== 1 ? 's' : ''} escola${platformUser.escolas !== 1 ? 's' : ''} na plataforma</div>
+      </div>
+    `;
+  } else if(email.includes('@') && email.includes('.')) {
+    inviteFoundUser = null;
+    box.className = 'email-lookup-box new';
+    box.innerHTML = `
+      <div class="lookup-avatar" style="background:var(--secondary);">✉️</div>
+      <div class="lookup-info">
+        <div class="l-name">Novo usuário</div>
+        <div class="l-desc">Receberá um e-mail para criar sua conta na plataforma</div>
+      </div>
+    `;
+  } else {
+    box.className = 'email-lookup-box';
+  }
+}
+
+function inviteNext() {
+  if(inviteStep === 1) {
+    const email = document.getElementById('invite-email').value.trim();
+    if(!email || !email.includes('@')) { showToast('Informe um e-mail válido','error'); return; }
+    const already = USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if(already) { showToast('Este usuário já está nesta escola','error'); return; }
+    inviteStep = 2;
+    updateInviteStepUI();
+  } else if(inviteStep === 2) {
+    if(!inviteSelectedPerfil) { showToast('Selecione um perfil para o usuário','error'); return; }
+    // Build confirm summary
+    const email = document.getElementById('invite-email').value.trim();
+    const pm = PROFILES_META[inviteSelectedPerfil];
+    const user = inviteFoundUser;
+    document.getElementById('invite-confirm-summary').innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:${pm.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;">
+          ${user ? user.ava : email.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:14px;">${user ? user.nome : 'Novo usuário'}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${email}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px;">
+        <span style="color:var(--text-muted);">Escola:</span><strong>Academia Atlética SP</strong>
+        <span style="color:var(--text-muted);">Perfil:</span><span><span class="profile-badge ${pm.cls}">${pm.icon} ${pm.label}</span></span>
+        <span style="color:var(--text-muted);">Tipo:</span><span>${user ? '✅ Usuário existente — acesso imediato após aceite' : '📧 Novo usuário — criará conta via e-mail'}</span>
+        ${user && user.escolas > 0 ? `<span style="color:var(--text-muted);">Multi-escola:</span><span>Este usuário já está em ${user.escolas} outra${user.escolas>1?'s':''} escola${user.escolas>1?'s':''}</span>` : ''}
+      </div>
+    `;
+    inviteStep = 3;
+    updateInviteStepUI();
+  } else if(inviteStep === 3) {
+    // Send invite
+    const email = document.getElementById('invite-email').value.trim();
+    const nome = inviteFoundUser ? inviteFoundUser.nome : email.split('@')[0].replace(/[\._]/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+    const newUser = {
+      id: Math.max(...USERS.map(u=>u.id)) + 1,
+      nome,
+      email,
+      perfil: inviteSelectedPerfil,
+      status: 'pendente',
+      ultimo_acesso: 'Nunca',
+      membro_desde: '—',
+      outras_escolas: inviteFoundUser && inviteFoundUser.escolas > 0 ? [{ nome:'Outra escola', perfil: inviteSelectedPerfil }] : [],
+    };
+    USERS.push(newUser);
+    closeInviteDrawer();
+    renderStats(); renderQuota(); renderUsers();
+    showToast(`✅ Convite enviado para ${email}`, 'success');
+  }
+}
+
+function inviteBack() {
+  if(inviteStep > 1) {
+    inviteStep--;
+    updateInviteStepUI();
+  }
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function showModal(title, desc, btnClass, btnLabel, action) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-desc').innerHTML = desc;
+  const btn = document.getElementById('modal-confirm-btn');
+  btn.className = `btn btn-sm ${btnClass}`;
+  btn.textContent = btnLabel;
+  pendingAction = action;
+  document.getElementById('confirm-modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('show');
+  pendingAction = null;
+}
+function modalConfirmAction() {
+  if(pendingAction) pendingAction();
+  closeModal();
+}
+
+// ═══════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════
+// PROFILE DEMO
+// ═══════════════════════════════════════
+const DEMO_PROFILES = {
+  admin_escola: { nome:'Carlos Mendes', ava:'CM', role:'admin_escola', access:true  },
+  coordenador:  { nome:'Ana Lima',      ava:'AL', role:'coordenador',  access:false },
+  professor:    { nome:'Roberto Santos',ava:'RS', role:'professor',    access:false },
+  financeiro:   { nome:'Paulo Alves',   ava:'PA', role:'financeiro',   access:false },
+  secretaria:   { nome:'Mariana Silva', ava:'MS', role:'secretaria',   access:false },
+  saude:        { nome:'Dr. Ricardo',   ava:'DR', role:'saude',        access:false },
+  marketing:    { nome:'Julia Oliveira',ava:'JO', role:'marketing',    access:false },
+};
+function setProfile(p, btn) {
+  currentProfile = p;
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const prof = DEMO_PROFILES[p];
+  document.getElementById('sidebarAva').textContent  = prof.ava;
+  document.getElementById('sidebarName').textContent = prof.nome;
+  document.getElementById('sidebarRole').textContent = prof.role;
+  document.getElementById('topbarAva').textContent   = prof.ava;
+  const overlay = document.getElementById('accessOverlay');
+  if(prof.access) { overlay.classList.remove('show'); }
+  else            { overlay.classList.add('show'); closeDetailPanel(); closeInviteDrawer(); }
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✅':type==='error'?'❌':type==='warning'?'⚠️':'ℹ️') + ' ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+<script>window.ESCOLA_PAGE = 'usuarios';</script>
+<script src="escola-sidebar.js"></script>
+</body>
+</html>

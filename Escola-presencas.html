@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esportes Academy — Escola · Presenças</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #20C997;
+      --primary-dark:  #17a57a;
+      --primary-light: #e6faf4;
+      --secondary:     #5BC0EB;
+      --secondary-light:#e8f6fd;
+      --accent:        #FFA552;
+      --accent-light:  #fff4e8;
+      --success:       #20C997;
+      --success-light: #e6faf4;
+      --warning:       #FFA552;
+      --warning-light: #fff4e8;
+      --danger:        #ef4444;
+      --danger-light:  #fee2e2;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --bg:            #F7F9FA;
+      --card:          #ffffff;
+      --text:          #1B1B1B;
+      --text-muted:    #6b7280;
+      --border:        #e5e7eb;
+      --sidebar-w:     268px;
+      --sidebar-bg:    #0d2112;
+      --sidebar-hover: #162e1c;
+      --shadow:        0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:     0 4px 6px -1px rgba(0,0,0,.09);
+      --shadow-lg:     0 10px 24px -3px rgba(0,0,0,.12);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --topbar-h:      60px;
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    /* OVERLAY */
+    .overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w);height:100dvh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .brand { display:flex;align-items:center;gap:10px; }
+    .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
+    .brand-text .name { color:#fff;font-weight:700;font-size:13.5px; }
+    .brand-text .sub  { color:rgba(255,255,255,.35);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase; }
+    .school-chip { margin:10px 12px 0;padding:8px 10px;background:rgba(32,201,151,.1);border:1px solid rgba(32,201,151,.2);border-radius:var(--radius-sm);display:flex;align-items:center;gap:8px;cursor:pointer; }
+    .school-chip .sc-ava { width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+    .sc-name { color:rgba(255,255,255,.85);font-size:11px;font-weight:600; }
+    .sc-plan { color:rgba(255,255,255,.38);font-size:10px; }
+    .sidebar-nav { padding:8px 10px;flex:1; }
+    .nav-section-label { color:rgba(255,255,255,.25);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 8px;margin:14px 0 4px; }
+    .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover);color:rgba(255,255,255,.85); }
+    .nav-item.active { background:var(--primary);color:#fff; }
+    .nav-item .icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+    .nav-item.locked { color:rgba(255,255,255,.28);cursor:not-allowed; }
+    .nav-item.locked:hover { background:none; }
+    .lock-badge { margin-left:auto;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600; }
+    .lock-plan { background:rgba(255,165,82,.15);color:#FFA552; }
+    .nav-badge { margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+    .sidebar-footer { padding:10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0; }
+    .user-row { display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0; }
+    .user-info .u-name { color:#fff;font-size:12.5px;font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35);font-size:10.5px; }
+
+    /* MAIN */
+    .main { display:flex;flex-direction:column;min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* TOPBAR */
+    .topbar { background:var(--card);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow); }
+    .menu-btn { display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;color:var(--text-muted); }
+    @media(min-width:1024px){ .menu-btn { display:none; } }
+    .breadcrumb { font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px; }
+    .breadcrumb span { color:var(--text);font-weight:600; }
+    .topbar-right { margin-left:auto;display:flex;align-items:center;gap:8px; }
+    .icon-btn { width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;transition:background .15s; }
+    .icon-btn:hover { background:var(--bg); }
+    .notif-dot { width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:6px;right:6px;border:2px solid #fff; }
+    .topbar-ava { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;cursor:pointer; }
+
+    /* PAGE */
+    .page { padding:24px 20px 120px;flex:1;position:relative; }
+    @media(min-width:1280px){ .page { padding:28px 32px 120px; } }
+
+    /* PAGE HEADER */
+    .page-header { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap; }
+    .page-title h1 { font-size:22px;font-weight:800; }
+    .page-title p { color:var(--text-muted);font-size:13px;margin-top:3px; }
+
+    /* BUTTONS */
+    .btn { display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif; }
+    .btn-primary { background:var(--primary);color:#fff; }
+    .btn-primary:hover { background:var(--primary-dark); }
+    .btn-outline { background:var(--card);border:1px solid var(--border);color:var(--text); }
+    .btn-outline:hover { background:var(--bg); }
+    .btn-ghost { background:transparent;border:none;color:var(--text-muted);padding:6px 10px; }
+    .btn-ghost:hover { background:var(--bg);color:var(--text); }
+    .btn-sm { padding:6px 12px;font-size:12px; }
+    .btn-danger { background:var(--danger);color:#fff; }
+    .btn-warning { background:var(--accent);color:#fff; }
+
+    /* TABS */
+    .tab-bar { display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;margin-bottom:20px;width:fit-content; }
+    .tab-btn { padding:8px 18px;border-radius:6px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Inter',sans-serif; }
+    .tab-btn.active { background:var(--primary);color:#fff;font-weight:600; }
+    .tab-btn:not(.active):hover { background:var(--bg);color:var(--text); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* DATE NAV */
+    .date-nav { display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center; }
+    .date-chip { padding:8px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+    .date-chip:hover { border-color:var(--primary); }
+    .date-chip.active { background:var(--primary);border-color:var(--primary);color:#fff; }
+    .date-chip .dc-day { font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;opacity:.7;display:block; }
+    .date-chip .dc-date { font-size:13px;font-weight:700; }
+    .window-note { font-size:12px;color:var(--text-muted);padding:6px 12px;background:var(--bg);border-radius:20px;border:1px solid var(--border);margin-left:auto; }
+
+    /* AULAS GRID */
+    .turma-filter-row { display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap; }
+    .turma-filter-row label { font-size:12px;font-weight:600;color:var(--text-muted); }
+    .filter-select { padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--card);color:var(--text);cursor:pointer;outline:none; }
+    .filter-select:focus { border-color:var(--primary); }
+    .aulas-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px; }
+    .aula-card { background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;transition:border-color .15s; }
+    .aula-card:hover { border-color:var(--primary); }
+    .aula-card.feita { border-color:var(--primary); }
+    .aula-card.pendente { border-color:var(--accent); }
+    .aula-card.futura { border-color:var(--secondary);opacity:.75; }
+    .aula-card.editavel { box-shadow:0 0 0 3px rgba(255,165,82,.15); }
+
+    .aula-card-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px; }
+    .aula-turma-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+    .aula-turma-name { font-size:15px;font-weight:800;color:var(--text); }
+    .aula-modalidade { font-size:11.5px;color:var(--text-muted);margin-top:1px; }
+    .aula-status-badge { font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap; }
+    .status-feita     { background:var(--success-light);color:var(--primary-dark); }
+    .status-pendente  { background:var(--warning-light);color:#c05500; }
+    .status-futura    { background:var(--secondary-light);color:#0369a1; }
+
+    .aula-meta { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px; }
+    .meta-item { display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted); }
+
+    .aula-freq-row { display:flex;align-items:center;gap:10px;margin-bottom:14px; }
+    .freq-bar-wrap { flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden; }
+    .freq-bar { height:100%;border-radius:3px;transition:width .4s; }
+    .freq-label { font-size:12px;font-weight:700;white-space:nowrap; }
+    .freq-counts { font-size:11.5px;color:var(--text-muted); }
+
+    .aula-card-footer { display:flex;gap:8px; }
+    .btn-chamada { flex:1;padding:9px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px; }
+    .btn-chamada.fazer { background:var(--primary);color:#fff; }
+    .btn-chamada.fazer:hover { background:var(--primary-dark); }
+    .btn-chamada.editar { background:var(--primary-light);color:var(--primary-dark); }
+    .btn-chamada.editar:hover { background:#c8f5e8; }
+    .btn-chamada.futura { background:var(--bg);color:var(--text-muted);cursor:not-allowed; }
+
+    .no-aulas { text-align:center;padding:48px 20px;color:var(--text-muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border); }
+    .no-aulas .emoji { font-size:36px;margin-bottom:10px; }
+    .no-aulas h3 { font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px; }
+
+    /* CHAMADA MODAL */
+    .chamada-modal { position:fixed;inset:0;z-index:150;display:none;flex-direction:column; }
+    .chamada-modal.open { display:flex; }
+    .chamada-modal-bg { position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px); }
+    .chamada-inner { position:relative;z-index:1;margin:auto;width:100%;max-width:780px;max-height:90dvh;background:var(--card);border-radius:var(--radius);display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden; }
+    @media(max-width:800px){ .chamada-inner { margin:0;max-width:100%;max-height:100dvh;border-radius:0; } }
+
+    .chamada-head { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--sidebar-bg);color:#fff; }
+    .chamada-head-info .ch-turma { font-size:16px;font-weight:800; }
+    .chamada-head-info .ch-meta { font-size:12px;opacity:.6;margin-top:2px; }
+    .chamada-close { margin-left:auto;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;transition:background .15s; }
+    .chamada-close:hover { background:rgba(255,255,255,.1); }
+    .chamada-toolbar { padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap; }
+    .chamada-summary { font-size:13px;font-weight:600;color:var(--text); }
+    .chamada-summary span { font-size:16px;font-weight:800; }
+    .chamada-summary .s-pres { color:var(--success); }
+    .chamada-summary .s-aus  { color:var(--danger); }
+    .chamada-summary .s-just { color:var(--accent); }
+
+    .chamada-body { flex:1;overflow-y:auto;padding:16px; }
+    .atletas-chamada-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px; }
+    @media(min-width:600px){ .atletas-chamada-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); } }
+
+    .atleta-chamada-card { background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative; }
+    .atleta-chamada-card.presente  { background:var(--success-light);border-color:var(--primary); }
+    .atleta-chamada-card.ausente   { background:var(--danger-light);border-color:var(--danger); }
+    .atleta-chamada-card.justificada { background:var(--warning-light);border-color:var(--accent); }
+    .ac-ava { width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;margin:0 auto 8px; }
+    .ac-name { font-size:12.5px;font-weight:700;color:var(--text);line-height:1.3; }
+    .ac-status-row { display:flex;justify-content:center;gap:5px;margin-top:8px; }
+    .ac-btn { width:28px;height:28px;border-radius:50%;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;background:var(--card); }
+    .ac-btn:hover { transform:scale(1.1); }
+    .ac-btn.pres-btn { border-color:var(--primary); }
+    .ac-btn.aus-btn  { border-color:var(--danger); }
+    .ac-btn.just-btn { border-color:var(--accent); }
+    .atleta-chamada-card.presente  .ac-btn.pres-btn { background:var(--primary);color:#fff; }
+    .atleta-chamada-card.ausente   .ac-btn.aus-btn  { background:var(--danger);color:#fff; }
+    .atleta-chamada-card.justificada .ac-btn.just-btn { background:var(--accent);color:#fff; }
+
+    .chamada-foot { padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg); }
+    .readonly-banner { background:var(--secondary-light);border:1px solid var(--secondary);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#0369a1;font-weight:500;text-align:center; }
+
+    /* HISTÓRICO TAB */
+    .hist-toolbar { display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center; }
+    .search-wrap { position:relative;flex:1;min-width:180px;max-width:280px; }
+    .search-wrap input { width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--card);outline:none;transition:border .15s; }
+    .search-wrap input:focus { border-color:var(--primary); }
+    .search-icon { position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px; }
+
+    .table-wrap { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
+    .pres-table { width:100%;border-collapse:collapse; }
+    .pres-table thead th { padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap; }
+    .pres-table tbody tr { border-bottom:1px solid var(--border); }
+    .pres-table tbody tr:last-child { border-bottom:none; }
+    .pres-table td { padding:12px 14px;font-size:13px;vertical-align:middle; }
+
+    .freq-pill-wrap { display:flex;align-items:center;gap:8px;min-width:140px; }
+    .freq-mini-bar { flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;min-width:60px; }
+    .freq-mini-fill { height:100%;border-radius:3px; }
+    .freq-pct { font-size:13px;font-weight:800;min-width:38px;text-align:right; }
+    .freq-green { color:var(--primary); }
+    .freq-orange { color:var(--accent); }
+    .freq-red { color:var(--danger); }
+    .alert-flag { display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:var(--danger-light);color:var(--danger); }
+    .ok-flag { display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:var(--success-light);color:var(--primary-dark); }
+
+    .atleta-cell { display:flex;align-items:center;gap:10px; }
+    .ava { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0; }
+
+    /* RELATÓRIO TAB */
+    .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px; }
+    @media(min-width:768px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+    .kpi-card { background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);position:relative;overflow:hidden; }
+    .kpi-card::after { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .kpi-card.kpi-green::after { background:var(--primary); }
+    .kpi-card.kpi-orange::after { background:var(--accent); }
+    .kpi-card.kpi-red::after { background:var(--danger); }
+    .kpi-card.kpi-blue::after { background:var(--secondary); }
+    .kpi-label { font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px; }
+    .kpi-value { font-size:24px;font-weight:800;color:var(--text); }
+    .kpi-sub { font-size:11.5px;color:var(--text-muted);margin-top:4px; }
+
+    .charts-grid { display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px; }
+    @media(min-width:900px){ .charts-grid { grid-template-columns:3fr 2fr; } }
+    .chart-card { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px; }
+    .chart-title { font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px; }
+    .chart-sub { font-size:12px;color:var(--text-muted);margin-bottom:14px; }
+
+    .alert-section-title { font-size:13px;font-weight:700;color:var(--danger);display:flex;align-items:center;gap:6px;margin-bottom:10px; }
+    .alert-athlete-list { display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px; }
+    .alert-athlete-card { background:var(--card);border:1.5px solid var(--danger);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px; }
+    .alert-athlete-card .ava { width:38px;height:38px;flex-shrink:0; }
+    .aa-name { font-size:13px;font-weight:700;color:var(--text); }
+    .aa-meta { font-size:12px;color:var(--text-muted);margin-top:2px; }
+    .aa-freq { font-size:18px;font-weight:800;color:var(--danger);margin-left:auto;text-align:right; }
+    .aa-freq small { font-size:11px;color:var(--text-muted);display:block;font-weight:400; }
+
+    /* CHAMADA TABS */
+    .chamada-tabs { display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--card); }
+    .ctab { flex:1;padding:10px 6px;font-size:12px;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px; }
+    .ctab:hover { color:var(--text);background:var(--bg); }
+    .ctab.active { color:var(--primary);border-bottom-color:var(--primary); }
+    .ctab-count { background:var(--primary);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;font-weight:700; }
+    .ctab-count.warn { background:var(--accent); }
+
+    /* CHAMADA SECTIONS */
+    .chamada-section { display:none; }
+    .chamada-section.active { display:block; }
+
+    /* GUEST/EXPERIMENTAL PANEL */
+    .add-panel { background:var(--bg);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px; }
+    .add-panel-title { font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);margin-bottom:8px; }
+    .add-search-row { display:flex;gap:6px;margin-bottom:8px; }
+    .add-search-row input { flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text); }
+    .add-search-row input:focus { outline:none;border-color:var(--primary); }
+    .guest-results { display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto; }
+    .guest-result-item { display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all .15s; }
+    .guest-result-item:hover { border-color:var(--primary);background:var(--primary-light); }
+    .guest-result-item .gr-ava { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0; }
+    .guest-result-item .gr-info { flex:1;font-size:12.5px; }
+    .guest-result-item .gr-turma { font-size:11px;color:var(--text-muted); }
+    .guest-result-item .gr-add { font-size:11px;color:var(--primary);font-weight:600; }
+    .guest-result-item.added { opacity:.45;cursor:default;pointer-events:none; }
+
+    /* Convidado/Experimental badge on card */
+    .ac-type-badge { font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;display:inline-block; }
+    .badge-convidado { background:var(--secondary-light);color:#0369a1; }
+    .badge-experimental { background:var(--accent-light);color:#92400e; }
+    .badge-lead { background:var(--purple-light);color:#5b21b6; }
+
+    /* Experimental form */
+    .exp-form { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+    .exp-form input { padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text); }
+    .exp-form input:focus { outline:none;border-color:var(--accent); }
+    .exp-list { display:flex;flex-direction:column;gap:6px;margin-top:8px; }
+    .exp-item { display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border-radius:var(--radius-sm);border:1px solid rgba(255,165,82,.3);font-size:12.5px; }
+    .exp-item .ei-ava { width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0; }
+    .exp-item .ei-info { flex:1; }
+    .exp-item .ei-name { font-weight:600; }
+    .exp-item .ei-phone { font-size:11px;color:var(--text-muted); }
+    .exp-item .ei-rm { cursor:pointer;color:var(--danger);font-size:12px;padding:2px; }
+    .exp-info-box { background:var(--accent-light);border:1px solid rgba(255,165,82,.3);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:10px; }
+
+    /* BLOCKED */
+    .module-blocked { display:none;position:absolute;inset:0;background:rgba(247,249,250,.92);z-index:40;flex-direction:column;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(3px); }
+    .module-blocked.show { display:flex; }
+    .blocked-icon { font-size:48px; }
+    .blocked-title { font-size:18px;font-weight:800; }
+    .blocked-sub { font-size:13.5px;color:var(--text-muted);text-align:center;max-width:320px;line-height:1.5; }
+
+    /* READ-ONLY BANNER (coordenador) */
+    .readonly-top-banner { display:none;background:var(--secondary-light);border:1px solid var(--secondary);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#0369a1;margin-bottom:16px;align-items:center;gap:8px; }
+    .readonly-top-banner.show { display:flex; }
+
+    /* DEMO BAR */
+    .demo-bar { position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0d2112;border-top:1px solid rgba(255,255,255,.1);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    @media(min-width:1024px){ .demo-bar { left:var(--sidebar-w); } }
+    .demo-label { color:rgba(255,255,255,.4);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-right:4px;white-space:nowrap; }
+    .demo-btn { padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.55);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Inter',sans-serif; }
+    .demo-btn:hover { background:rgba(255,255,255,.1);color:#fff; }
+    .demo-btn.active { background:var(--primary);border-color:var(--primary);color:#fff; }
+    .demo-sep { color:rgba(255,255,255,.15);padding:0 2px; }
+    .demo-status { margin-left:auto;font-size:11px;color:rgba(255,255,255,.35);white-space:nowrap; }
+
+    @media(max-width:600px){
+      .pres-table thead th:nth-child(4),
+      .pres-table td:nth-child(4),
+      .pres-table thead th:nth-child(5),
+      .pres-table td:nth-child(5) { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">Portal da Escola</div>
+      </div>
+    </div>
+    <div class="school-chip" title="Trocar escola">
+      <div class="sc-ava">🏫</div>
+      <div>
+        <div class="sc-name">Academia Atlética SP</div>
+        <div class="sc-plan">Plano Pro</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:10px;">⇅</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">AD</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Admin Escola</div>
+        <div class="u-role" id="sidebarRole">admin_escola</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')">☰</button>
+    <div class="breadcrumb">Portal Escola <span style="opacity:.4">/</span> <span>Presenças</span></div>
+    <div class="topbar-right">
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="topbar-ava" id="topbar-ava">W</div>
+    </div>
+  </div>
+
+  <div class="page">
+    <!-- BLOCKED OVERLAY -->
+    <div class="module-blocked" id="module-blocked">
+      <div class="blocked-icon">🔒</div>
+      <div class="blocked-title">Acesso restrito</div>
+      <div class="blocked-sub">O módulo Presenças não está disponível para o seu perfil atual.</div>
+    </div>
+
+    <!-- READ-ONLY BANNER -->
+    <div class="readonly-top-banner" id="readonly-banner">
+      👁️ <strong>Modo leitura.</strong> O perfil <strong id="ro-profile-name">coordenador</strong> pode visualizar presenças mas não pode registrar ou editar chamadas.
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-title">
+        <h1>✅ Presenças</h1>
+        <p>Chamada digital por turma · Histórico e frequência dos atletas</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;color:var(--text-muted);background:var(--card);border:1px solid var(--border);padding:6px 12px;border-radius:var(--radius-sm);">
+          ⚙️ Alerta: frequência &lt; <strong id="threshold-val">75%</strong>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="exportarRelatorio()">⬇️ Exportar</button>
+      </div>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setTab('chamada')">📋 Chamada</button>
+      <button class="tab-btn" onclick="setTab('historico')">📊 Histórico</button>
+      <button class="tab-btn" onclick="setTab('relatorio')">📈 Relatório</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB: CHAMADA
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-chamada">
+
+      <!-- Date selector (3-day window) -->
+      <div class="date-nav">
+        <div class="date-chip active" id="chip-0" onclick="selectDate(0)">
+          <span class="dc-day">Hoje</span>
+          <span class="dc-date" id="label-0"></span>
+        </div>
+        <div class="date-chip" id="chip-1" onclick="selectDate(1)">
+          <span class="dc-day">Ontem</span>
+          <span class="dc-date" id="label-1"></span>
+        </div>
+        <div class="date-chip" id="chip-2" onclick="selectDate(2)">
+          <span class="dc-day">Anteontem</span>
+          <span class="dc-date" id="label-2"></span>
+        </div>
+        <div class="window-note">⏱️ Janela de 48h para registro</div>
+      </div>
+
+      <!-- Turma filter -->
+      <div class="turma-filter-row">
+        <label>Turma:</label>
+        <select class="filter-select" id="turma-filter-chamada" onchange="renderAulas()">
+          <option value="">Todas as turmas</option>
+        </select>
+        <span id="chamada-day-label" style="font-size:13px;color:var(--text-muted);margin-left:4px;"></span>
+      </div>
+
+      <!-- Aulas grid -->
+      <div class="aulas-grid" id="aulas-grid"></div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB: HISTÓRICO
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-historico">
+      <div class="hist-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="hist-search" placeholder="Buscar atleta..." oninput="renderHistorico()"/>
+        </div>
+        <select class="filter-select" id="hist-turma" onchange="renderHistorico()">
+          <option value="">Todas as turmas</option>
+        </select>
+        <select class="filter-select" id="hist-alert" onchange="renderHistorico()">
+          <option value="">Todos</option>
+          <option value="alert">Abaixo do limiar</option>
+          <option value="ok">Dentro do esperado</option>
+        </select>
+        <div style="margin-left:auto;font-size:12px;color:var(--text-muted);" id="hist-count">— atletas</div>
+      </div>
+      <div class="table-wrap">
+        <table class="pres-table">
+          <thead>
+            <tr>
+              <th>Atleta</th>
+              <th>Turma</th>
+              <th>Aulas</th>
+              <th>Presenças</th>
+              <th>Ausências</th>
+              <th>Justificadas</th>
+              <th>Frequência</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB: RELATÓRIO
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-relatorio">
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">Frequência Média</div>
+          <div class="kpi-value">82.4%</div>
+          <div class="kpi-sub">Todas as turmas · Março/2026</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Abaixo do Limiar</div>
+          <div class="kpi-value">4 atletas</div>
+          <div class="kpi-sub">Frequência &lt; 75%</div>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-label">Aulas Realizadas</div>
+          <div class="kpi-value">87</div>
+          <div class="kpi-sub">Em 12 turmas · Março</div>
+        </div>
+        <div class="kpi-card kpi-orange">
+          <div class="kpi-label">Chamadas Pendentes</div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-sub">Aulas sem registro hoje</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Frequência por Turma</div>
+          <div class="chart-sub">Média de presença — Março 2026</div>
+          <div style="height:240px;">
+            <canvas id="chart-turmas"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Evolução Mensal</div>
+          <div class="chart-sub">Frequência média geral</div>
+          <div style="height:240px;">
+            <canvas id="chart-evolucao"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="alert-section-title">⚠️ Atletas abaixo do limiar (75%)</div>
+      <div class="alert-athlete-list" id="alert-list"></div>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /main -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     CHAMADA MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="chamada-modal" id="chamada-modal">
+  <div class="chamada-modal-bg" onclick="closeModal()"></div>
+  <div class="chamada-inner">
+    <div class="chamada-head">
+      <div class="aula-turma-dot" id="modal-dot" style="width:14px;height:14px;border-radius:50%;flex-shrink:0;"></div>
+      <div class="chamada-head-info">
+        <div class="ch-turma" id="modal-turma-name"></div>
+        <div class="ch-meta" id="modal-meta"></div>
+      </div>
+      <button class="chamada-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="chamada-toolbar">
+      <div class="chamada-summary" id="modal-summary"></div>
+      <div style="margin-left:auto;display:flex;gap:8px;" id="modal-quick-btns">
+        <button class="btn btn-outline btn-sm" onclick="marcarTodos('presente')">✅ Todos presentes</button>
+        <button class="btn btn-outline btn-sm" onclick="marcarTodos('ausente')">❌ Todos ausentes</button>
+      </div>
+    </div>
+    <!-- ABAS DA CHAMADA -->
+    <div class="chamada-tabs" id="chamada-tabs">
+      <button class="ctab active" id="ctab-turma" onclick="setChamadaTab('turma')">
+        👥 Turma <span class="ctab-count" id="ctab-count-turma">0</span>
+      </button>
+      <button class="ctab" id="ctab-convidados" onclick="setChamadaTab('convidados')">
+        🔄 Convidados <span class="ctab-count" id="ctab-count-convidados" style="display:none;background:var(--secondary);">0</span>
+      </button>
+      <button class="ctab" id="ctab-experimental" onclick="setChamadaTab('experimental')">
+        🧪 Experimental <span class="ctab-count" id="ctab-count-exp" style="display:none;background:var(--accent);">0</span>
+      </button>
+    </div>
+    <div class="chamada-body">
+      <!-- ABA TURMA -->
+      <div class="chamada-section active" id="sec-turma">
+        <div class="atletas-chamada-grid" id="chamada-grid"></div>
+      </div>
+
+      <!-- ABA CONVIDADOS -->
+      <div class="chamada-section" id="sec-convidados">
+        <div class="add-panel">
+          <div class="add-panel-title">🔄 Buscar atleta de outra turma</div>
+          <div class="add-search-row">
+            <input type="text" id="guest-search" placeholder="Nome do atleta..." oninput="searchGuests()"/>
+            <button class="btn btn-outline btn-sm" onclick="searchGuests()">Buscar</button>
+          </div>
+          <div class="guest-results" id="guest-results">
+            <div style="font-size:12px;color:var(--text-muted);padding:8px 0;">Digite o nome do atleta para buscar nas outras turmas.</div>
+          </div>
+        </div>
+        <div id="convidados-grid" class="atletas-chamada-grid"></div>
+        <div id="no-convidados" style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;display:none;">Nenhum convidado adicionado ainda.</div>
+      </div>
+
+      <!-- ABA EXPERIMENTAL -->
+      <div class="chamada-section" id="sec-experimental">
+        <div class="exp-info-box">
+          🧪 Atletas de <strong>aula experimental</strong> são <strong>leads</strong> — ainda não matriculados. Seus dados ficam salvos para acompanhamento no módulo de Marketing.
+        </div>
+        <div class="add-panel">
+          <div class="add-panel-title">➕ Cadastrar participante experimental</div>
+          <div class="exp-form" id="exp-form">
+            <input type="text" id="exp-nome" placeholder="Nome completo *"/>
+            <input type="tel" id="exp-telefone" placeholder="Telefone / WhatsApp"/>
+            <input type="number" id="exp-idade" placeholder="Idade" min="3" max="80"/>
+            <input type="text" id="exp-modalidade" placeholder="Interesse (ex: Futebol)"/>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="btn btn-outline btn-sm" style="border-color:var(--accent);color:var(--accent);" onclick="addExperimental()">🧪 Adicionar à chamada</button>
+          </div>
+        </div>
+        <div class="exp-list" id="exp-list"></div>
+        <div class="atletas-chamada-grid" id="exp-chamada-grid" style="margin-top:12px;"></div>
+      </div>
+    </div>
+    <div class="chamada-foot" id="chamada-foot"></div>
+  </div>
+</div>
+
+<!-- DEMO BAR -->
+<div class="demo-bar">
+  <span class="demo-label">Demo</span>
+  <button class="demo-btn active" onclick="setProfile('admin_escola',this)">admin_escola</button>
+  <button class="demo-btn" onclick="setProfile('professor',this)">professor</button>
+  <button class="demo-btn" onclick="setProfile('coordenador',this)">coordenador</button>
+  <button class="demo-btn" onclick="setProfile('secretaria',this)">secretaria</button>
+  <span class="demo-sep">|</span>
+  <button class="demo-btn" onclick="setProfile('financeiro',this)">financeiro</button>
+  <button class="demo-btn" onclick="setProfile('saude',this)">saúde</button>
+  <button class="demo-btn" onclick="setProfile('marketing',this)">marketing</button>
+  <span class="demo-status" id="demo-status">Perfil: admin_escola</span>
+</div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────────────────
+
+const ATLETAS = [
+  { id:1,  nome:'Lucas Mendes',      ini:'LM', cor:'#20C997' },
+  { id:2,  nome:'Ana Paula Costa',   ini:'AC', cor:'#5BC0EB' },
+  { id:3,  nome:'Gabriel Santos',    ini:'GS', cor:'#8b5cf6' },
+  { id:4,  nome:'Pedro Alves',       ini:'PA', cor:'#FFA552' },
+  { id:5,  nome:'Julia Ferreira',    ini:'JF', cor:'#ef4444' },
+  { id:6,  nome:'Mateus Oliveira',   ini:'MO', cor:'#20C997' },
+  { id:7,  nome:'Sofia Lima',        ini:'SL', cor:'#5BC0EB' },
+  { id:8,  nome:'Rafael Costa',      ini:'RC', cor:'#FFA552' },
+  { id:9,  nome:'Isabela Martins',   ini:'IM', cor:'#8b5cf6' },
+  { id:10, nome:'Vitor Rocha',       ini:'VR', cor:'#ef4444' },
+  { id:11, nome:'Larissa Oliveira',  ini:'LO', cor:'#20C997' },
+  { id:12, nome:'Felipe Nascimento', ini:'FN', cor:'#5BC0EB' },
+  { id:13, nome:'Gustavo Lima',      ini:'GL', cor:'#FFA552' },
+  { id:14, nome:'Camila Torres',     ini:'CT', cor:'#8b5cf6' },
+  { id:15, nome:'Diego Matos',       ini:'DM', cor:'#20C997' },
+  { id:16, nome:'Beatriz Cunha',     ini:'BC', cor:'#5BC0EB' },
+];
+
+const TURMAS = [
+  { id:'T1', nome:'Futebol U11', modalidade:'Futebol', cor:'#20C997', dias:['seg','qua','sex'], horario:'09:00', duracao:'1h', professor:'Paula Costa', prof_id:'professor', atletas:[3,10,12,13,15] },
+  { id:'T2', nome:'Futebol U13', modalidade:'Futebol', cor:'#17a57a', dias:['ter','qui','sab'], horario:'09:00', duracao:'1h', professor:'Paula Costa', prof_id:'professor', atletas:[10,4,13,15,8,1] },
+  { id:'T3', nome:'Futebol U15', modalidade:'Futebol', cor:'#5BC0EB', dias:['seg','qua','sex'], horario:'10:00', duracao:'1h30', professor:'Paula Costa', prof_id:'professor', atletas:[1,8,10,15,3,13] },
+  { id:'T4', nome:'Futebol U17', modalidade:'Futebol', cor:'#0369a1', dias:['ter','qui'], horario:'17:00', duracao:'2h', professor:'Rafael Torres', prof_id:'outro', atletas:[8,1,4,13,15] },
+  { id:'T5', nome:'Natação',     modalidade:'Natação',  cor:'#06b6d4', dias:['seg','ter','qua','qui','sex'], horario:'08:00', duracao:'1h', professor:'Ana Lima', prof_id:'outro', atletas:[2,6,9,14,16,7] },
+  { id:'T6', nome:'Futsal',      modalidade:'Futsal',   cor:'#FFA552', dias:['seg','qua'], horario:'14:00', duracao:'1h30', professor:'Carlos Mendes', prof_id:'outro', atletas:[4,12,11,13,14] },
+  { id:'T7', nome:'Ginástica',   modalidade:'Ginástica',cor:'#8b5cf6', dias:['ter','qui','sab'], horario:'10:00', duracao:'1h', professor:'Fernanda Reis', prof_id:'outro', atletas:[5,7,11,16,14,9] },
+];
+
+// Today = 2026-03-24 (Tuesday / Terça)
+const DIAS_SEMANA = ['dom','seg','ter','qua','qui','sex','sab'];
+const DATES = ['2026-03-24','2026-03-23','2026-03-22'];
+// Day-of-week for each date:
+// 2026-03-24 = Tue = 'ter'
+// 2026-03-23 = Mon = 'seg'
+// 2026-03-22 = Sun = 'dom'
+const DATE_DOW = { '2026-03-24':'ter', '2026-03-23':'seg', '2026-03-22':'dom' };
+const DATE_LABEL_FULL = { '2026-03-24':'Ter, 24/03', '2026-03-23':'Seg, 23/03', '2026-03-22':'Dom, 22/03' };
+
+// Pre-saved chamadas (some done, some not)
+// Format: { [aulaKey]: { status: 'feita'|'pendente', presencas: { [atletaId]: 'presente'|'ausente'|'justificada' } } }
+const CHAMADAS_SALVAS = {
+  'T5-2026-03-24': { status:'feita', presencas:{ 2:'presente',6:'presente',9:'ausente',14:'presente',16:'presente',7:'presente' } },
+  'T7-2026-03-24': { status:'feita', presencas:{ 5:'presente',7:'presente',11:'ausente',16:'presente',14:'presente',9:'justificada' } },
+  'T1-2026-03-23': { status:'feita', presencas:{ 3:'presente',10:'presente',12:'presente',13:'presente',15:'presente' } },
+  'T3-2026-03-23': { status:'feita', presencas:{ 1:'presente',8:'presente',10:'ausente',15:'presente',3:'presente',13:'presente' } },
+  'T5-2026-03-23': { status:'feita', presencas:{ 2:'presente',6:'ausente',9:'presente',14:'presente',16:'justificada',7:'presente' } },
+};
+
+// Frequency data for Histórico tab (March 2026, ~12 aulas each)
+const FREQ_DATA = [
+  { atleta_id:1,  turma_id:'T3', total:12, pres:11, aus:1,  just:0 },
+  { atleta_id:2,  turma_id:'T5', total:15, pres:14, aus:1,  just:0 },
+  { atleta_id:3,  turma_id:'T1', total:12, pres:9,  aus:2,  just:1 },
+  { atleta_id:3,  turma_id:'T2', total:10, pres:7,  aus:3,  just:0 },
+  { atleta_id:4,  turma_id:'T2', total:10, pres:6,  aus:3,  just:1 },
+  { atleta_id:4,  turma_id:'T6', total:8,  pres:5,  aus:3,  just:0 },
+  { atleta_id:5,  turma_id:'T7', total:12, pres:10, aus:1,  just:1 },
+  { atleta_id:6,  turma_id:'T5', total:15, pres:12, aus:2,  just:1 },
+  { atleta_id:7,  turma_id:'T5', total:15, pres:8,  aus:6,  just:1 },  // ALERTA 53%
+  { atleta_id:7,  turma_id:'T7', total:12, pres:7,  aus:5,  just:0 },  // ALERTA 58%
+  { atleta_id:8,  turma_id:'T4', total:8,  pres:6,  aus:2,  just:0 },
+  { atleta_id:9,  turma_id:'T5', total:15, pres:10, aus:3,  just:2 },
+  { atleta_id:10, turma_id:'T1', total:12, pres:7,  aus:4,  just:1 },  // ALERTA 58%
+  { atleta_id:10, turma_id:'T2', total:10, pres:5,  aus:5,  just:0 },  // ALERTA 50%
+  { atleta_id:11, turma_id:'T6', total:8,  pres:7,  aus:1,  just:0 },
+  { atleta_id:11, turma_id:'T7', total:12, pres:9,  aus:3,  just:0 },
+  { atleta_id:12, turma_id:'T2', total:10, pres:8,  aus:2,  just:0 },
+  { atleta_id:12, turma_id:'T6', total:8,  pres:6,  aus:2,  just:0 },
+  { atleta_id:13, turma_id:'T1', total:12, pres:11, aus:1,  just:0 },
+  { atleta_id:14, turma_id:'T5', total:15, pres:13, aus:2,  just:0 },
+  { atleta_id:14, turma_id:'T7', total:12, pres:10, aus:2,  just:0 },
+  { atleta_id:15, turma_id:'T3', total:12, pres:9,  aus:2,  just:1 },
+  { atleta_id:16, turma_id:'T5', total:15, pres:11, aus:2,  just:2 },
+  { atleta_id:16, turma_id:'T7', total:12, pres:8,  aus:3,  just:1 },
+];
+
+const THRESHOLD = 75;
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let selectedDateIdx = 0;
+let currentProfile = 'admin_escola';
+let currentChamada = null; // { aulaKey, turma, atletas, presencas, convidados, experimentais, isReadonly }
+let chamadaTab = 'turma';
+let chartsInited = false;
+
+// ─── PROFILE ──────────────────────────────────────────────────────────────────
+const PROFILE_LABELS   = { admin_escola:'admin_escola', financeiro:'financeiro', coordenador:'coordenador', professor:'professor', secretaria:'secretaria', saude:'saúde', marketing:'marketing' };
+const PROFILE_NAMES    = { admin_escola:'Willian Melo', financeiro:'Carla Souza', coordenador:'Rafael Torres', professor:'Paula Costa', secretaria:'Sandra Lima', saude:'Monica Vieira', marketing:'Leo Farias' };
+const PROFILE_INITIALS = { admin_escola:'W', financeiro:'C', coordenador:'R', professor:'P', secretaria:'S', saude:'M', marketing:'L' };
+// Access rules: full=can take chamada, readonly=view only, none=blocked
+const PROFILE_ACCESS   = { admin_escola:'full', secretaria:'full', professor:'partial', coordenador:'readonly', financeiro:'none', saude:'none', marketing:'none' };
+
+function setProfile(profile, btn) {
+  currentProfile = profile;
+  document.querySelectorAll('.demo-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const access = PROFILE_ACCESS[profile];
+  document.getElementById('module-blocked').classList.toggle('show', access==='none');
+  const isReadonly = access==='readonly';
+  document.getElementById('readonly-banner').classList.toggle('show', isReadonly);
+  document.getElementById('ro-profile-name').textContent = profile;
+  document.getElementById('sidebarName').textContent = PROFILE_NAMES[profile];
+  document.getElementById('sidebarRole').textContent = PROFILE_LABELS[profile];
+  document.getElementById('sidebarAva').textContent = PROFILE_INITIALS[profile];
+  document.getElementById('topbar-ava').textContent = PROFILE_INITIALS[profile];
+  // sidebar-plan removed (now managed by escola-sidebar.js)
+  document.getElementById('demo-status').textContent = `Perfil: ${profile} · ${access==='none'?'🔒 Sem acesso':access==='readonly'?'👁️ Somente leitura':access==='partial'?'⚡ Suas turmas':'✅ Acesso completo'}`;
+  populateTurmaFilters();
+  renderAulas();
+  renderHistorico();
+}
+
+function getTurmasForProfile() {
+  if(currentProfile === 'professor') return TURMAS.filter(t=>t.prof_id==='professor');
+  return TURMAS;
+}
+
+// ─── DATE LABELS ──────────────────────────────────────────────────────────────
+function initDateLabels() {
+  const labels = ['Ter, 24/03','Seg, 23/03','Dom, 22/03'];
+  for(let i=0;i<3;i++) document.getElementById('label-'+i).textContent = labels[i];
+}
+
+function selectDate(idx) {
+  selectedDateIdx = idx;
+  [0,1,2].forEach(i=>{
+    document.getElementById('chip-'+i).classList.toggle('active', i===idx);
+  });
+  renderAulas();
+}
+
+// ─── POPULATE FILTERS ─────────────────────────────────────────────────────────
+function populateTurmaFilters() {
+  const turmas = getTurmasForProfile();
+  const opts = `<option value="">Todas as turmas</option>` + turmas.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
+  document.getElementById('turma-filter-chamada').innerHTML = opts;
+  document.getElementById('hist-turma').innerHTML = opts;
+}
+
+// ─── RENDER AULAS ─────────────────────────────────────────────────────────────
+function renderAulas() {
+  const dateStr = DATES[selectedDateIdx];
+  const dow = DATE_DOW[dateStr];
+  const turmas = getTurmasForProfile();
+  const filterTurmaId = document.getElementById('turma-filter-chamada').value;
+  const dayLabels = ['Ter, 24 de março','Seg, 23 de março','Dom, 22 de março'];
+  document.getElementById('chamada-day-label').textContent = dayLabels[selectedDateIdx] || '';
+
+  const aulasHoje = turmas.filter(t=>{
+    if(filterTurmaId && t.id!==filterTurmaId) return false;
+    return t.dias.includes(dow);
+  });
+
+  const grid = document.getElementById('aulas-grid');
+  if(!aulasHoje.length) {
+    grid.innerHTML = `<div class="no-aulas" style="grid-column:1/-1;"><div class="emoji">📅</div><h3>Nenhuma aula neste dia</h3><p>As turmas selecionadas não têm aulas em ${DATE_LABEL_FULL[dateStr]||dateStr}.</p></div>`;
+    return;
+  }
+
+  const isReadonly = PROFILE_ACCESS[currentProfile]==='readonly';
+  const isNone     = PROFILE_ACCESS[currentProfile]==='none';
+  const isFutura   = false; // all 3 days are in the past/today
+
+  // Sort: pendentes first, then feitas
+  const aulaKey = t => `${t.id}-${dateStr}`;
+  const sorted = [...aulasHoje].sort((a,b)=>{
+    const aFeita = !!CHAMADAS_SALVAS[aulaKey(a)];
+    const bFeita = !!CHAMADAS_SALVAS[aulaKey(b)];
+    return aFeita - bFeita;
+  });
+
+  grid.innerHTML = sorted.map(t=>{
+    const key = aulaKey(t);
+    const chamada = CHAMADAS_SALVAS[key];
+    const feita = !!chamada;
+    const atlList = t.atletas.map(id=>ATLETAS.find(a=>a.id===id)).filter(Boolean);
+    const total = atlList.length;
+    let presCount=0, ausCount=0, justCount=0;
+    if(feita && chamada.presencas) {
+      Object.values(chamada.presencas).forEach(s=>{ if(s==='presente')presCount++; else if(s==='ausente')ausCount++; else if(s==='justificada')justCount++; });
+    }
+    const freqPct = feita && total ? Math.round(((presCount+justCount)/total)*100) : null;
+    const freqColor = freqPct===null ? '#d1d5db' : freqPct>=75 ? '#20C997' : freqPct>=50 ? '#FFA552' : '#ef4444';
+    const cardClass = isReadonly ? (feita?'feita':'pendente') : feita ? 'feita' : 'pendente';
+
+    let btnHtml;
+    if(isNone) {
+      btnHtml = `<button class="btn-chamada futura" disabled>🔒 Sem acesso</button>`;
+    } else if(isReadonly) {
+      btnHtml = feita
+        ? `<button class="btn-chamada editar" onclick="openChamada('${t.id}','${dateStr}',true)">👁️ Visualizar</button>`
+        : `<button class="btn-chamada futura" disabled>👁️ Não registrada</button>`;
+    } else {
+      btnHtml = feita
+        ? `<button class="btn-chamada editar" onclick="openChamada('${t.id}','${dateStr}',false)">✏️ Editar chamada</button>`
+        : `<button class="btn-chamada fazer" onclick="openChamada('${t.id}','${dateStr}',false)">📋 Fazer chamada</button>`;
+    }
+    // Hora label (future if today and time hasn't arrived - simplified mock)
+    const isFutureHour = selectedDateIdx===0 && ['17:00','14:00'].includes(t.horario) && t.id==='T4';
+
+    return `<div class="aula-card ${isFutureHour?'futura editavel':cardClass}">
+      <div class="aula-card-header">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          <div class="aula-turma-dot" style="background:${t.cor};"></div>
+          <div>
+            <div class="aula-turma-name">${t.nome}</div>
+            <div class="aula-modalidade">${t.modalidade}</div>
+          </div>
+        </div>
+        <span class="aula-status-badge ${isFutureHour?'status-futura':feita?'status-feita':'status-pendente'}">
+          ${isFutureHour?'🕑 Em breve':feita?'✅ Feita':'⏳ Pendente'}
+        </span>
+      </div>
+      <div class="aula-meta">
+        <div class="meta-item">🕐 ${t.horario} · ${t.duracao}</div>
+        <div class="meta-item">👤 ${t.professor}</div>
+        <div class="meta-item">🏃 ${total} atletas</div>
+      </div>
+      ${feita ? `
+      <div class="aula-freq-row">
+        <div class="freq-bar-wrap"><div class="freq-bar" style="width:${freqPct}%;background:${freqColor};"></div></div>
+        <span class="freq-label" style="color:${freqColor};">${freqPct}%</span>
+      </div>
+      <div class="freq-counts">✅ ${presCount} pres · ❌ ${ausCount} aus · ⚠️ ${justCount} just</div>
+      <div style="margin-top:12px;"></div>
+      ` : `<div style="margin-bottom:14px;font-size:12.5px;color:var(--text-muted);">Chamada ainda não registrada para este dia.</div>`}
+      <div class="aula-card-footer">${btnHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── CHAMADA MODAL ────────────────────────────────────────────────────────────
+function openChamada(turmaId, dateStr, readonly) {
+  const turma = TURMAS.find(t=>t.id===turmaId);
+  if(!turma) return;
+  const key = `${turmaId}-${dateStr}`;
+  const saved = CHAMADAS_SALVAS[key];
+  const atletaObjs = turma.atletas.map(id=>ATLETAS.find(a=>a.id===id)).filter(Boolean);
+  // Initial presencas: from saved or empty
+  const presencas = {};
+  atletaObjs.forEach(a=>{ presencas[a.id] = (saved&&saved.presencas[a.id]) || null; });
+  // Restore saved convidados / experimentais for this key
+  const savedConvidados   = (saved && saved.convidados)   || [];
+  const savedExperimentais= (saved && saved.experimentais)|| [];
+  const convidadosPresencas = {};
+  savedConvidados.forEach(c => { convidadosPresencas[c.id] = (saved.presencas && saved.presencas[c.id]) || null; });
+  const expPresencas = {};
+  savedExperimentais.forEach(e => { expPresencas[e.id] = (saved && saved.presencas && saved.presencas[e.id]) || null; });
+
+  currentChamada = {
+    aulaKey: key, turma, atletas: atletaObjs, presencas,
+    convidados: savedConvidados.map(c=>({...c})),
+    convidadosPresencas,
+    experimentais: savedExperimentais.map(e=>({...e})),
+    expPresencas,
+    isReadonly: readonly
+  };
+
+  chamadaTab = 'turma';
+  document.getElementById('modal-dot').style.background = turma.cor;
+  document.getElementById('modal-turma-name').textContent = turma.nome;
+  document.getElementById('modal-meta').textContent = `${DATE_LABEL_FULL[dateStr]} · ${turma.horario} · ${turma.professor}`;
+  document.getElementById('modal-quick-btns').style.display = readonly ? 'none' : 'flex';
+  document.getElementById('chamada-tabs').style.display = readonly ? 'none' : '';
+  setChamadaTab('turma');
+  renderChamadaGrid();
+  document.getElementById('chamada-modal').classList.add('open');
+}
+
+// ─── CHAMADA TABS ─────────────────────────────────────────────────────────────
+function setChamadaTab(tab) {
+  chamadaTab = tab;
+  ['turma','convidados','experimental'].forEach(t => {
+    document.getElementById(`ctab-${t}`)?.classList.toggle('active', t === tab);
+    document.getElementById(`sec-${t}`)?.classList.toggle('active', t === tab);
+  });
+  updateTabCounts();
+  if(tab === 'convidados') renderConvidadosGrid();
+  if(tab === 'experimental') renderExperimentalGrid();
+}
+
+function updateTabCounts() {
+  if(!currentChamada) return;
+  document.getElementById('ctab-count-turma').textContent = currentChamada.atletas.length;
+  const nc = currentChamada.convidados.length;
+  const ne = currentChamada.experimentais.length;
+  const cc = document.getElementById('ctab-count-convidados');
+  const ce = document.getElementById('ctab-count-exp');
+  cc.textContent = nc; cc.style.display = nc > 0 ? '' : 'none';
+  ce.textContent = ne; ce.style.display = ne > 0 ? '' : 'none';
+}
+
+// ─── CONVIDADOS (atletas de outras turmas) ────────────────────────────────────
+function searchGuests() {
+  if(!currentChamada) return;
+  const q = (document.getElementById('guest-search').value || '').toLowerCase().trim();
+  const resultsEl = document.getElementById('guest-results');
+
+  // Athletes from OTHER classes (not already in this chamada)
+  const alreadyIds = new Set([
+    ...currentChamada.atletas.map(a => a.id),
+    ...currentChamada.convidados.map(c => c.id)
+  ]);
+
+  let candidates = [];
+  TURMAS.forEach(t => {
+    if(t.id === currentChamada.turma.id) return;
+    t.atletas.forEach(aid => {
+      if(alreadyIds.has(aid)) return;
+      const atleta = ATLETAS.find(a => a.id === aid);
+      if(!atleta) return;
+      if(q && !atleta.nome.toLowerCase().includes(q)) return;
+      // Avoid duplicates across turmas
+      if(candidates.find(c => c.atleta.id === aid)) return;
+      candidates.push({ atleta, turma: t });
+    });
+  });
+
+  if(!q && candidates.length === 0) {
+    resultsEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0;">Digite o nome do atleta para buscar nas outras turmas.</div>';
+    return;
+  }
+  if(candidates.length === 0) {
+    resultsEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0;">Nenhum atleta encontrado.</div>';
+    return;
+  }
+
+  resultsEl.innerHTML = candidates.slice(0, 8).map(({ atleta, turma }) => {
+    const isAdded = currentChamada.convidados.find(c => c.id === atleta.id);
+    return `
+      <div class="guest-result-item ${isAdded ? 'added' : ''}" onclick="addGuest(${atleta.id}, '${turma.id}')">
+        <div class="gr-ava" style="background:${atleta.cor}">${atleta.ini}</div>
+        <div class="gr-info">
+          <div style="font-weight:600;">${atleta.nome}</div>
+          <div class="gr-turma">📍 ${turma.nome}</div>
+        </div>
+        <span class="gr-add">${isAdded ? '✓ Adicionado' : '+ Adicionar'}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function addGuest(atletaId, turmaId) {
+  if(!currentChamada) return;
+  if(currentChamada.convidados.find(c => c.id === atletaId)) return;
+  const atleta = ATLETAS.find(a => a.id === atletaId);
+  const turma  = TURMAS.find(t => t.id === turmaId);
+  if(!atleta) return;
+  const guest = { ...atleta, turmaOrigem: turma?.nome || '—', tipo: 'convidado' };
+  currentChamada.convidados.push(guest);
+  currentChamada.convidadosPresencas[atletaId] = null;
+  renderConvidadosGrid();
+  searchGuests(); // refresh results list
+  updateTabCounts();
+  renderModalSummary();
+}
+
+function removeGuest(atletaId) {
+  if(!currentChamada) return;
+  currentChamada.convidados = currentChamada.convidados.filter(c => c.id !== atletaId);
+  delete currentChamada.convidadosPresencas[atletaId];
+  renderConvidadosGrid();
+  updateTabCounts();
+  renderModalSummary();
+}
+
+function setGuestStatus(atletaId, status) {
+  if(!currentChamada || currentChamada.isReadonly) return;
+  currentChamada.convidadosPresencas[atletaId] =
+    currentChamada.convidadosPresencas[atletaId] === status ? null : status;
+  renderConvidadosGrid();
+  renderModalSummary();
+}
+
+function renderConvidadosGrid() {
+  if(!currentChamada) return;
+  const grid = document.getElementById('convidados-grid');
+  const empty = document.getElementById('no-convidados');
+  const { convidados, convidadosPresencas, isReadonly } = currentChamada;
+  if(convidados.length === 0) {
+    grid.innerHTML = ''; empty.style.display = 'block'; return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = convidados.map(c => {
+    const s = convidadosPresencas[c.id];
+    const cardClass = s === 'presente' ? 'presente' : s === 'ausente' ? 'ausente' : s === 'justificada' ? 'justificada' : '';
+    return `<div class="atleta-chamada-card ${cardClass}" id="acc-g-${c.id}">
+      <div class="ac-ava" style="background:${c.cor}">${c.ini}</div>
+      <div class="ac-name">${c.nome.split(' ')[0]}<br><span style="font-size:10px;color:var(--text-muted);">${c.nome.split(' ').slice(1).join(' ')}</span></div>
+      <span class="ac-type-badge badge-convidado">🔄 ${c.turmaOrigem}</span>
+      <div class="ac-status-row">
+        ${isReadonly ? '' : `
+        <div class="ac-btn pres-btn" onclick="event.stopPropagation();setGuestStatus(${c.id},'presente')">✓</div>
+        <div class="ac-btn aus-btn"  onclick="event.stopPropagation();setGuestStatus(${c.id},'ausente')">✕</div>
+        <div class="ac-btn just-btn" onclick="event.stopPropagation();setGuestStatus(${c.id},'justificada')">⚠</div>
+        <div style="font-size:12px;color:var(--danger);cursor:pointer;padding:2px 4px;" onclick="removeGuest(${c.id})" title="Remover">🗑</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── AULA EXPERIMENTAL (leads) ────────────────────────────────────────────────
+let expNextId = 1000;
+
+function addExperimental() {
+  if(!currentChamada) return;
+  const nome = document.getElementById('exp-nome').value.trim();
+  if(!nome) { alert('Informe o nome do participante.'); return; }
+  const telefone  = document.getElementById('exp-telefone').value.trim();
+  const idade     = document.getElementById('exp-idade').value.trim();
+  const modalidade= document.getElementById('exp-modalidade').value.trim() || currentChamada.turma.modalidade;
+  const id = ++expNextId;
+  const ini = nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+  const exp = { id, nome, ini, cor:'#FFA552', telefone, idade, modalidade, tipo:'experimental' };
+  currentChamada.experimentais.push(exp);
+  currentChamada.expPresencas[id] = 'presente'; // default to presente for leads
+  // Clear form
+  ['exp-nome','exp-telefone','exp-idade','exp-modalidade'].forEach(id => document.getElementById(id).value = '');
+  renderExperimentalGrid();
+  updateTabCounts();
+  renderModalSummary();
+}
+
+function removeExperimental(id) {
+  if(!currentChamada) return;
+  currentChamada.experimentais = currentChamada.experimentais.filter(e => e.id !== id);
+  delete currentChamada.expPresencas[id];
+  renderExperimentalGrid();
+  updateTabCounts();
+  renderModalSummary();
+}
+
+function setExpStatus(id, status) {
+  if(!currentChamada || currentChamada.isReadonly) return;
+  currentChamada.expPresencas[id] = currentChamada.expPresencas[id] === status ? null : status;
+  renderExperimentalGrid();
+  renderModalSummary();
+}
+
+function renderExperimentalGrid() {
+  if(!currentChamada) return;
+  const list = document.getElementById('exp-list');
+  const grid = document.getElementById('exp-chamada-grid');
+  const { experimentais, expPresencas, isReadonly } = currentChamada;
+
+  // Info list
+  list.innerHTML = experimentais.map(e => `
+    <div class="exp-item">
+      <div class="ei-ava">${e.ini}</div>
+      <div class="ei-info">
+        <div class="ei-name">${e.nome} ${e.idade ? `(${e.idade} anos)` : ''}</div>
+        <div class="ei-phone">${e.modalidade} ${e.telefone ? '· ' + e.telefone : ''}</div>
+      </div>
+      <span class="ac-type-badge badge-lead">🧪 Lead</span>
+      ${!isReadonly ? `<span class="ei-rm" onclick="removeExperimental(${e.id})" title="Remover">✕</span>` : ''}
+    </div>
+  `).join('');
+
+  // Chamada grid
+  grid.innerHTML = experimentais.map(e => {
+    const s = expPresencas[e.id];
+    const cardClass = s === 'presente' ? 'presente' : s === 'ausente' ? 'ausente' : s === 'justificada' ? 'justificada' : '';
+    return `<div class="atleta-chamada-card ${cardClass}">
+      <div class="ac-ava" style="background:${e.cor}">${e.ini}</div>
+      <div class="ac-name">${e.nome.split(' ')[0]}<br><span style="font-size:10px;color:var(--text-muted);">Lead</span></div>
+      <span class="ac-type-badge badge-experimental">🧪 Exp.</span>
+      <div class="ac-status-row">
+        ${isReadonly ? '' : `
+        <div class="ac-btn pres-btn" onclick="setExpStatus(${e.id},'presente')">✓</div>
+        <div class="ac-btn aus-btn"  onclick="setExpStatus(${e.id},'ausente')">✕</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderModalSummary() {
+  if(!currentChamada) return;
+  const all = [
+    ...currentChamada.atletas.map(a => currentChamada.presencas[a.id]),
+    ...currentChamada.convidados.map(c => currentChamada.convidadosPresencas[c.id]),
+    ...currentChamada.experimentais.map(e => currentChamada.expPresencas[e.id]),
+  ];
+  const pres = all.filter(s => s==='presente').length;
+  const aus  = all.filter(s => s==='ausente').length;
+  const just = all.filter(s => s==='justificada').length;
+  const unmarked = all.filter(s => !s).length;
+  const total = all.length;
+  document.getElementById('modal-summary').innerHTML =
+    `${total} participantes · <span class="s-pres">${pres} pres</span> · <span class="s-aus">${aus} aus</span> · <span class="s-just">${just} just</span>${unmarked>0?` · <span style="color:var(--text-muted);">${unmarked} ⚠ não marcados</span>`:''}`;
+}
+
+function closeModal() {
+  document.getElementById('chamada-modal').classList.remove('open');
+  currentChamada = null;
+  chamadaTab = 'turma';
+}
+
+function renderChamadaGrid() {
+  if(!currentChamada) return;
+  const { atletas, presencas, isReadonly } = currentChamada;
+
+  document.getElementById('chamada-grid').innerHTML = atletas.map(a=>{
+    const s = presencas[a.id];
+    const cardClass = s==='presente'?'presente':s==='ausente'?'ausente':s==='justificada'?'justificada':'';
+    const clickAttr = isReadonly ? '' : `onclick="toggleAtleta(${a.id},'presente')"`;
+    return `<div class="atleta-chamada-card ${cardClass}" id="acc-${a.id}">
+      <div class="ac-ava" style="background:${a.cor}">${a.ini}</div>
+      <div class="ac-name">${a.nome.split(' ')[0]}<br><span style="font-weight:400;color:var(--text-muted);font-size:11px;">${a.nome.split(' ').slice(1).join(' ')}</span></div>
+      <div class="ac-status-row">
+        ${isReadonly ? '' : `
+        <div class="ac-btn pres-btn" title="Presente" onclick="event.stopPropagation();setStatus(${a.id},'presente')">✓</div>
+        <div class="ac-btn aus-btn"  title="Ausente"  onclick="event.stopPropagation();setStatus(${a.id},'ausente')">✕</div>
+        <div class="ac-btn just-btn" title="Justificada" onclick="event.stopPropagation();setStatus(${a.id},'justificada')">⚠</div>`}
+        ${isReadonly && !s ? '<span style="font-size:11px;color:var(--text-muted);">—</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  renderModalSummary();
+
+  // Footer
+  const foot = document.getElementById('chamada-foot');
+  if(isReadonly) {
+    foot.innerHTML = `<div class="readonly-banner" style="flex:1;">👁️ Visualização somente. Não é possível editar esta chamada com seu perfil.</div><button class="btn btn-outline" onclick="closeModal()">Fechar</button>`;
+  } else {
+    const allMarked = atletas.every(a=>presencas[a.id]);
+    const nc = currentChamada.convidados.length;
+    const ne = currentChamada.experimentais.length;
+    const extra = (nc + ne) > 0 ? ` · +${nc} convidado${nc!==1?'s':''} · ${ne} experimental${ne!==1?'is':''}` : '';
+    foot.innerHTML = `
+      <div style="font-size:12.5px;color:var(--text-muted);flex:1;">${!allMarked?`⚠️ turma incompleta`:'✅ Todos marcados'}${extra}</div>
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarChamada()">💾 Salvar Chamada</button>`;
+  }
+}
+
+function setStatus(atletaId, status) {
+  if(!currentChamada || currentChamada.isReadonly) return;
+  currentChamada.presencas[atletaId] = currentChamada.presencas[atletaId]===status ? null : status;
+  renderChamadaGrid();
+}
+
+function marcarTodos(status) {
+  if(!currentChamada) return;
+  currentChamada.atletas.forEach(a=>{ currentChamada.presencas[a.id]=status; });
+  // Also mark guests
+  currentChamada.convidados.forEach(c=>{ currentChamada.convidadosPresencas[c.id]=status; });
+  renderChamadaGrid();
+  renderConvidadosGrid();
+}
+
+function salvarChamada() {
+  if(!currentChamada) return;
+  const unmarked = currentChamada.atletas.filter(a=>!currentChamada.presencas[a.id]);
+  if(unmarked.length) {
+    const names = unmarked.map(a=>a.nome.split(' ')[0]).join(', ');
+    if(!confirm(`Ainda há ${unmarked.length} atleta(s) da turma sem marcação: ${names}.\nDeseja salvar assim mesmo?`)) return;
+    unmarked.forEach(a=>{ currentChamada.presencas[a.id]='ausente'; });
+  }
+  // Merge all presences into one object
+  const allPresencas = {
+    ...currentChamada.presencas,
+    ...currentChamada.convidadosPresencas,
+    ...currentChamada.expPresencas,
+  };
+  CHAMADAS_SALVAS[currentChamada.aulaKey] = {
+    status: 'feita',
+    presencas: allPresencas,
+    convidados: currentChamada.convidados.map(c=>({...c})),
+    experimentais: currentChamada.experimentais.map(e=>({...e})),
+  };
+  const nc = currentChamada.convidados.length;
+  const ne = currentChamada.experimentais.length;
+  const extra = (nc+ne)>0 ? ` (+ ${nc} convidado${nc!==1?'s':''}, ${ne} experimental${ne!==1?'is':''})` : '';
+  alert(`✅ Chamada salva para ${currentChamada.turma.nome}${extra}!`);
+  closeModal();
+  renderAulas();
+}
+
+// ─── HISTÓRICO ────────────────────────────────────────────────────────────────
+function renderHistorico() {
+  const q = (document.getElementById('hist-search').value||'').toLowerCase();
+  const turmaFilter = document.getElementById('hist-turma').value;
+  const alertFilter = document.getElementById('hist-alert').value;
+
+  let rows = FREQ_DATA.map(f=>{
+    const a = ATLETAS.find(x=>x.id===f.atleta_id);
+    const t = TURMAS.find(x=>x.id===f.turma_id);
+    if(!a||!t) return null;
+    // Profile filter
+    if(currentProfile==='professor' && t.prof_id!=='professor') return null;
+    const pct = Math.round(((f.pres+f.just)/f.total)*100);
+    return { ...f, atleta:a, turma:t, pct };
+  }).filter(Boolean);
+
+  if(q) rows = rows.filter(r=>r.atleta.nome.toLowerCase().includes(q)||r.turma.nome.toLowerCase().includes(q));
+  if(turmaFilter) rows = rows.filter(r=>r.turma.id===turmaFilter);
+  if(alertFilter==='alert') rows = rows.filter(r=>r.pct<THRESHOLD);
+  if(alertFilter==='ok')    rows = rows.filter(r=>r.pct>=THRESHOLD);
+
+  document.getElementById('hist-count').textContent = `${rows.length} registro(s)`;
+  const tbody = document.getElementById('hist-tbody');
+  if(!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">Nenhum registro encontrado.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r=>{
+    const color = r.pct>=75?'#20C997':r.pct>=50?'#FFA552':'#ef4444';
+    const cls   = r.pct>=75?'freq-green':r.pct>=50?'freq-orange':'freq-red';
+    const flag  = r.pct<THRESHOLD
+      ? `<span class="alert-flag">⚠️ ${r.pct}%</span>`
+      : `<span class="ok-flag">✓ OK</span>`;
+    return `<tr>
+      <td>
+        <div class="atleta-cell">
+          <div class="ava" style="background:${r.atleta.cor}">${r.atleta.ini}</div>
+          <div>
+            <div style="font-weight:600;">${r.atleta.nome}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${r.turma.cor};flex-shrink:0;"></div>
+          <span style="font-size:12.5px;">${r.turma.nome}</span>
+        </div>
+      </td>
+      <td style="font-weight:600;text-align:center;">${r.total}</td>
+      <td style="color:var(--primary);font-weight:700;text-align:center;">${r.pres}</td>
+      <td style="color:var(--danger);font-weight:700;text-align:center;">${r.aus}</td>
+      <td style="color:var(--accent);font-weight:700;text-align:center;">${r.just}</td>
+      <td>
+        <div class="freq-pill-wrap">
+          <div class="freq-mini-bar"><div class="freq-mini-fill" style="width:${r.pct}%;background:${color};"></div></div>
+          <span class="freq-pct ${cls}">${r.pct}%</span>
+        </div>
+      </td>
+      <td>${flag}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── RELATÓRIO CHARTS ─────────────────────────────────────────────────────────
+function initCharts() {
+  if(chartsInited) return;
+  chartsInited = true;
+
+  // Bar — frequência por turma
+  const ctxT = document.getElementById('chart-turmas');
+  if(ctxT) new Chart(ctxT, {
+    type:'bar',
+    data:{
+      labels: TURMAS.map(t=>t.nome),
+      datasets:[{
+        label:'Frequência %',
+        data:[89,76,91,83,87,73,79],
+        backgroundColor: TURMAS.map(t=>t.cor+'99'),
+        borderColor: TURMAS.map(t=>t.cor),
+        borderWidth:1.5, borderRadius:6,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        y:{ beginAtZero:true, max:100, grid:{color:'#f0f0f0'}, ticks:{callback:v=>v+'%',font:{size:10,family:'Inter'}} },
+        x:{ grid:{display:false}, ticks:{font:{size:10,family:'Inter'},maxRotation:30} }
+      },
+      // Threshold line
+      plugins:{ annotation:{ annotations:{ threshold:{ type:'line', yMin:75, yMax:75, borderColor:'#ef4444', borderWidth:1.5, borderDash:[6,4] } } } }
+    }
+  });
+
+  // Line — evolução mensal
+  const ctxE = document.getElementById('chart-evolucao');
+  if(ctxE) new Chart(ctxE, {
+    type:'line',
+    data:{
+      labels:['Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'],
+      datasets:[{
+        label:'Frequência média',
+        data:[78,80,75,81,83,82],
+        borderColor:'#20C997', backgroundColor:'rgba(32,201,151,.12)',
+        borderWidth:2.5, fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#20C997',
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        y:{ beginAtZero:false, min:60, max:100, ticks:{callback:v=>v+'%',font:{size:10,family:'Inter'}}, grid:{color:'#f0f0f0'} },
+        x:{ grid:{display:false}, ticks:{font:{size:10,family:'Inter'}} }
+      }
+    }
+  });
+
+  // Alert list
+  const alerts = FREQ_DATA.map(f=>{
+    const a = ATLETAS.find(x=>x.id===f.atleta_id);
+    const t = TURMAS.find(x=>x.id===f.turma_id);
+    const pct = Math.round(((f.pres+f.just)/f.total)*100);
+    return { a, t, pct, f };
+  }).filter(r=>r.pct<THRESHOLD && r.a && r.t);
+  alerts.sort((a,b)=>a.pct-b.pct);
+
+  document.getElementById('alert-list').innerHTML = alerts.map(r=>`
+    <div class="alert-athlete-card">
+      <div class="ava" style="background:${r.a.cor};width:38px;height:38px;">${r.a.ini}</div>
+      <div>
+        <div class="aa-name">${r.a.nome}</div>
+        <div class="aa-meta">${r.t.nome} · ${r.f.pres} de ${r.f.total} aulas</div>
+      </div>
+      <div class="aa-freq">${r.pct}%<small>frequência</small></div>
+    </div>`).join('');
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function setTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const idx = ['chamada','historico','relatorio'].indexOf(tab);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if(tab==='relatorio') setTimeout(initCharts, 80);
+  if(tab==='historico') renderHistorico();
+}
+
+function exportarRelatorio() { alert('⬇️ Exportando relatório de presenças...'); }
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  initDateLabels();
+  populateTurmaFilters();
+  renderAulas();
+});
+</script>
+<script>window.ESCOLA_PAGE = 'presencas';</script>
+<script src="escola-sidebar.js"></script>
+</body>
+</html>
