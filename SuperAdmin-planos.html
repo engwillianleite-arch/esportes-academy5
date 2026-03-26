@@ -1264,7 +1264,7 @@ function openSubPanel(id) {
   document.getElementById('sp-ocp-bar').style.background = barColor;
 
   // plan selector
-  document.getElementById('sp-plan-selector').innerHTML = PLANS.filter(p=>p.monthlyPrice).map(p => `
+  document.getElementById('sp-plan-selector').innerHTML = PLANS.filter(p=>p.id!=='enterprise').map(p => `
     <div class="plan-sel-opt ${p.id} ${s.plano.toLowerCase()===p.id?'selected':''}" onclick="selectPlan('${p.id}',this)">
       <div class="plan-sel-name" style="color:${PLAN_TEXT[p.id]}">${p.name}</div>
       <div class="plan-sel-price" style="color:${PLAN_TEXT[p.id]}">R$ ${p.monthlyPrice.toLocaleString('pt-BR')}</div>
@@ -1330,16 +1330,17 @@ function saveAssign() {
    EDIT PLAN MODAL
 ────────────────────────────────────────── */
 function openNewPlanModal() {
-  document.getElementById('editPlanList').innerHTML = PLANS.filter(p=>p.monthlyPrice).map(p=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px">
+  const editablePlans = PLANS.filter(p => p.id !== 'enterprise');
+  document.getElementById('editPlanList').innerHTML = editablePlans.map(p=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px" data-plan-id="${p.id}">
       <div style="width:70px;font-size:12px;font-weight:800;color:${PLAN_TEXT[p.id]}">${p.name}</div>
       <div style="flex:1">
         <label style="font-size:11px;color:var(--text-muted)">Preço mensal (R$)</label>
-        <input type="number" class="form-input" style="margin-top:3px;padding:7px 10px" value="${p.monthlyPrice}" />
+        <input type="number" min="1" class="form-input plan-price-input" data-plan="${p.id}" data-field="price" style="margin-top:3px;padding:7px 10px" value="${p.monthlyPrice || ''}" placeholder="Ex: 490" />
       </div>
       <div style="flex:1">
         <label style="font-size:11px;color:var(--text-muted)">Limite de atletas</label>
-        <input type="number" class="form-input" style="margin-top:3px;padding:7px 10px" value="${p.limits.atletas}" />
+        <input type="number" min="1" class="form-input plan-limit-input" data-plan="${p.id}" data-field="limit" style="margin-top:3px;padding:7px 10px" value="${p.limits ? p.limits.atletas : ''}" placeholder="Ex: 100" />
       </div>
     </div>`).join('') + `
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
@@ -1554,13 +1555,38 @@ renderTable(SUBSCRIPTIONS);
     });
   }
 
+  function applyPlansConfig(cfg) {
+    if (!cfg) return;
+    var parsed = typeof cfg === 'string' ? JSON.parse(cfg) : cfg;
+    Object.keys(parsed).forEach(function(k) {
+      var p = PLANS.find(function(x){ return x.id === k; });
+      if (!p || !parsed[k]) return;
+      if (parsed[k].monthlyPrice && parsed[k].monthlyPrice > 0) {
+        p.monthlyPrice = parsed[k].monthlyPrice;
+      }
+      if (parsed[k].limits && parsed[k].limits.atletas > 0 && p.limits) {
+        p.limits.atletas = parsed[k].limits.atletas;
+      }
+    });
+  }
+
   function loadData() {
     if (!db) return;
-    db.from('escolas')
-      .select('id,nome_fantasia,razao_social,logo_emoji,logo_cor,cidade,estado,plano,periodicidade,status,status_pagamento,mensalidade,proximo_vencimento,total_alunos,capacidade,created_at')
-      .order('created_at', {ascending: true})
+    // 1. Carrega preços dos planos do banco
+    db.from('platform_settings')
+      .select('value')
+      .eq('key', 'plans_config')
       .then(function(res) {
-        if (res.error) { showToast('Erro ao carregar: '+res.error.message); return; }
+        if (!res.error && res.data && res.data[0]) {
+          try { applyPlansConfig(res.data[0].value); } catch(e) {}
+        }
+        // 2. Carrega escolas
+        return db.from('escolas')
+          .select('id,nome_fantasia,razao_social,logo_emoji,logo_cor,cidade,estado,plano,periodicidade,status,status_pagamento,mensalidade,proximo_vencimento,total_alunos,capacidade,created_at')
+          .order('created_at', {ascending: true});
+      })
+      .then(function(res) {
+        if (!res || res.error) { showToast('Erro ao carregar escolas.'); return; }
         ALL_ESCOLAS = res.data || [];
         ESCOLA_DB_IDS = {};
         SUBSCRIPTIONS = ALL_ESCOLAS.map(mapEscola);
@@ -1641,24 +1667,59 @@ renderTable(SUBSCRIPTIONS);
 
   // Override saveEditPlans (save prices to platform_settings)
   saveEditPlans = function() {
-    closeEditPlanModal();
-    if (!db) return;
-    var inputs = document.querySelectorAll('#editPlanList input[type=number]');
-    var planKeys = ['basic','pro','premium'];
+    if (!db) { closeEditPlanModal(); return; }
+
+    // Lê os inputs POR data-plan/data-field ANTES de fechar o modal
     var config = {};
-    planKeys.forEach(function(k,i) {
-      var price = inputs[i*2]   ? parseInt(inputs[i*2].value)   : 0;
-      var limit = inputs[i*2+1] ? parseInt(inputs[i*2+1].value) : 0;
-      config[k] = { monthlyPrice: price, limits: { atletas: limit } };
-      var p = PLANS.find(function(p){ return p.id===k; });
-      if (p) { p.monthlyPrice = price; if (p.limits) p.limits.atletas = limit; }
+    var hasError = false;
+    PLANS.filter(function(p){ return p.id !== 'enterprise'; }).forEach(function(p) {
+      var priceInput = document.querySelector('.plan-price-input[data-plan="' + p.id + '"]');
+      var limitInput = document.querySelector('.plan-limit-input[data-plan="' + p.id + '"]');
+      var price = priceInput ? parseInt(priceInput.value) : NaN;
+      var limit = limitInput ? parseInt(limitInput.value) : NaN;
+      if (isNaN(price) || price < 1) {
+        if (priceInput) priceInput.style.borderColor = 'var(--danger)';
+        hasError = true;
+      } else {
+        if (priceInput) priceInput.style.borderColor = '';
+        config[p.id] = config[p.id] || {};
+        config[p.id].monthlyPrice = price;
+      }
+      if (!isNaN(limit) && limit >= 1) {
+        config[p.id] = config[p.id] || {};
+        config[p.id].limits = { atletas: limit };
+      }
     });
+
+    if (hasError) {
+      showToast('\u26a0\ufe0f Preencha os pre\u00e7os corretamente.');
+      return;
+    }
+
     config.enterprise = { monthlyPrice: null, limits: { atletas: null } };
-    db.from('platform_settings').upsert({ key:'plans_config', value:JSON.stringify(config) }, { onConflict:'key' })
+
+    // Fecha o modal
+    closeEditPlanModal();
+
+    // Atualiza PLANS em memória imediatamente
+    Object.keys(config).forEach(function(k) {
+      var p = PLANS.find(function(x){ return x.id === k; });
+      if (p && config[k].monthlyPrice) {
+        p.monthlyPrice = config[k].monthlyPrice;
+        if (p.limits && config[k].limits) p.limits.atletas = config[k].limits.atletas;
+      }
+    });
+    renderPlans();
+
+    // Persiste no banco
+    db.from('platform_settings')
+      .upsert({ key: 'plans_config', value: JSON.stringify(config) }, { onConflict: 'key' })
       .then(function(res) {
-        if (res.error) { showToast('Erro ao salvar planos.'); return; }
-        showToast('\u2705 Planos atualizados!');
-        renderPlans();
+        if (res.error) {
+          showToast('\u274c Erro ao salvar: ' + (res.error.message || 'Tente novamente.'));
+          return;
+        }
+        showToast('\u2705 Planos atualizados com sucesso!');
       });
   };
 
