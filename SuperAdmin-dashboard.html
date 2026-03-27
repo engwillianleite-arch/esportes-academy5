@@ -1401,54 +1401,65 @@
   });
 </script>
 <!-- SUPABASE BLOCK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (function(){
   var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
-  var db = null;
+
+  var BASE_HDR = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json'
+  };
+
+  function dbGet(table, params) {
+    var url = SUPA_URL + '/rest/v1/' + table + (params ? '?' + params : '');
+    return fetch(url, { method: 'GET', headers: BASE_HDR })
+      .then(function(r) { return r.json(); })
+      .catch(function(e) { console.error('dbGet error', e); return []; });
+  }
 
   function set(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
 
   function fmtK(v){ return v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : 'R$'+v.toLocaleString('pt-BR'); }
 
   function monthName(d){
-    return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()];
+    return ['Fev','Jev','Kev','Mev','Mev','Mev','Mev','Mev','Mev','Mev','Mev','Mev'][d.getMonth()];
   }
+
+  var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  function mName(d){ return MONTH_NAMES[d.getMonth()]; }
 
   function updateKPIs(escolas, fcData) {
     var total   = escolas.length;
-    var ativas  = escolas.filter(function(e){ return e.status_pagamento === 'ativa'; }).length;
-    var trials  = escolas.filter(function(e){ return e.status_pagamento === 'trial'; }).length;
+    var ativas  = escolas.filter(function(e){ return e.status_pagamento === 'ativa' || e.status === 'ativa'; }).length;
+    var trials  = escolas.filter(function(e){ return e.status_pagamento === 'trial' || e.status === 'trial'; }).length;
     var atraso  = escolas.filter(function(e){ return e.status_pagamento === 'inadimplente'; }).length;
     var totalAlunos = escolas.reduce(function(s,e){ return s + (Number(e.total_alunos)||0); }, 0);
-    var mrr     = escolas.filter(function(e){ return e.status_pagamento !== 'cancelada'; })
+    var mrr     = escolas.filter(function(e){ return e.status_pagamento !== 'cancelada' && e.status !== 'cancelada'; })
                          .reduce(function(s,e){ return s + (Number(e.mensalidade)||0); }, 0);
 
-    // MRR previous month from fluxo_caixa
     var today = new Date();
     var prevFrom = new Date(today.getFullYear(), today.getMonth()-1, 1).toISOString().slice(0,10);
     var prevTo   = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().slice(0,10);
     var prevMRR  = fcData.filter(function(r){ return r.tipo==='receita'&&r.status==='realizado'&&r.data>=prevFrom&&r.data<=prevTo; })
                          .reduce(function(s,r){ return s+(Number(r.valor)||0); }, 0);
     var mrrDelta = prevMRR > 0 ? Math.round((mrr-prevMRR)/prevMRR*100) : 0;
-
     var retencao = total > 0 ? Math.max(0, Math.round(((total-atraso)/total)*1000)/10) : 0;
 
-    var months = ['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    var months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     var curMonth = months[today.getMonth()];
 
     set('kpi-escolas', total);
-    set('kpi-escolas-sub', ativas+' ativas \u00b7 '+trials+' trial \u00b7 '+atraso+' atraso');
+    set('kpi-escolas-sub', ativas+' ativas · '+trials+' trial · '+atraso+' atraso');
     set('kpi-alunos', totalAlunos.toLocaleString('pt-BR'));
     set('kpi-alunos-sub', 'Total de atletas cadastrados');
     set('kpi-mrr', fmtK(mrr));
-    set('kpi-mrr-sub', prevMRR>0 ? fmtK(prevMRR)+' m\u00eas anterior' : 'MRR calculado das assinaturas');
+    set('kpi-mrr-sub', prevMRR>0 ? fmtK(prevMRR)+' mês anterior' : 'MRR calculado das assinaturas');
     set('kpi-retencao', retencao.toFixed(1)+'%');
-    set('kpi-retencao-sub', 'M\u00e9dia baseada em status de pagamento');
-    set('welcome-sub', 'Plataforma atualizada \u00b7 '+total+' escolas ativas \u00b7 '+curMonth.charAt(0).toUpperCase()+curMonth.slice(1)+' '+today.getFullYear());
+    set('kpi-retencao-sub', 'Média baseada em status de pagamento');
+    set('welcome-sub', 'Plataforma atualizada · '+total+' escolas · '+curMonth.charAt(0).toUpperCase()+curMonth.slice(1)+' '+today.getFullYear());
 
-    // Mini stats
     set('ms-ativas', ativas);
     set('ms-trial', trials);
     set('ms-atraso', atraso);
@@ -1459,10 +1470,9 @@
       barEl = document.getElementById('ms-atraso-bar'); if(barEl) barEl.style.width = Math.round(atraso/total*100)+'%';
     }
 
-    // KPI trend badges
     var trends = document.querySelectorAll('.kpi-card .kpi-trend');
-    if (trends[2]) { // MRR trend
-      trends[2].textContent = (mrrDelta>=0?'\u25b2 +':'\u25bc ')+Math.abs(mrrDelta)+'%';
+    if (trends[2]) {
+      trends[2].textContent = (mrrDelta>=0?'▲ +':'▼ ')+Math.abs(mrrDelta)+'%';
       trends[2].className = 'kpi-trend '+(mrrDelta>=0?'up':'down');
     }
   }
@@ -1476,16 +1486,18 @@
       var to   = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().slice(0,10);
       var rec  = fcData.filter(function(r){ return r.tipo==='receita'&&r.status==='realizado'&&r.data>=from&&r.data<=to; })
                         .reduce(function(s,r){ return s+(Number(r.valor)||0); }, 0);
-      labels.push(monthName(d)+(i===0?'':'/'+String(d.getFullYear()).slice(2)));
+      labels.push(mName(d)+(i===0?'':'/'+String(d.getFullYear()).slice(2)));
       realData.push(rec);
       metaData.push(Math.round(rec * 0.92) || 0);
     }
     if (window._revChart) { window._revChart.destroy(); window._revChart=null; }
-    var rCtx = document.getElementById('revenueChart').getContext('2d');
-    var rGrad = rCtx.createLinearGradient(0,0,0,240);
+    var rCtx = document.getElementById('revenueChart');
+    if (!rCtx) return;
+    var ctx = rCtx.getContext('2d');
+    var rGrad = ctx.createLinearGradient(0,0,0,240);
     rGrad.addColorStop(0,'rgba(26,86,219,.22)');
     rGrad.addColorStop(1,'rgba(26,86,219,0)');
-    window._revChart = new Chart(rCtx,{
+    window._revChart = new Chart(ctx,{
       type:'line',
       data:{
         labels: labels,
@@ -1503,18 +1515,20 @@
       options:{
         responsive:true, maintainAspectRatio:false,
         plugins:{ legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,boxHeight:6,padding:14}},
-          tooltip:{mode:'index',intersect:false, callbacks:{label:function(c){ return c.dataset.label+': R$ '+c.raw.toLocaleString('pt-BR'); }}}},
-        scales:{x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:function(v){ return 'R$'+(v/1000).toFixed(0)+'k'; }}}}
+          tooltip:{mode:'index',intersect:false,callbacks:{label:function(c){ return c.dataset.label+': R$ '+c.raw.toLocaleString('pt-BR'); }}}},
+        scales:{x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'},ticks:{callback:function(v){ return 'R$'+(v/1000).toFixed(0)+'k'; }}}}
       }
     });
   }
 
   function updateStatusChart(escolas) {
-    var ativas  = escolas.filter(function(e){ return e.status_pagamento==='ativa'; }).length;
-    var trials  = escolas.filter(function(e){ return e.status_pagamento==='trial'; }).length;
+    var ativas  = escolas.filter(function(e){ return e.status_pagamento==='ativa'||e.status==='ativa'; }).length;
+    var trials  = escolas.filter(function(e){ return e.status_pagamento==='trial'||e.status==='trial'; }).length;
     var atraso  = escolas.filter(function(e){ return e.status_pagamento==='inadimplente'; }).length;
     if (window._statusChart) { window._statusChart.destroy(); window._statusChart=null; }
-    window._statusChart = new Chart(document.getElementById('statusChart'),{
+    var el = document.getElementById('statusChart');
+    if (!el) return;
+    window._statusChart = new Chart(el,{
       type:'doughnut',
       data:{ labels:['Ativas','Trial','Em atraso'], datasets:[{data:[ativas,trials,atraso], backgroundColor:['#1a56db','#d97706','#dc2626'], borderWidth:0, hoverOffset:4}]},
       options:{ responsive:true, maintainAspectRatio:false, cutout:'72%',
@@ -1537,7 +1551,9 @@
       else regions.CO++;
     });
     if (window._regionChart) { window._regionChart.destroy(); window._regionChart=null; }
-    window._regionChart = new Chart(document.getElementById('regionChart'),{
+    var el = document.getElementById('regionChart');
+    if (!el) return;
+    window._regionChart = new Chart(el,{
       type:'pie',
       data:{ labels:['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'],
         datasets:[{ data:[regions.SE,regions.S,regions.NE,regions.N,regions.CO],
@@ -1548,34 +1564,30 @@
   }
 
   function updateAlerts(escolas) {
-    var today   = new Date();
+    var today    = new Date();
     var todayStr = today.toISOString().slice(0,10);
     var in14Str  = new Date(today.getTime()+14*86400000).toISOString().slice(0,10);
-    var alerts  = [];
+    var alerts   = [];
 
-    // Overdue
     var overdue = escolas.filter(function(e){ return e.status_pagamento==='inadimplente'; });
     overdue.forEach(function(e){
       var daysAgo = e.proximo_vencimento ? Math.round((new Date(todayStr)-new Date(e.proximo_vencimento))/86400000) : 0;
       alerts.push({ dot:'danger', text:'Pagamento em atraso: '+(e.nome_fantasia||e.razao_social), time: daysAgo>0?daysAgo+'d de atraso':'Vence hoje' });
     });
 
-    // Trials expiring
-    var expiring = escolas.filter(function(e){ return e.status_pagamento==='trial' && e.proximo_vencimento && e.proximo_vencimento<=in14Str; });
+    var expiring = escolas.filter(function(e){ return (e.status_pagamento==='trial'||e.status==='trial') && e.proximo_vencimento && e.proximo_vencimento<=in14Str; });
     expiring.forEach(function(e){
       var days = Math.round((new Date(e.proximo_vencimento)-new Date(todayStr))/86400000);
       alerts.push({ dot:'warning', text:'Trial expirando: '+(e.nome_fantasia||e.razao_social), time:'Em '+days+' dias' });
     });
 
-    // Recent new schools
     var weekAgo = new Date(today.getTime()-7*86400000).toISOString().slice(0,10);
     var newSchools = escolas.filter(function(e){ return (e.created_at||'').slice(0,10)>=weekAgo; });
     newSchools.forEach(function(e){
       alerts.push({ dot:'info', text:'Nova escola cadastrada: '+(e.nome_fantasia||e.razao_social), time:'Recente' });
     });
 
-    // MRR positive
-    var mrr = escolas.filter(function(e){ return e.status_pagamento!=='cancelada'; })
+    var mrr = escolas.filter(function(e){ return e.status_pagamento!=='cancelada'&&e.status!=='cancelada'; })
                      .reduce(function(s,e){ return s+(Number(e.mensalidade)||0); }, 0);
     if (mrr > 0) {
       alerts.push({ dot:'success', text:'MRR atual: '+fmtK(mrr), time:'Receita mensal recorrente' });
@@ -1595,46 +1607,35 @@
     var badge = alertsList.parentElement.querySelector('.badge');
     if (badge) {
       var crit = overdue.length + expiring.length;
-      badge.textContent = crit+' cr\u00edticos';
+      badge.textContent = crit+' críticos';
       badge.className = crit>0 ? 'badge badge-overdue' : 'badge badge-active';
     }
     var subtitle = alertsList.parentElement.querySelector('.card-subtitle');
-    if (subtitle) subtitle.textContent = alerts.length+' itens requerem aten\u00e7\u00e3o';
+    if (subtitle) subtitle.textContent = alerts.length+' itens requerem atenção';
   }
 
   function loadData() {
-    if (!db) return;
-    var escolas, fcData;
-
-    db.from('escolas')
-      .select('nome_fantasia,razao_social,status_pagamento,mensalidade,total_alunos,capacidade,estado,modalidades,proximo_vencimento,created_at')
-      .then(function(res) {
-        escolas = res.data || [];
-        return db.from('fluxo_caixa').select('data,tipo,status,valor').order('data');
-      })
-      .then(function(res) {
-        fcData = res.data || [];
-        updateKPIs(escolas, fcData);
-        updateRevenueChart(fcData);
-        updateStatusChart(escolas);
-        updateRegionChart(escolas);
-        updateAlerts(escolas);
-      });
-  }
-
-  function initDb() {
-    try {
-      if (window.supabase && window.supabase.createClient) {
-        db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-        return true;
-      }
-    } catch(e) {}
-    return false;
+    Promise.all([
+      dbGet('escolas', 'select=nome_fantasia,razao_social,status_pagamento,status,mensalidade,total_alunos,capacidade,estado,modalidades,proximo_vencimento,created_at'),
+      dbGet('fluxo_caixa', 'select=data,tipo,status,valor&order=data')
+    ]).then(function(results) {
+      var escolas = Array.isArray(results[0]) ? results[0] : [];
+      var fcData  = Array.isArray(results[1]) ? results[1] : [];
+      updateKPIs(escolas, fcData);
+      updateRevenueChart(fcData);
+      updateStatusChart(escolas);
+      updateRegionChart(escolas);
+      updateAlerts(escolas);
+    }).catch(function(e) {
+      console.error('loadData error', e);
+    });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ if(initDb()) loadData(); });
-  } else { if(initDb()) loadData(); }
+    document.addEventListener('DOMContentLoaded', loadData);
+  } else {
+    loadData();
+  }
 })();
 </script>
 
