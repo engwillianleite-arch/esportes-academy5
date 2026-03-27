@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Esportes Academy — SuperAdmin-schools</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1214,93 +1213,107 @@ function setLoading(on){
 }
 </script>
 
-<!-- ═══ BLOCO 2: Supabase ═══ -->
+<!-- ╙══ BLOCO 2: Supabase via fetch() nativo ══╙ -->
 <script>
 (function(){
   var SUPA_URL = 'https://eeavrkosnyilxetbtzox.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
-  var db = null;
 
-  function initSupabase(){
-    try{
-      if(window.supabase&&window.supabase.createClient){
-        db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
-        return true;
-      }
-    }catch(e){ db=null; }
-    return false;
+  var BASE_HDR = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json'
+  };
+
+  function supa(table, params, method, body, extra) {
+    var url  = SUPA_URL + '/rest/v1/' + table + (params ? '?' + params : '');
+    var hdrs = Object.assign({}, BASE_HDR, extra || {});
+    var opts = { method: method || 'GET', headers: hdrs };
+    if (body !== undefined && body !== null) opts.body = JSON.stringify(body);
+    return fetch(url, opts)
+      .then(function(r) {
+        if (r.status === 204) return { data: null, error: null };
+        return r.json().then(function(d) {
+          return r.ok ? { data: d, error: null } : { data: null, error: d };
+        });
+      })
+      .catch(function(e) { return { data: null, error: { message: e.message } }; });
   }
+
+  function dbGet(t, p)    { return supa(t, p, 'GET'); }
+  function dbPatch(t,p,b) { return supa(t, p, 'PATCH', b, {'Prefer':'return=representation'}); }
+  function dbPost(t, b)   { return supa(t, null, 'POST', b, {'Prefer':'return=representation'}); }
+  function dbDel(t, p)    { return supa(t, p, 'DELETE'); }
 
   /* ── Load all schools ── */
-  function loadSchools(){
-    if(!db){ setLoading(false); return; }
+  function loadSchools() {
     setLoading(true);
-    db.from('escolas').select('*').order('created_at',{ascending:false})
-      .then(function(res){
-        setLoading(false);
-        if(res.error){ showToast('Erro ao carregar escolas: '+res.error.message,'danger'); return; }
-        SCHOOLS = res.data||[];
-        FILTERED = SCHOOLS.slice();
-        updateKPIs(SCHOOLS);
-        renderTable(SCHOOLS);
-      });
+    dbGet('escolas', 'select=*&order=created_at.desc').then(function(res) {
+      setLoading(false);
+      if (res.error) {
+        showToast('\u274c Erro ao carregar: ' + (res.error.message || JSON.stringify(res.error)), 'danger');
+        return;
+      }
+      SCHOOLS  = res.data || [];
+      FILTERED = SCHOOLS.slice();
+      updateKPIs(SCHOOLS);
+      renderTable(SCHOOLS);
+    });
   }
 
-  /* ── Save (create or update) ── */
-  saveSchool = function(){
-    if(!db){ showToast('Supabase n\u00e3o conectado','danger'); return; }
-    var name=(document.getElementById('f-name')||{}).value||'';
-    if(!name.trim()){ showToast('Preencha o nome da escola.','danger'); return; }
-
+  /* ── Save school ── */
+  saveSchool = function() {
+    var name = (document.getElementById('f-name') || {}).value || '';
+    if (!name.trim()) { showToast('Preencha o nome da escola.', 'danger'); return; }
+    var g = function(id){ return ((document.getElementById(id)||{}).value||'').trim()||null; };
+    var n = function(id,def){ return parseFloat((document.getElementById(id)||{}).value||def)||parseFloat(def); };
     var data = {
       nome_fantasia:       name.trim(),
-      razao_social:        ((document.getElementById('f-company')||{}).value||'').trim()||null,
-      cpf_cnpj:            ((document.getElementById('f-cpfcnpj')||{}).value||'').trim()||null,
-      cnpj:                selectedPersonType==='JURIDICA'?((document.getElementById('f-cpfcnpj')||{}).value||'').trim()||null:null,
-      email:               ((document.getElementById('f-email')||{}).value||'').trim()||null,
-      telefone:            ((document.getElementById('f-phone')||{}).value||'').trim()||null,
-      celular:             ((document.getElementById('f-mobile')||{}).value||'').trim()||null,
-      emails_adicionais:   ((document.getElementById('f-extra-emails')||{}).value||'').trim()||null,
-      modalidades:         ((document.getElementById('f-sports')||{}).value||'').trim()||null,
-      capacidade:          parseInt((document.getElementById('f-capacity')||{}).value||'100')||100,
-      plano:               (document.getElementById('f-plan')||{}).value||'Basic',
+      razao_social:        g('f-company'),
+      cpf_cnpj:            g('f-cpfcnpj'),
+      cnpj:                selectedPersonType==='JURIDICA'?g('f-cpfcnpj'):null,
+      email:               g('f-email'),
+      telefone:            g('f-phone'),
+      celular:             g('f-mobile'),
+      emails_adicionais:   g('f-extra-emails'),
+      modalidades:         g('f-sports'),
+      capacidade:          parseInt(g('f-capacity')||'100')||100,
+      plano:               (document.getElementById('f-plan')||{}).value||'basic',
       status:              (document.getElementById('f-status')||{}).value||'trial',
       person_type:         selectedPersonType,
-      nome_responsavel:    ((document.getElementById('f-responsible')||{}).value||'').trim()||null,
-      inscricao_municipal: ((document.getElementById('f-munic')||{}).value||'').trim()||null,
-      inscricao_estadual:  ((document.getElementById('f-state-insc')||{}).value||'').trim()||null,
-      cep:                 ((document.getElementById('f-cep')||{}).value||'').trim()||null,
-      bairro:              ((document.getElementById('f-province')||{}).value||'').trim()||null,
-      logradouro:          ((document.getElementById('f-address')||{}).value||'').trim()||null,
-      numero:              ((document.getElementById('f-number')||{}).value||'').trim()||null,
-      complemento:         ((document.getElementById('f-complement')||{}).value||'').trim()||null,
-      cidade:              ((document.getElementById('f-city')||{}).value||'').trim()||null,
+      nome_responsavel:    g('f-responsible'),
+      inscricao_municipal: g('f-munic'),
+      inscricao_estadual:  g('f-state-insc'),
+      cep:                 g('f-cep'),
+      bairro:              g('f-province'),
+      logradouro:          g('f-address'),
+      numero:              g('f-number'),
+      complemento:         g('f-complement'),
+      cidade:              g('f-city'),
       estado:              (document.getElementById('f-state')||{}).value||null,
       tipo_cobranca:       selectedBillingType,
-      mensalidade:         parseFloat((document.getElementById('f-value')||{}).value||'0')||0,
-      dia_vencimento:      parseInt((document.getElementById('f-dueday')||{}).value||'5')||5,
-      desconto_perc:       parseFloat((document.getElementById('f-discount')||{}).value||'0')||0,
-      desconto_dias:       parseInt((document.getElementById('f-discount-days')||{}).value||'0')||0,
-      juros_perc:          parseFloat((document.getElementById('f-interest')||{}).value||'1')||1,
-      multa_perc:          parseFloat((document.getElementById('f-fine')||{}).value||'2')||2,
+      mensalidade:         n('f-value','0'),
+      dia_vencimento:      parseInt(g('f-dueday')||'5')||5,
+      desconto_perc:       n('f-discount','0'),
+      desconto_dias:       parseInt(g('f-discount-days')||'0')||0,
+      juros_perc:          n('f-interest','1'),
+      multa_perc:          n('f-fine','2'),
       notif_desabilitada:  !!(document.getElementById('f-notif')||{}).checked,
-      observacoes:         ((document.getElementById('f-obs')||{}).value||'').trim()||null,
+      observacoes:         g('f-obs'),
       updated_at:          new Date().toISOString()
     };
-
     var promise;
-    if(panelMode==='edit'&&currentSchoolId){
-      promise = db.from('escolas').update(data).eq('id',currentSchoolId);
+    if (panelMode==='edit' && currentSchoolId) {
+      promise = dbPatch('escolas', 'id=eq.'+currentSchoolId, data);
     } else {
       data.status_pagamento = 'trial';
-      data.status = data.status || 'trial';
-      data.logo_emoji = '\ud83c\udfeb';
-      data.logo_cor   = '#dbeafe';
-      promise = db.from('escolas').insert(data).select().single();
+      data.status     = data.status || 'trial';
+      data.logo_emoji  = '\ud83c\udfeb';
+      data.logo_cor    = '#dbeafe';
+      promise = dbPost('escolas', data);
     }
-
-    promise.then(function(res){
-      if(res.error){ showToast('Erro ao salvar: '+res.error.message,'danger'); return; }
+    promise.then(function(res) {
+      if (res.error) { showToast('\u274c Erro ao salvar: '+(res.error.message||JSON.stringify(res.error)),'danger'); return; }
       closePanel();
       showToast(panelMode==='edit'?'\u2705 Escola atualizada!':'\ud83c\udfeb Nova escola cadastrada!','success');
       loadSchools();
@@ -1308,48 +1321,38 @@ function setLoading(on){
   };
 
   /* ── Toggle status ── */
-  confirmToggleStatus = function(){
-    if(!db||!pendingToggleId){ closeModal(); return; }
-    var s=SCHOOLS.find(function(x){return x.id===pendingToggleId;});
-    if(!s){ closeModal(); return; }
-    var isInact = s.status==='inactive'||s.status==='inativa';
-    var newStatus = isInact?'ativa':'inativa';
-    db.from('escolas').update({status:newStatus,updated_at:new Date().toISOString()}).eq('id',pendingToggleId)
+  confirmToggleStatus = function() {
+    if (!pendingToggleId) { closeModal(); return; }
+    var s = SCHOOLS.find(function(x){ return x.id===pendingToggleId; });
+    if (!s) { closeModal(); return; }
+    var isInact  = s.status==='inactive'||s.status==='inativa';
+    var newSt = isInact ? 'ativa' : 'inativa';
+    dbPatch('escolas','id=eq.'+pendingToggleId,{status:newSt,updated_at:new Date().toISOString()})
       .then(function(res){
-        if(res.error){ showToast('Erro: '+res.error.message,'danger'); closeModal(); return; }
-        closeModal();
-        closePanel();
-        showToast(newStatus==='ativa'?'\ud83d\udfe2 Escola reativada!':'\ud83d\udd34 Escola inativada.','success');
+        if (res.error){ showToast('\u274c Erro: '+(res.error.message||JSON.stringify(res.error)),'danger'); closeModal(); return; }
+        closeModal(); closePanel();
+        showToast(newSt==='ativa'?'\ud83d\udfe2 Escola reativada!':'\ud83d\udd34 Escola inativada.','success');
         loadSchools();
       });
   };
 
   /* ── Delete school ── */
-  confirmDeleteSchool = function(){
-    if(!db||!pendingDeleteId){ closeModal(); return; }
-    var sid=pendingDeleteId;
-    db.from('escolas').delete().eq('id',sid)
-      .then(function(res){
-        if(res.error){ showToast('\u274c Erro ao excluir: '+res.error.message,'danger'); closeModal(); return; }
-        closeModal();
-        closePanel();
-        showToast('\ud83d\uddd1\ufe0f Escola exclu\u00edda com sucesso.','success');
-        loadSchools();
-      });
+  confirmDeleteSchool = function() {
+    if (!pendingDeleteId) { closeModal(); return; }
+    var sid = pendingDeleteId;
+    dbDel('escolas','id=eq.'+sid).then(function(res){
+      if (res.error){ showToast('\u274c Erro ao excluir: '+(res.error.message||JSON.stringify(res.error)),'danger'); closeModal(); return; }
+      closeModal(); closePanel();
+      showToast('\ud83d\uddd1\ufe0f Escola exclu\u00edda com sucesso.','success');
+      loadSchools();
+    });
   };
 
-  function run(){
-    if(initSupabase()){
-      loadSchools();
-    } else {
-      showToast('Supabase indispon\u00edvel — exibindo dados vazios.','');
-      setLoading(false);
-    }
+  if (document.readyState==='loading') {
+    document.addEventListener('DOMContentLoaded', loadSchools);
+  } else {
+    loadSchools();
   }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',run);
-  } else { run(); }
 })();
 </script>
 <script>window.SUPERADMIN_PAGE = 'schools';</script>
