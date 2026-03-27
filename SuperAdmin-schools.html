@@ -469,10 +469,10 @@
       </div>
       <select id="filter-status" onchange="filterTable()">
         <option value="">Todos os status</option>
-        <option value="active">Ativas</option>
+        <option value="ativa">Ativas</option>
         <option value="trial">Trial</option>
-        <option value="pending">Pendente</option>
-        <option value="inactive">Inativas</option>
+        <option value="pendente">Pendente</option>
+        <option value="inativa">Inativas</option>
       </select>
       <select id="filter-type" onchange="filterTable()">
         <option value="">PF / PJ</option>
@@ -481,9 +481,10 @@
       </select>
       <select id="filter-plan" onchange="filterTable()">
         <option value="">Todos os planos</option>
-        <option value="Premium">Premium</option>
-        <option value="Pro">Pro</option>
-        <option value="Basic">Basic</option>
+        <option value="premium">Premium</option>
+        <option value="pro">Pro</option>
+        <option value="basic">Basic</option>
+        <option value="enterprise">Enterprise</option>
       </select>
       <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ Exportar</button>
     </div>
@@ -580,8 +581,8 @@ var selectedBillingType = 'PIX';
    HELPERS
 ────────────────────────────────────────────────── */
 function statusBadge(s){
-  var map    = {active:'badge-active',trial:'badge-trial',pending:'badge-pending',inactive:'badge-inactive'};
-  var labels = {active:'\u25cf Ativa',trial:'\u25ce Trial',pending:'\u25ce Pendente',inactive:'\u25cb Inativa'};
+  var map    = {active:'badge-active',ativa:'badge-active',trial:'badge-trial',pending:'badge-pending',pendente:'badge-pending',inactive:'badge-inactive',inativa:'badge-inactive'};
+  var labels = {active:'\u25cf Ativa',ativa:'\u25cf Ativa',trial:'\u25ce Trial',pending:'\u25ce Pendente',pendente:'\u25ce Pendente',inactive:'\u25cb Inativa',inativa:'\u25cb Inativa'};
   return '<span class="badge '+(map[s]||'badge-inactive')+'">'+(labels[s]||s)+'</span>';
 }
 function typeBadge(pt){
@@ -590,8 +591,10 @@ function typeBadge(pt){
     : '<span class="type-tag type-pf">PF</span>';
 }
 function planChip(p){
-  var map={Premium:'chip-blue',Pro:'chip-green',Basic:'chip-gray'};
-  return '<span class="chip '+(map[p]||'chip-gray')+'">'+p+'</span>';
+  var pl=(p||'').toLowerCase();
+  var map={premium:'chip-blue',pro:'chip-green',basic:'chip-gray',enterprise:'chip-orange'};
+  var label=p?p.charAt(0).toUpperCase()+p.slice(1).toLowerCase():'-';
+  return '<span class="chip '+(map[pl]||'chip-gray')+'">'+label+'</span>';
 }
 function billingIcon(bt){
   return {PIX:'\u26a1',BOLETO:'\ud83d\udcc4',CREDIT_CARD:'\ud83d\udcb3',UNDEFINED:'\ud83d\udd04'}[bt]||'-';
@@ -611,9 +614,9 @@ function fmtDate(d){
 ────────────────────────────────────────────────── */
 function updateKPIs(list){
   var total   = list.length;
-  var ativas  = list.filter(function(s){return s.status==='active';}).length;
+  var ativas  = list.filter(function(s){return s.status==='active'||s.status==='ativa';}).length;
   var trial   = list.filter(function(s){return s.status==='trial';}).length;
-  var inativa = list.filter(function(s){return s.status==='inactive';}).length;
+  var inativa = list.filter(function(s){return s.status==='inactive'||s.status==='inativa';}).length;
   var el;
   el=document.getElementById('kpiTotal');   if(el) el.textContent=total;
   el=document.getElementById('kpiAtivas');  if(el) el.textContent=ativas;
@@ -669,7 +672,7 @@ function renderPage(){
     var bt    = s.tipo_cobranca||'PIX';
     var venc  = s.proximo_vencimento?fmtDate(s.proximo_vencimento):'-';
     var sid   = s.id;
-    var isInact = s.status==='inactive';
+    var isInact = s.status==='inactive'||s.status==='inativa';
     return '<tr onclick="openView(\''+sid+'\')">'
       +'<td><div class="school-cell">'
       +'<div class="school-logo-sm" style="background:'+cor+'">'+logo+'</div>'
@@ -679,7 +682,7 @@ function renderPage(){
       +'<td class="text-muted text-sm">'+doc+'</td>'
       +'<td><div class="text-sm fw-600">'+email+'</div><div class="text-sm text-muted">'+tel+'</div></td>'
       +'<td>'+planChip(plan)+'</td>'
-      +'<td>'+statusBadge(s.status||'inactive')+'</td>'
+      +'<td>'+statusBadge(s.status||'inativa')+'</td>'
       +'<td><span class="fw-600">'+alun+'</span><span class="text-muted text-sm"> / '+cap+'</span></td>'
       +'<td>'+billingIcon(bt)+' <span class="text-sm">'+bt+'</span></td>'
       +'<td class="text-muted text-sm">'+venc+'</td>'
@@ -688,6 +691,7 @@ function renderPage(){
       +'<button class="action-btn" title="Visualizar" onclick="openView(\''+sid+'\')">&#128065;</button>'
       +'<button class="action-btn" title="Editar" onclick="openEdit(\''+sid+'\')">&#9999;&#65039;</button>'
       +'<button class="action-btn '+(isInact?'success':'danger')+'" title="'+(isInact?'Ativar':'Inativar')+'" onclick="askToggleStatus(\''+sid+'\')">'+(isInact?'&#128994;':'&#128308;')+'</button>'
+      +'<button class="action-btn danger" title="Excluir" onclick="deleteSchool(\''+sid+'\')">&#128465;</button>'
       +'</div></td></tr>';
   }).join('');
 
@@ -736,9 +740,9 @@ function filterTable(){
     var cid  = (s.cidade||'').toLowerCase();
     var rz   = (s.razao_social||'').toLowerCase();
     var matchQ  = !q || nome.includes(q)||doc.includes(q)||cid.includes(q)||rz.includes(q);
-    var matchSt = !st || s.status===st;
+    var matchSt = !st || (s.status||'')=== st;
     var matchPt = !pt || (s.person_type||'JURIDICA')===pt;
-    var matchPl = !pl || (s.plano||'')=== pl;
+    var matchPl = !pl || (s.plano||'').toLowerCase()=== pl;
     return matchQ&&matchSt&&matchPt&&matchPl;
   });
   renderTable(result);
@@ -779,9 +783,9 @@ function openView(id){
 
   var pct  = s.capacidade?Math.round((s.total_alunos||0)/s.capacidade*100):0;
   var hist = s.historico_pagamentos||[];
-  var payMap = {paid:'badge-active',overdue:'badge-pending',trial:'badge-trial',inactive:'badge-inactive'};
-  var payLbl = {paid:'Em dia',overdue:'Em atraso',trial:'Trial',inactive:'Inativa'};
-  var pst = s.status_pagamento||s.status||'inactive';
+  var payMap = {paid:'badge-active',ativa:'badge-active',overdue:'badge-pending',pendente:'badge-pending',trial:'badge-trial',inactive:'badge-inactive',inativa:'badge-inactive'};
+  var payLbl = {paid:'Em dia',ativa:'Em dia',overdue:'Em atraso',pendente:'Em atraso',trial:'Trial',inactive:'Inativa',inativa:'Inativa'};
+  var pst = s.status_pagamento||s.status||'inativa';
 
   document.getElementById('panelBody').innerHTML=''
     +'<div class="tabs" id="viewTabs">'
@@ -815,7 +819,7 @@ function openView(id){
     +'<div class="info-section"><div class="info-section-title">Endere\u00e7o</div><div class="info-grid">'
     +'<div class="info-item"><div class="info-label">CEP</div><div class="info-value">'+(s.cep||'-')+'</div></div>'
     +'<div class="info-item"><div class="info-label">Bairro</div><div class="info-value">'+(s.bairro||'-')+'</div></div>'
-    +'<div class="info-item full"><div class="info-label">Logradouro</div><div class="info-value">'+(s.logradouro||'-')+', '+(s.numero||s/n||'')+(s.complemento?' \u2014 '+s.complemento:'')+'</div></div>'
+    +'<div class="info-item full"><div class="info-label">Logradouro</div><div class="info-value">'+(s.logradouro||'-')+', '+(s.numero||'s/n')+(s.complemento?' \u2014 '+s.complemento:'')+'</div></div>'
     +'<div class="info-item"><div class="info-label">Cidade</div><div class="info-value">'+(s.cidade||'-')+'</div></div>'
     +'<div class="info-item"><div class="info-label">Estado</div><div class="info-value">'+(s.estado||'-')+'</div></div>'
     +'</div></div>'
@@ -858,9 +862,15 @@ function openView(id){
     +'</div>'/* end tab-asaas */
 
     +'<div class="tab-content" id="tab-alunos">'
+    +'<div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">'
+    +'<div style="font-size:32px;">&#128081;</div>'
+    +'<div><div style="font-size:14px;font-weight:700;">'+( s.total_alunos||0)+' aluno'+(( s.total_alunos||0)!==1?'s':'')+'</div>'
+    +'<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Capacidade: '+(s.capacidade||100)+' vagas \u00b7 '
+    +Math.round(((s.total_alunos||0)/(s.capacidade||100))*100)+'% ocupado</div></div></div>'
     +(!(s.total_alunos)
-      ?'<div class="empty-state"><div class="es-icon">\ud83d\udc68\u200d\ud83c\udf93</div><div class="es-text">Nenhum aluno cadastrado ainda.</div></div>'
-      :'<div class="empty-state"><div class="es-icon">\ud83d\udc68\u200d\ud83c\udf93</div><div class="es-text">Acesse a tela de Usu\u00e1rios para ver os alunos desta escola.</div></div>')
+      ?'<div class="empty-state"><div class="es-icon">&#128101;</div><div class="es-text">Nenhum aluno cadastrado nesta escola ainda.</div></div>'
+      :'<div class="empty-state"><div class="es-icon">&#128101;</div><div class="es-text">Gerencie os alunos na tela de <strong>Usu\u00e1rios</strong>.</div>'
+      +'<div style="margin-top:12px;"><a href="SuperAdmin-usuarios.html" class="btn btn-primary btn-sm">&#128101; Ver Usu\u00e1rios</a></div></div>')
     +'</div>'/* end tab-alunos */
 
     +'<div class="tab-content" id="tab-historico">'
@@ -878,10 +888,12 @@ function openView(id){
         }).join(''))
     +'</div>';/* end tab-historico */
 
+  var isInactView = s.status==='inactive'||s.status==='inativa';
   document.getElementById('panelFooter').innerHTML=''
     +'<button class="btn btn-secondary" onclick="closePanel()">Fechar</button>'
     +'<button class="btn btn-secondary" onclick="openEdit(\''+id+'\')">&#9999;&#65039; Editar</button>'
-    +'<button class="btn '+(s.status==='inactive'?'btn-success':'btn-danger')+'" onclick="askToggleStatus(\''+id+'\')">'+(s.status==='inactive'?'&#128994; Ativar':'&#128308; Inativar')+'</button>';
+    +'<button class="btn '+(isInactView?'btn-success':'btn-danger')+'" onclick="askToggleStatus(\''+id+'\')">'+(isInactView?'&#128994; Ativar':'&#128308; Inativar')+'</button>'
+    +'<button class="btn btn-danger" onclick="deleteSchool(\''+id+'\')">&#128465; Excluir</button>';
 
   openPanel();
 }
@@ -942,13 +954,13 @@ function renderForm(s){
     +'<div class="form-group"><label class="form-label">Capacidade M\u00e1x.</label>'
     +'<input class="form-input" id="f-capacity" type="number" placeholder="200" value="'+(isEdit?s.capacidade||100:100)+'" /></div>'
     +'<div class="form-group"><label class="form-label">Plano <span class="required">*</span></label>'
-    +'<select class="form-select" id="f-plan">'+['Premium','Pro','Basic'].map(function(p){return '<option value="'+p+'" '+(isEdit&&s.plano===p?'selected':'')+'>'+p+'</option>';}).join('')+'</select></div>'
+    +'<select class="form-select" id="f-plan">'+['premium','pro','basic','enterprise'].map(function(p){var lbl=p.charAt(0).toUpperCase()+p.slice(1);return '<option value="'+p+'" '+(isEdit&&(s.plano||'').toLowerCase()===p?'selected':'')+'>'+lbl+'</option>';}).join('')+'</select></div>'
     +'<div class="form-group"><label class="form-label">Status</label>'
     +'<select class="form-select" id="f-status">'
-    +'<option value="active" '+(isEdit&&s.status==='active'?'selected':'')+'>Ativa</option>'
+    +'<option value="ativa" '+(isEdit&&(s.status==='ativa'||s.status==='active')?'selected':'')+'>Ativa</option>'
     +'<option value="trial" '+(isEdit&&s.status==='trial'?'selected':'')+'>Trial</option>'
-    +'<option value="pending" '+(isEdit&&s.status==='pending'?'selected':'')+'>Pendente</option>'
-    +'<option value="inactive" '+(isEdit&&s.status==='inactive'?'selected':'')+'>Inativa</option>'
+    +'<option value="pendente" '+(isEdit&&(s.status==='pendente'||s.status==='pending')?'selected':'')+'>Pendente</option>'
+    +'<option value="inativa" '+(isEdit&&(s.status==='inativa'||s.status==='inactive')?'selected':'')+'>Inativa</option>'
     +'</select></div>'
     +'</div></div>'
 
@@ -1086,8 +1098,9 @@ function askToggleStatus(id){
   pendingToggleId=id;
   var s=SCHOOLS.find(function(x){return x.id===id;});
   if(!s) return;
-  var isActive=s.status!=='inactive';
+  var isActive=s.status!=='inactive'&&s.status!=='inativa';
   document.getElementById('modal-icon-el').className=isActive?'modal-icon':'modal-icon activate';
+  document.getElementById('modal-icon-el').style.background=isActive?'var(--danger-light)':'var(--success-light)';
   document.getElementById('modal-icon-el').textContent=isActive?'\u26a0\ufe0f':'\ud83d\udfe2';
   document.getElementById('modal-title-el').textContent=isActive?'Inativar "'+s.nome_fantasia+'"?':'Reativar "'+s.nome_fantasia+'"?';
   document.getElementById('modal-text-el').textContent=isActive
@@ -1095,14 +1108,36 @@ function askToggleStatus(id){
     :'A escola voltar\u00e1 a ter acesso \u00e0 plataforma.';
   document.getElementById('modal-confirm-btn').className=isActive?'btn btn-danger':'btn btn-success';
   document.getElementById('modal-confirm-btn').textContent=isActive?'Inativar':'Reativar';
+  document.getElementById('modal-confirm-btn').onclick=confirmToggleStatus;
   document.getElementById('deactivateModal').classList.add('show');
 }
 
 function confirmToggleStatus(){ showToast('Supabase n\u00e3o conectado','danger'); }
 
+var pendingDeleteId=null;
+
+function deleteSchool(id){
+  var s=SCHOOLS.find(function(x){return x.id===id;});
+  if(!s) return;
+  pendingDeleteId=id;
+  document.getElementById('modal-icon-el').className='modal-icon';
+  document.getElementById('modal-icon-el').style.background='var(--danger-light)';
+  document.getElementById('modal-icon-el').textContent='\ud83d\uddd1\ufe0f';
+  document.getElementById('modal-title-el').textContent='Excluir "'+s.nome_fantasia+'"?';
+  document.getElementById('modal-text-el').textContent='Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel. Todos os dados da escola ser\u00e3o removidos permanentemente.';
+  document.getElementById('modal-confirm-btn').className='btn btn-danger';
+  document.getElementById('modal-confirm-btn').textContent='Excluir';
+  document.getElementById('modal-confirm-btn').onclick=confirmDeleteSchool;
+  document.getElementById('deactivateModal').classList.add('show');
+}
+
+function confirmDeleteSchool(){ showToast('Supabase n\u00e3o conectado','danger'); }
+
 function closeModal(){
   document.getElementById('deactivateModal').classList.remove('show');
   pendingToggleId=null;
+  pendingDeleteId=null;
+  document.getElementById('modal-confirm-btn').onclick=confirmToggleStatus;
 }
 
 /* ──────────────────────────────────────────────────
@@ -1258,6 +1293,7 @@ function setLoading(on){
       promise = db.from('escolas').update(data).eq('id',currentSchoolId);
     } else {
       data.status_pagamento = 'trial';
+      data.status = data.status || 'trial';
       data.logo_emoji = '\ud83c\udfeb';
       data.logo_cor   = '#dbeafe';
       promise = db.from('escolas').insert(data).select().single();
@@ -1276,13 +1312,28 @@ function setLoading(on){
     if(!db||!pendingToggleId){ closeModal(); return; }
     var s=SCHOOLS.find(function(x){return x.id===pendingToggleId;});
     if(!s){ closeModal(); return; }
-    var newStatus = s.status==='inactive'?'active':'inactive';
+    var isInact = s.status==='inactive'||s.status==='inativa';
+    var newStatus = isInact?'ativa':'inativa';
     db.from('escolas').update({status:newStatus,updated_at:new Date().toISOString()}).eq('id',pendingToggleId)
       .then(function(res){
         if(res.error){ showToast('Erro: '+res.error.message,'danger'); closeModal(); return; }
         closeModal();
         closePanel();
-        showToast(newStatus==='active'?'\ud83d\udfe2 Escola reativada!':'\ud83d\udd34 Escola inativada.','success');
+        showToast(newStatus==='ativa'?'\ud83d\udfe2 Escola reativada!':'\ud83d\udd34 Escola inativada.','success');
+        loadSchools();
+      });
+  };
+
+  /* ── Delete school ── */
+  confirmDeleteSchool = function(){
+    if(!db||!pendingDeleteId){ closeModal(); return; }
+    var sid=pendingDeleteId;
+    db.from('escolas').delete().eq('id',sid)
+      .then(function(res){
+        if(res.error){ showToast('\u274c Erro ao excluir: '+res.error.message,'danger'); closeModal(); return; }
+        closeModal();
+        closePanel();
+        showToast('\ud83d\uddd1\ufe0f Escola exclu\u00edda com sucesso.','success');
         loadSchools();
       });
   };
