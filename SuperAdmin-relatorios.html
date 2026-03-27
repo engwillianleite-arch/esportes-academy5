@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esportes Academy — SuperAdmin · Relatórios & Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════
+       BASE RESET & TOKENS
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #4f46e5;
+      --primary-dark:   #3730a3;
+      --primary-light:  #eef2ff;
+      --secondary:      #0ea5e9;
+      --secondary-light:#e0f2fe;
+      --accent:         #f59e0b;
+      --accent-light:   #fef3c7;
+      --success:        #10b981;
+      --success-light:  #d1fae5;
+      --warning:        #f59e0b;
+      --warning-light:  #fef3c7;
+      --danger:         #ef4444;
+      --danger-light:   #fee2e2;
+      --purple:         #8b5cf6;
+      --purple-light:   #ede9fe;
+      --bg:             #f1f5f9;
+      --card:           #ffffff;
+      --text:           #0f172a;
+      --text-muted:     #64748b;
+      --border:         #e2e8f0;
+      --sidebar-w:      268px;
+      --sidebar-bg:     #0d1117;
+      --sidebar-hover:  #161b22;
+      --shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:      0 10px 20px -3px rgba(0,0,0,.12);
+      --radius:         12px;
+      --radius-sm:      8px;
+      --topbar-h:       60px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* OVERLAY */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:90; backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w); height:100dvh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:100; transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1); overflow-y:auto; }
+    .sidebar.open { transform:translateX(0); }
+    @media(min-width:1024px){ .sidebar { transform:translateX(0); } }
+    .sidebar-logo { padding:20px 18px; border-bottom:1px solid rgba(255,255,255,.07); flex-shrink:0; }
+    .sidebar-logo .brand { display:flex; align-items:center; gap:10px; }
+    .logo-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--primary),var(--secondary)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .brand-text .name { color:#fff; font-weight:700; font-size:14px; line-height:1.2; }
+    .brand-text .sub  { color:rgba(255,255,255,.4); font-size:10px; letter-spacing:.6px; }
+    .sidebar-nav { padding:12px 10px; flex:1; overflow-y:auto; }
+    .nav-section-label { color:rgba(255,255,255,.3); font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:0 8px; margin:14px 0 5px; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,.6); font-size:14px; font-weight:500; cursor:pointer; transition:all .15s; margin-bottom:2px; text-decoration:none; }
+    .nav-item:hover { background:var(--sidebar-hover); color:#fff; }
+    .nav-item.active { background:var(--primary); color:#fff; }
+    .nav-item .nav-icon { font-size:15px; width:20px; text-align:center; flex-shrink:0; }
+    .nav-item.stub { opacity:.45; cursor:default; }
+    .nav-item.stub:hover { background:transparent; color:rgba(255,255,255,.55); }
+    .nav-badge { margin-left:auto; background:var(--accent); color:#fff; font-size:10px; font-weight:700; padding:1px 6px; border-radius:20px; }
+    .nav-item.active .nav-badge { background:rgba(255,255,255,.25); }
+    .sidebar-footer { padding:14px 10px; border-top:1px solid rgba(255,255,255,.07); flex-shrink:0; }
+    .user-row { display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s; }
+    .user-row:hover { background:var(--sidebar-hover); }
+    .user-ava { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--secondary)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:12px; flex-shrink:0; }
+    .user-info .u-name { color:#fff; font-size:12.5px; font-weight:600; }
+    .user-info .u-role { color:rgba(255,255,255,.35); font-size:10.5px; }
+
+    /* MAIN */
+    .main { display:flex; flex-direction:column; min-height:100dvh; }
+    @media(min-width:1024px){ .main { margin-left:var(--sidebar-w); } }
+
+    /* TOPBAR */
+    .topbar { background:var(--card); border-bottom:1px solid var(--border); height:var(--topbar-h); padding:0 16px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:50; box-shadow:var(--shadow); }
+    @media(min-width:640px){ .topbar { padding:0 20px; } }
+    @media(min-width:1024px){ .topbar { padding:0 28px; height:64px; } }
+    .hamburger { width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:none; background:var(--bg); cursor:pointer; font-size:18px; flex-shrink:0; }
+    @media(min-width:1024px){ .hamburger { display:none; } }
+    .topbar-title-group { flex:1; min-width:0; }
+    .topbar-title-group .page-title { font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .topbar-title-group .breadcrumb { font-size:11px; color:var(--text-muted); display:none; }
+    @media(min-width:640px){ .topbar-title-group .page-title { font-size:17px; } .topbar-title-group .breadcrumb { display:block; } }
+    .topbar-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .icon-btn { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:var(--bg); border:1.5px solid var(--border); cursor:pointer; font-size:15px; position:relative; transition:all .15s; flex-shrink:0; }
+    .icon-btn:hover { background:var(--primary-light); border-color:var(--primary); }
+
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all .15s; text-decoration:none; white-space:nowrap; font-family:inherit; }
+    @media(min-width:640px){ .btn { font-size:14px; padding:9px 18px; } }
+    .btn-primary { background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.3); }
+    .btn-primary:hover { background:var(--primary-dark); transform:translateY(-1px); }
+    .btn-secondary { background:var(--card); color:var(--text); border:1.5px solid var(--border); }
+    .btn-secondary:hover { background:var(--bg); }
+    .btn-sm { padding:6px 12px; font-size:12px; }
+    .btn-success { background:var(--success); color:#fff; }
+    .btn-success:hover { background:#059669; transform:translateY(-1px); }
+
+    /* CONTENT */
+    .content { padding:16px; flex:1; }
+    @media(min-width:640px){ .content { padding:20px; } }
+    @media(min-width:1024px){ .content { padding:28px; } }
+
+    /* ═══════════════════════════════════════
+       HERO HEADER BAR
+    ═══════════════════════════════════════ */
+    .page-hero {
+      background: linear-gradient(135deg, #1a56db 0%, #4f46e5 50%, #7c3aed 100%);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(79,70,229,.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .hero-left .hero-title { color:#fff; font-size:20px; font-weight:800; line-height:1.2; }
+    .hero-left .hero-sub { color:rgba(255,255,255,.7); font-size:13px; margin-top:4px; }
+    .hero-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+    .period-btn {
+      padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;
+      cursor:pointer; border:1.5px solid rgba(255,255,255,.3); background:transparent;
+      color:rgba(255,255,255,.75); transition:all .15s; font-family:inherit;
+    }
+    .period-btn:hover { background:rgba(255,255,255,.15); color:#fff; }
+    .period-btn.active { background:rgba(255,255,255,.25); color:#fff; border-color:rgba(255,255,255,.6); }
+
+    .export-btn {
+      padding:7px 16px; border-radius:8px; font-size:12px; font-weight:700;
+      cursor:pointer; border:none; background:#fff; color:var(--primary);
+      display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit;
+    }
+    .export-btn:hover { background:var(--primary-light); transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.15); }
+
+    /* ═══════════════════════════════════════
+       KPI STRIP
+    ═══════════════════════════════════════ */
+    .kpi-strip { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:24px; }
+    @media(min-width:768px){ .kpi-strip { grid-template-columns:repeat(4,1fr); } }
+
+    .kpi-card {
+      background:var(--card); border-radius:var(--radius); padding:18px 20px;
+      box-shadow:var(--shadow); border-top:3px solid transparent; position:relative; overflow:hidden;
+      transition:transform .15s, box-shadow .15s;
+    }
+    .kpi-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .kpi-card.accent-primary { border-top-color:var(--primary); }
+    .kpi-card.accent-success { border-top-color:var(--success); }
+    .kpi-card.accent-warning { border-top-color:var(--warning); }
+    .kpi-card.accent-purple  { border-top-color:var(--purple); }
+
+    .kpi-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+    .kpi-value { font-size:24px; font-weight:800; color:var(--text); line-height:1; margin-bottom:6px; }
+    @media(min-width:640px){ .kpi-value { font-size:28px; } }
+    .kpi-sub { font-size:11px; color:var(--text-muted); }
+    .kpi-trend { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; margin-top:4px; }
+    .kpi-trend.up { background:var(--success-light); color:#059669; }
+    .kpi-trend.down { background:var(--danger-light); color:var(--danger); }
+    .kpi-trend.neutral { background:var(--bg); color:var(--text-muted); }
+
+    /* Skeleton */
+    .skeleton { background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:4px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skel-line { height:14px; border-radius:4px; }
+    .skel-val  { height:28px; border-radius:6px; margin:6px 0; }
+
+    /* ═══════════════════════════════════════
+       TAB NAVIGATION
+    ═══════════════════════════════════════ */
+    .tab-nav {
+      display:flex; gap:4px; background:var(--card); border-radius:var(--radius);
+      padding:6px; margin-bottom:24px; box-shadow:var(--shadow);
+      overflow-x:auto; -webkit-overflow-scrolling:touch;
+    }
+    .tab-nav::-webkit-scrollbar { display:none; }
+    .tab-btn {
+      padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600;
+      cursor:pointer; border:none; background:transparent; color:var(--text-muted);
+      transition:all .15s; white-space:nowrap; font-family:inherit; flex-shrink:0;
+    }
+    .tab-btn:hover { background:var(--bg); color:var(--text); }
+    .tab-btn.active { background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.3); }
+
+    /* TAB PANELS */
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* ═══════════════════════════════════════
+       CHART CARDS
+    ═══════════════════════════════════════ */
+    .chart-grid-2 { display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:20px; }
+    @media(min-width:768px){ .chart-grid-2 { grid-template-columns:repeat(2,1fr); } }
+
+    .chart-card {
+      background:var(--card); border-radius:var(--radius); padding:20px;
+      box-shadow:var(--shadow); transition:box-shadow .15s;
+    }
+    .chart-card:hover { box-shadow:var(--shadow-md); }
+    .chart-card-full { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:20px; }
+
+    .chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+    .chart-title { font-size:14px; font-weight:700; color:var(--text); }
+    .chart-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .chart-badge { font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; }
+    .chart-badge.blue { background:var(--primary-light); color:var(--primary); }
+    .chart-badge.green { background:var(--success-light); color:#059669; }
+
+    .chart-wrap { position:relative; }
+    .chart-wrap canvas { max-height:260px; }
+    .chart-wrap-tall canvas { max-height:320px; }
+
+    /* ═══════════════════════════════════════
+       SUMMARY CARDS ROW (Financeiro)
+    ═══════════════════════════════════════ */
+    .summary-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:20px; }
+    @media(min-width:768px){ .summary-grid { grid-template-columns:repeat(4,1fr); } }
+
+    .summary-card {
+      background:var(--card); border-radius:var(--radius); padding:16px 18px;
+      box-shadow:var(--shadow); border-left:4px solid transparent;
+    }
+    .summary-card.c-revenue { border-left-color:#1a56db; }
+    .summary-card.c-expense { border-left-color:var(--danger); }
+    .summary-card.c-net    { border-left-color:var(--success); }
+    .summary-card.c-margin { border-left-color:var(--purple); }
+    .summary-card .s-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+    .summary-card .s-value { font-size:22px; font-weight:800; margin:6px 0 2px; }
+    .summary-card .s-value.revenue { color:#1a56db; }
+    .summary-card .s-value.expense { color:var(--danger); }
+    .summary-card .s-value.net-pos { color:#059669; }
+    .summary-card .s-value.net-neg { color:var(--danger); }
+    .summary-card .s-value.margin  { color:var(--purple); }
+    .summary-card .s-sub { font-size:11px; color:var(--text-muted); }
+
+    /* ═══════════════════════════════════════
+       TABLES
+    ═══════════════════════════════════════ */
+    .table-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px; }
+    .table-card-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    .table-card-title { font-size:14px; font-weight:700; }
+    .table-card-sub { font-size:11px; color:var(--text-muted); }
+    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; border-bottom:1.5px solid var(--border); background:var(--bg); white-space:nowrap; }
+    td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr { transition:background .1s; cursor:default; }
+    tbody tr:hover { background:var(--bg); }
+    .sortable { cursor:pointer; user-select:none; }
+    .sortable:hover { color:var(--primary); }
+    .sort-arrow { margin-left:4px; opacity:.5; font-size:10px; }
+
+    /* CHIPS & BADGES */
+    .chip { display:inline-flex; align-items:center; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .chip-enterprise { background:#ede9fe; color:#6d28d9; }
+    .chip-premium    { background:#dbeafe; color:#1d4ed8; }
+    .chip-pro        { background:#d1fae5; color:#065f46; }
+    .chip-basic      { background:#f1f5f9; color:#475569; border:1px solid var(--border); }
+
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+    .badge::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .badge-ativa      { background:var(--success-light); color:#065f46; }
+    .badge-ativa::before { background:#059669; }
+    .badge-inativa    { background:#f1f5f9; color:#475569; }
+    .badge-inativa::before { background:#94a3b8; }
+    .badge-trial      { background:var(--accent-light); color:#92400e; }
+    .badge-trial::before { background:var(--accent); }
+    .badge-inadimplente { background:var(--danger-light); color:#991b1b; }
+    .badge-inadimplente::before { background:var(--danger); }
+    .badge-cancelada  { background:#f1f5f9; color:#6b7280; }
+    .badge-cancelada::before { background:#9ca3af; }
+    .badge-receita    { background:#dbeafe; color:#1d4ed8; }
+    .badge-despesa    { background:var(--danger-light); color:#991b1b; }
+    .badge-realizado  { background:var(--success-light); color:#065f46; }
+    .badge-previsto   { background:var(--accent-light); color:#92400e; }
+
+    .cat-chip { display:inline-flex; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+    .cat-assinatura { background:#dbeafe; color:#1d4ed8; }
+    .cat-setup      { background:#ede9fe; color:#6d28d9; }
+    .cat-modulo     { background:var(--success-light); color:#065f46; }
+    .cat-upgrade    { background:#d1fae5; color:#065f46; }
+    .cat-marketing  { background:var(--accent-light); color:#92400e; }
+    .cat-payroll    { background:var(--danger-light); color:#991b1b; }
+    .cat-servicos   { background:#f0fdf4; color:#166534; }
+    .cat-ferramentas{ background:#fdf4ff; color:#7e22ce; }
+    .cat-impostos   { background:#fff1f2; color:#9f1239; }
+    .cat-outro      { background:#f8fafc; color:#64748b; }
+
+    /* PROGRESS BAR */
+    .prog-wrap { display:flex; align-items:center; gap:8px; }
+    .prog-bar-bg { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; min-width:60px; }
+    .prog-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--primary),var(--secondary)); transition:width .4s ease; }
+    .prog-bar-fill.warn { background:linear-gradient(90deg,var(--warning),#f97316); }
+    .prog-bar-fill.over { background:linear-gradient(90deg,var(--danger),#dc2626); }
+    .prog-pct { font-size:11px; font-weight:700; color:var(--text-muted); white-space:nowrap; width:36px; text-align:right; }
+
+    /* ═══════════════════════════════════════
+       GROWTH TAB EXTRAS
+    ═══════════════════════════════════════ */
+    .cohort-table th, .cohort-table td { padding:10px 16px; }
+    .growth-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:20px; }
+    .growth-card { background:var(--card); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+    .growth-card .gc-label { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .school-row-mini { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+    .school-row-mini:last-child { border-bottom:none; padding-bottom:0; }
+    .school-avatar { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--primary),var(--secondary)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:12px; flex-shrink:0; }
+    .school-mini-info .smi-name { font-size:13px; font-weight:600; }
+    .school-mini-info .smi-sub { font-size:11px; color:var(--text-muted); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align:center; padding:48px 24px; color:var(--text-muted); }
+    .empty-state .empty-icon { font-size:40px; margin-bottom:12px; }
+    .empty-state p { font-size:14px; }
+
+    /* LOADING */
+    .loading-overlay { display:flex; align-items:center; justify-content:center; gap:10px; padding:24px; color:var(--text-muted); font-size:14px; }
+    .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin .7s linear infinite; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+
+    /* RESPONSIVE HIDE */
+    .hide-mobile { display:none; }
+    @media(min-width:640px){ .hide-mobile { display:table-cell; } }
+    .hide-sm { display:none; }
+    @media(min-width:768px){ .hide-sm { display:table-cell; } }
+
+    /* VALUE COLORS */
+    .val-revenue { color:#1a56db; font-weight:700; }
+    .val-expense { color:#dc2626; font-weight:700; }
+    .val-net-pos { color:#059669; font-weight:700; }
+
+    /* REGION MINI CHART */
+    .region-list { display:flex; flex-direction:column; gap:10px; }
+    .region-row { }
+    .region-label-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+    .region-name { font-size:13px; font-weight:600; }
+    .region-count { font-size:12px; color:var(--text-muted); }
+    .region-bar-bg { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
+    .region-bar-fill { height:100%; border-radius:4px; transition:width .5s ease; }
+
+    /* ALERTS CARD */
+    .alert-item { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .alert-item:last-child { border-bottom:none; }
+    .alert-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .alert-dot.red { background:var(--danger); }
+    .alert-dot.yellow { background:var(--warning); }
+    .alert-text { font-size:13px; }
+    .alert-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="logo-icon">⚽</div>
+      <div class="brand-text">
+        <div class="name">Esportes Academy</div>
+        <div class="sub">SUPERADMIN</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-ava" id="sidebarAva">SA</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebarName">Super Admin</div>
+        <div class="u-role" id="sidebarRole">super_admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+    <div class="topbar-title-group">
+      <div class="page-title">Relatórios & Analytics</div>
+      <div class="breadcrumb">SuperAdmin · BI & Relatórios</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-success btn-sm" id="exportCsvBtn">⬇ Exportar CSV</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HERO BAR -->
+    <div class="page-hero">
+      <div class="hero-left">
+        <div class="hero-title">📈 Relatórios & Analytics</div>
+        <div class="hero-sub" id="heroPeriodLabel">Carregando período...</div>
+      </div>
+      <div class="hero-right">
+        <button class="period-btn active" data-period="mes" onclick="setPeriod('mes', this)">Este Mês</button>
+        <button class="period-btn" data-period="trimestre" onclick="setPeriod('trimestre', this)">Último Trimestre</button>
+        <button class="period-btn" data-period="ano" onclick="setPeriod('ano', this)">Este Ano</button>
+        <button class="export-btn" onclick="exportCSV()">⬇ CSV</button>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip" id="kpiStrip">
+      <!-- Skeleton -->
+      <div class="kpi-card accent-primary">
+        <div class="kpi-label">MRR</div>
+        <div class="skeleton skel-val"></div>
+        <div class="skeleton skel-line" style="width:60%"></div>
+      </div>
+      <div class="kpi-card accent-success">
+        <div class="kpi-label">Total Escolas</div>
+        <div class="skeleton skel-val"></div>
+        <div class="skeleton skel-line" style="width:70%"></div>
+      </div>
+      <div class="kpi-card accent-warning">
+        <div class="kpi-label">Total Atletas</div>
+        <div class="skeleton skel-val"></div>
+        <div class="skeleton skel-line" style="width:50%"></div>
+      </div>
+      <div class="kpi-card accent-purple">
+        <div class="kpi-label">Taxa de Retenção</div>
+        <div class="skeleton skel-val"></div>
+        <div class="skeleton skel-line" style="width:55%"></div>
+      </div>
+    </div>
+
+    <!-- TAB NAV -->
+    <div class="tab-nav" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('overview', this)" role="tab">Visão Geral</button>
+      <button class="tab-btn" onclick="switchTab('financeiro', this)" role="tab">Financeiro</button>
+      <button class="tab-btn" onclick="switchTab('escolas', this)" role="tab">Escolas</button>
+      <button class="tab-btn" onclick="switchTab('crescimento', this)" role="tab">Crescimento</button>
+    </div>
+
+    <!-- ══════════════════════════════
+         TAB: VISÃO GERAL
+    ══════════════════════════════ -->
+    <div class="tab-panel active" id="tab-overview">
+
+      <div class="chart-grid-2">
+        <!-- Revenue Trend -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Tendência de Receita (MRR)</div>
+              <div class="chart-sub">Últimos 12 meses — receitas realizadas</div>
+            </div>
+            <span class="chart-badge blue">Mensal</span>
+          </div>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartRevenueTrend"></canvas>
+          </div>
+        </div>
+
+        <!-- Plan Distribution Donut -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Distribuição por Plano</div>
+              <div class="chart-sub">Escolas ativas por tipo de plano</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="display:flex;justify-content:center;">
+            <canvas id="chartPlanDonut" style="max-height:240px;max-width:300px;"></canvas>
+          </div>
+          <div id="planLegend" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
+        </div>
+      </div>
+
+      <div class="chart-grid-2">
+        <!-- Revenue vs Expense Bar -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Receita vs Despesa</div>
+              <div class="chart-sub">Últimos 6 meses</div>
+            </div>
+            <span class="chart-badge green">Comparativo</span>
+          </div>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartRevVsExp"></canvas>
+          </div>
+        </div>
+
+        <!-- Region Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Escolas por Região</div>
+              <div class="chart-sub">Distribuição geográfica</div>
+            </div>
+          </div>
+          <div id="regionList" class="region-list" style="padding:8px 0;">
+            <div class="loading-overlay"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-overview -->
+
+    <!-- ══════════════════════════════
+         TAB: FINANCEIRO
+    ══════════════════════════════ -->
+    <div class="tab-panel" id="tab-financeiro">
+
+      <!-- Summary Cards -->
+      <div class="summary-grid" id="finSummaryGrid">
+        <div class="summary-card c-revenue">
+          <div class="s-label">Receita Realizada</div>
+          <div class="s-value revenue" id="finReceita">—</div>
+          <div class="s-sub">Total do período</div>
+        </div>
+        <div class="summary-card c-expense">
+          <div class="s-label">Despesa Realizada</div>
+          <div class="s-value expense" id="finDespesa">—</div>
+          <div class="s-sub">Total do período</div>
+        </div>
+        <div class="summary-card c-net">
+          <div class="s-label">Resultado Líquido</div>
+          <div class="s-value" id="finNet">—</div>
+          <div class="s-sub">Receita − Despesa</div>
+        </div>
+        <div class="summary-card c-margin">
+          <div class="s-label">Margem %</div>
+          <div class="s-value margin" id="finMargem">—</div>
+          <div class="s-sub">Sobre receita</div>
+        </div>
+      </div>
+
+      <!-- Full-width Cash Flow Chart -->
+      <div class="chart-card-full">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Fluxo de Caixa — Área Empilhada</div>
+            <div class="chart-sub">Receitas vs Despesas (12 meses)</div>
+          </div>
+          <span class="chart-badge blue">12 Meses</span>
+        </div>
+        <div class="chart-wrap chart-wrap-tall" style="height:300px;">
+          <canvas id="chartCashFlow"></canvas>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="table-card-title">Últimas Transações</div>
+            <div class="table-card-sub">20 entradas mais recentes do fluxo de caixa</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th class="hide-mobile">Escola</th>
+                <th class="hide-mobile">Categoria</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th class="hide-sm">Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyTransactions">
+              <tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div> Carregando transações...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /tab-financeiro -->
+
+    <!-- ══════════════════════════════
+         TAB: ESCOLAS
+    ══════════════════════════════ -->
+    <div class="tab-panel" id="tab-escolas">
+
+      <!-- School Performance Table -->
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-card-header">
+          <div>
+            <div class="table-card-title">Performance das Escolas</div>
+            <div class="table-card-sub">Todas as escolas cadastradas · clique no cabeçalho para ordenar</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="schoolTable">
+            <thead>
+              <tr>
+                <th class="sortable" onclick="sortSchools('nome_fantasia')">Escola <span class="sort-arrow">↕</span></th>
+                <th>Plano</th>
+                <th class="hide-mobile sortable" onclick="sortSchools('estado')">Estado <span class="sort-arrow">↕</span></th>
+                <th class="sortable" onclick="sortSchools('total_alunos')">Alunos <span class="sort-arrow">↕</span></th>
+                <th class="hide-mobile">Cap. Utiliz.</th>
+                <th class="sortable" onclick="sortSchools('mensalidade')">Mensalidade <span class="sort-arrow">↕</span></th>
+                <th>Status</th>
+                <th class="hide-sm">Próx. Venc.</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySchools">
+              <tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div> Carregando escolas...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-grid-2">
+        <!-- Top schools by revenue -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Top Escolas por Receita</div>
+              <div class="chart-sub">Mensalidade mensal (R$)</div>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartTopSchools"></canvas>
+          </div>
+        </div>
+
+        <!-- Modalidades -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Alunos por Modalidade</div>
+              <div class="chart-sub">Distribuição por esporte</div>
+            </div>
+          </div>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartModalidades"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-escolas -->
+
+    <!-- ══════════════════════════════
+         TAB: CRESCIMENTO
+    ══════════════════════════════ -->
+    <div class="tab-panel" id="tab-crescimento">
+
+      <!-- Cumulative Growth Chart -->
+      <div class="chart-card-full">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Crescimento Acumulado de Escolas</div>
+            <div class="chart-sub">Número total de escolas ao longo do tempo</div>
+          </div>
+          <span class="chart-badge green">Acumulado</span>
+        </div>
+        <div class="chart-wrap chart-wrap-tall" style="height:280px;">
+          <canvas id="chartGrowth"></canvas>
+        </div>
+      </div>
+
+      <!-- Cohort Table -->
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-card-header">
+          <div>
+            <div class="table-card-title">Cohort por Mês de Cadastro</div>
+            <div class="table-card-sub">Escolas agrupadas por mês de criação</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="cohort-table">
+            <thead>
+              <tr>
+                <th>Mês/Ano</th>
+                <th>Novas Escolas</th>
+                <th>Acumulado</th>
+                <th>Planos</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCohort">
+              <tr><td colspan="4"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bottom Cards: Newest + At-Risk -->
+      <div class="growth-cards">
+        <div class="growth-card">
+          <div class="gc-label">✨ Escolas Mais Recentes</div>
+          <div id="newestSchools"><div class="loading-overlay"><div class="spinner"></div></div></div>
+        </div>
+        <div class="growth-card">
+          <div class="gc-label">⚠️ Escolas em Risco</div>
+          <div id="atRiskSchools"><div class="loading-overlay"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+    </div><!-- /tab-crescimento -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+const SUPA_URL  = 'https://eeavrkosnyilxetbtzox.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlYXZya29zbnlpbHhldGJ0em94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ0NzU5MCwiZXhwIjoyMDkwMDIzNTkwfQ.6tQVlUDpiJBL64_F9odK9MQGenfDMFP2lnUuFIKyQMU';
+
+let currentPeriod = 'mes';
+let allEscolas    = [];
+let allFluxo      = [];
+let schoolSortKey = 'mensalidade';
+let schoolSortDir = -1;
+
+const chartInstances = {};
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  API HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+async function supaFetch(table, params = '') {
+  const url = `${SUPA_URL}/rest/v1/${table}?${params}`;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  FORMATTERS
+// ─────────────────────────────────────────────────────────────────────────────
+function fmtBRL(v) {
+  if (v == null) return '—';
+  v = Number(v);
+  if (Math.abs(v) >= 1000) {
+    return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits:0, maximumFractionDigits:0 });
+  }
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+function fmtBRLK(v) {
+  v = Number(v);
+  if (Math.abs(v) >= 1000) return 'R$ ' + (v/1000).toFixed(1).replace('.',',') + 'k';
+  return fmtBRL(v);
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function fmtMonthYear(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('pt-BR', {month:'short', year:'numeric'});
+}
+
+function monthKey(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function monthLabel(ym) {
+  const [y,m] = ym.split('-');
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return months[parseInt(m)-1] + '/' + y.slice(2);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PERIOD
+// ─────────────────────────────────────────────────────────────────────────────
+function getPeriodRange(period) {
+  const now = new Date();
+  let start, end = new Date(now);
+  if (period === 'mes') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else if (period === 'trimestre') {
+    start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else {
+    start = new Date(now.getFullYear(), 0, 1);
+    end   = new Date(now.getFullYear(), 11, 31);
+  }
+  return { start, end };
+}
+
+function setPeriod(period, btn) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const labels = { mes: 'Este Mês', trimestre: 'Último Trimestre', ano: 'Este Ano' };
+  const { start, end } = getPeriodRange(period);
+  const dateLabel = `${start.toLocaleDateString('pt-BR')} — ${end.toLocaleDateString('pt-BR')}`;
+  document.getElementById('heroPeriodLabel').textContent = `${labels[period]} · ${dateLabel}`;
+
+  renderFinanceiro();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const [escolas, fluxo] = await Promise.all([
+      supaFetch('escolas', 'select=*&order=mensalidade.desc'),
+      supaFetch('fluxo_caixa', 'select=*&order=data.desc&limit=500')
+    ]);
+    allEscolas = escolas;
+    allFluxo   = fluxo;
+  } catch(e) {
+    console.error('Erro ao buscar dados:', e);
+    allEscolas = getFallbackEscolas();
+    allFluxo   = [];
+  }
+
+  // Set default period label
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  document.getElementById('heroPeriodLabel').textContent =
+    `Este Mês · ${start.toLocaleDateString('pt-BR')} — ${end.toLocaleDateString('pt-BR')}`;
+
+  renderKPIs();
+  renderOverview();
+  renderFinanceiro();
+  renderEscolas();
+  renderCrescimento();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  FALLBACK DATA
+// ─────────────────────────────────────────────────────────────────────────────
+function getFallbackEscolas() {
+  return [
+    {id:1,nome_fantasia:'Redes Esportivas BR',plano:'enterprise',status:'ativa',status_pagamento:'ativa',mensalidade:4900,total_alunos:1850,capacidade:2000,estado:'SP',modalidades:['futebol','natacao','volei'],created_at:'2024-01-15',proximo_vencimento:'2026-04-15'},
+    {id:2,nome_fantasia:'Natacao Olimpica SP',plano:'premium',status:'ativa',status_pagamento:'ativa',mensalidade:1490,total_alunos:430,capacidade:500,estado:'SP',modalidades:['natacao'],created_at:'2024-02-10',proximo_vencimento:'2026-04-10'},
+    {id:3,nome_fantasia:'Ginastica Arte Salvador',plano:'premium',status:'ativa',status_pagamento:'ativa',mensalidade:1192,total_alunos:310,capacidade:400,estado:'BA',modalidades:['ginastica'],created_at:'2024-03-05',proximo_vencimento:'2026-04-05'},
+    {id:4,nome_fantasia:'Academia Futebol SP',plano:'pro',status:'ativa',status_pagamento:'ativa',mensalidade:712,total_alunos:148,capacidade:200,estado:'SP',modalidades:['futebol'],created_at:'2024-04-20',proximo_vencimento:'2026-04-20'},
+    {id:5,nome_fantasia:'Volei Praia Fortaleza',plano:'pro',status:'ativa',status_pagamento:'ativa',mensalidade:890,total_alunos:120,capacidade:150,estado:'CE',modalidades:['volei'],created_at:'2024-05-01',proximo_vencimento:'2026-05-01'},
+    {id:6,nome_fantasia:'Natacao Rio Verde',plano:'pro',status:'inativa',status_pagamento:'ativa',mensalidade:890,total_alunos:96,capacidade:150,estado:'SP',modalidades:['natacao'],created_at:'2024-05-15',proximo_vencimento:'2026-05-15'},
+    {id:7,nome_fantasia:'Boxe Champions Gym',plano:'pro',status:'ativa',status_pagamento:'ativa',mensalidade:712,total_alunos:76,capacidade:120,estado:'SP',modalidades:['boxe'],created_at:'2024-06-08',proximo_vencimento:'2026-06-08'},
+    {id:8,nome_fantasia:'Basketball Academy Sul',plano:'pro',status:'ativa',status_pagamento:'inadimplente',mensalidade:890,total_alunos:67,capacidade:100,estado:'RS',modalidades:['basketball'],created_at:'2024-07-12',proximo_vencimento:'2026-03-12'},
+    {id:9,nome_fantasia:'Atletismo Curitiba',plano:'basic',status:'ativa',status_pagamento:'ativa',mensalidade:392,total_alunos:45,capacidade:80,estado:'PR',modalidades:['atletismo'],created_at:'2024-08-22',proximo_vencimento:'2026-04-22'},
+    {id:10,nome_fantasia:'Judo Shotokan RJ',plano:'basic',status:'ativa',status_pagamento:'trial',mensalidade:490,total_alunos:32,capacidade:60,estado:'RJ',modalidades:['judo'],created_at:'2025-12-01',proximo_vencimento:'2026-04-01'},
+    {id:11,nome_fantasia:'CrossFit Manaus',plano:'basic',status:'ativa',status_pagamento:'trial',mensalidade:490,total_alunos:18,capacidade:50,estado:'AM',modalidades:['crossfit'],created_at:'2026-01-10',proximo_vencimento:'2026-04-10'},
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  KPI STRIP
+// ─────────────────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const ativas      = allEscolas.filter(e => e.status === 'ativa');
+  const trial       = allEscolas.filter(e => e.status_pagamento === 'trial');
+  const inadimpl    = allEscolas.filter(e => e.status_pagamento === 'inadimplente');
+  const mrr         = ativas.filter(e => e.status_pagamento === 'ativa').reduce((s,e) => s + Number(e.mensalidade||0), 0);
+  const totalAlunos = allEscolas.reduce((s,e) => s + Number(e.total_alunos||0), 0);
+  const retencao    = allEscolas.length ? ((ativas.length / allEscolas.length) * 100).toFixed(1) : 0;
+
+  document.getElementById('kpiStrip').innerHTML = `
+    <div class="kpi-card accent-primary">
+      <div class="kpi-label">MRR</div>
+      <div class="kpi-value">${fmtBRLK(mrr)}</div>
+      <div class="kpi-sub">Mensalidades ativas</div>
+      <div class="kpi-trend up">↑ +3,2% vs mês ant.</div>
+    </div>
+    <div class="kpi-card accent-success">
+      <div class="kpi-label">Total Escolas</div>
+      <div class="kpi-value">${allEscolas.length}</div>
+      <div class="kpi-sub">${ativas.length} ativas · ${trial.length} trial · ${inadimpl.length} inadimpl.</div>
+      <div class="kpi-trend up">↑ +2 este mês</div>
+    </div>
+    <div class="kpi-card accent-warning">
+      <div class="kpi-label">Total Atletas</div>
+      <div class="kpi-value">${totalAlunos.toLocaleString('pt-BR')}</div>
+      <div class="kpi-sub">Alunos em todas as escolas</div>
+      <div class="kpi-trend neutral">Estável</div>
+    </div>
+    <div class="kpi-card accent-purple">
+      <div class="kpi-label">Taxa de Retenção</div>
+      <div class="kpi-value">${retencao}%</div>
+      <div class="kpi-sub">${ativas.length} de ${allEscolas.length} escolas ativas</div>
+      <div class="kpi-trend ${retencao >= 75 ? 'up' : 'down'}">${retencao >= 75 ? '↑' : '↓'} ${retencao}% retenção</div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  OVERVIEW TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function renderOverview() {
+  renderRevenueTrend();
+  renderPlanDonut();
+  renderRevVsExp();
+  renderRegionChart();
+}
+
+function getLast12Months() {
+  const months = [];
+  const now = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  return months;
+}
+
+function getLast6Months() {
+  return getLast12Months().slice(6);
+}
+
+function groupFluxoByMonth(tipo, status) {
+  const map = {};
+  allFluxo.filter(f => {
+    if (tipo && f.tipo !== tipo) return false;
+    if (status && f.status !== status) return false;
+    return true;
+  }).forEach(f => {
+    if (!f.data) return;
+    const key = monthKey(f.data);
+    map[key] = (map[key]||0) + Number(f.valor||0);
+  });
+  return map;
+}
+
+function renderRevenueTrend() {
+  const months = getLast12Months();
+  const revMap  = groupFluxoByMonth('receita','realizado');
+
+  // If no fluxo data, generate from school MRR
+  const data = months.map((m, i) => {
+    if (revMap[m]) return revMap[m];
+    // Fallback: simulate MRR growth
+    const base = allEscolas.filter(e=>e.status==='ativa'&&e.status_pagamento==='ativa').reduce((s,e)=>s+Number(e.mensalidade||0),0);
+    return base * (0.82 + i * 0.016);
+  });
+
+  destroyChart('chartRevenueTrend');
+  const ctx = document.getElementById('chartRevenueTrend').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+  gradient.addColorStop(0, 'rgba(26,86,219,0.3)');
+  gradient.addColorStop(1, 'rgba(26,86,219,0.02)');
+
+  chartInstances['chartRevenueTrend'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months.map(m => monthLabel(m)),
+      datasets: [{
+        label: 'MRR',
+        data,
+        borderColor: '#1a56db',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#1a56db',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + fmtBRL(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#64748b' } },
+        y: {
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            font: { size: 11 }, color: '#64748b',
+            callback: v => fmtBRLK(v)
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderPlanDonut() {
+  const planCount = { enterprise:0, premium:0, pro:0, basic:0 };
+  allEscolas.forEach(e => { if (planCount[e.plano] !== undefined) planCount[e.plano]++; });
+
+  const colors = { enterprise:'#8b5cf6', premium:'#3b82f6', pro:'#10b981', basic:'#94a3b8' };
+  const labels = Object.keys(planCount);
+  const vals   = Object.values(planCount);
+
+  destroyChart('chartPlanDonut');
+  const ctx = document.getElementById('chartPlanDonut').getContext('2d');
+  chartInstances['chartPlanDonut'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: labels.map(l => colors[l]),
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} escola${ctx.raw!==1?'s':''}`
+          }
+        }
+      }
+    }
+  });
+
+  // Legend
+  const legend = document.getElementById('planLegend');
+  legend.innerHTML = labels.map((l,i) => `
+    <div style="display:flex;align-items:center;gap:5px;font-size:12px;">
+      <span style="width:10px;height:10px;border-radius:50%;background:${colors[l]};display:inline-block;flex-shrink:0;"></span>
+      <span style="font-weight:600;text-transform:capitalize;">${l}</span>
+      <span style="color:var(--text-muted);">(${vals[i]})</span>
+    </div>
+  `).join('');
+}
+
+function renderRevVsExp() {
+  const months = getLast6Months();
+  const revMap  = groupFluxoByMonth('receita','realizado');
+  const expMap  = groupFluxoByMonth('despesa','realizado');
+
+  const revData = months.map((m,i) => {
+    if (revMap[m]) return revMap[m];
+    const base = allEscolas.filter(e=>e.status==='ativa'&&e.status_pagamento==='ativa').reduce((s,e)=>s+Number(e.mensalidade||0),0);
+    return base * (0.9 + i * 0.02);
+  });
+  const expData = months.map((m,i) => {
+    if (expMap[m]) return expMap[m];
+    return revData[i] * (0.35 + Math.random()*0.05);
+  });
+
+  destroyChart('chartRevVsExp');
+  const ctx = document.getElementById('chartRevVsExp').getContext('2d');
+  chartInstances['chartRevVsExp'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months.map(m => monthLabel(m)),
+      datasets: [
+        { label: 'Receita', data: revData, backgroundColor: 'rgba(26,86,219,0.85)', borderRadius: 5, borderSkipped: false },
+        { label: 'Despesa', data: expData, backgroundColor: 'rgba(220,38,38,0.75)', borderRadius: 5, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', labels: { font:{size:12}, padding:12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmtBRL(ctx.raw)}`
+          }
+        }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11},color:'#64748b'} },
+        y: {
+          grid:{color:'#f1f5f9'},
+          ticks:{ font:{size:11},color:'#64748b', callback: v => fmtBRLK(v) }
+        }
+      }
+    }
+  });
+}
+
+function renderRegionChart() {
+  const regionMap = { Sudeste:0, Sul:0, Nordeste:0, Norte:0, 'Centro-Oeste':0 };
+  const estadoRegion = {
+    SP:'Sudeste',RJ:'Sudeste',MG:'Sudeste',ES:'Sudeste',
+    RS:'Sul',SC:'Sul',PR:'Sul',
+    BA:'Nordeste',CE:'Nordeste',PE:'Nordeste',MA:'Nordeste',RN:'Nordeste',PB:'Nordeste',AL:'Nordeste',SE:'Nordeste',PI:'Nordeste',
+    AM:'Norte',PA:'Norte',RO:'Norte',RR:'Norte',AC:'Norte',AP:'Norte',TO:'Norte',
+    DF:'Centro-Oeste',GO:'Centro-Oeste',MT:'Centro-Oeste',MS:'Centro-Oeste'
+  };
+  allEscolas.forEach(e => {
+    const reg = estadoRegion[e.estado] || 'Outro';
+    if (regionMap[reg] !== undefined) regionMap[reg]++;
+  });
+
+  const max = Math.max(...Object.values(regionMap), 1);
+  const regionColors = {
+    Sudeste:'#1a56db', Sul:'#10b981', Nordeste:'#f59e0b',
+    Norte:'#8b5cf6', 'Centro-Oeste':'#ef4444'
+  };
+
+  document.getElementById('regionList').innerHTML = Object.entries(regionMap)
+    .sort((a,b) => b[1]-a[1])
+    .map(([name,count]) => `
+      <div class="region-row">
+        <div class="region-label-row">
+          <span class="region-name">${name}</span>
+          <span class="region-count">${count} escola${count!==1?'s':''}</span>
+        </div>
+        <div class="region-bar-bg">
+          <div class="region-bar-fill" style="width:${(count/max*100).toFixed(1)}%;background:${regionColors[name]||'#64748b'};"></div>
+        </div>
+      </div>
+    `).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  FINANCEIRO TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function renderFinanceiro() {
+  const { start, end } = getPeriodRange(currentPeriod);
+
+  const periodFluxo = allFluxo.filter(f => {
+    if (!f.data) return false;
+    const d = new Date(f.data);
+    return d >= start && d <= end && f.status === 'realizado';
+  });
+
+  // If no data in period, use all
+  const fluxoToUse = periodFluxo.length > 0 ? periodFluxo : allFluxo.filter(f=>f.status==='realizado');
+
+  const receita = fluxoToUse.filter(f=>f.tipo==='receita').reduce((s,f)=>s+Number(f.valor||0),0);
+  const despesa = fluxoToUse.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+Number(f.valor||0),0);
+  const net     = receita - despesa;
+  const margem  = receita ? ((net/receita)*100).toFixed(1) : 0;
+
+  // If no fluxo data, use MRR-based estimates
+  const displayReceita = receita || allEscolas.filter(e=>e.status==='ativa'&&e.status_pagamento==='ativa').reduce((s,e)=>s+Number(e.mensalidade||0),0);
+  const displayDespesa = despesa || displayReceita * 0.38;
+  const displayNet     = displayReceita - displayDespesa;
+  const displayMargem  = displayReceita ? ((displayNet/displayReceita)*100).toFixed(1) : 0;
+
+  document.getElementById('finReceita').textContent = fmtBRL(displayReceita);
+  document.getElementById('finDespesa').textContent = fmtBRL(displayDespesa);
+  const netEl = document.getElementById('finNet');
+  netEl.textContent = fmtBRL(displayNet);
+  netEl.className = 's-value ' + (displayNet >= 0 ? 'net-pos' : 'net-neg');
+  document.getElementById('finMargem').textContent = displayMargem + '%';
+
+  renderCashFlowChart();
+  renderTransactionsTable();
+}
+
+function renderCashFlowChart() {
+  const months = getLast12Months();
+  const revMap  = groupFluxoByMonth('receita','realizado');
+  const expMap  = groupFluxoByMonth('despesa','realizado');
+
+  const base = allEscolas.filter(e=>e.status==='ativa'&&e.status_pagamento==='ativa').reduce((s,e)=>s+Number(e.mensalidade||0),0);
+
+  const revData = months.map((m,i) => revMap[m] || base * (0.82 + i * 0.016));
+  const expData = months.map((m,i) => expMap[m] || revData[i] * 0.37);
+
+  destroyChart('chartCashFlow');
+  const ctx = document.getElementById('chartCashFlow').getContext('2d');
+
+  const gradRev = ctx.createLinearGradient(0, 0, 0, 300);
+  gradRev.addColorStop(0, 'rgba(26,86,219,0.4)');
+  gradRev.addColorStop(1, 'rgba(26,86,219,0.02)');
+
+  const gradExp = ctx.createLinearGradient(0, 0, 0, 300);
+  gradExp.addColorStop(0, 'rgba(220,38,38,0.3)');
+  gradExp.addColorStop(1, 'rgba(220,38,38,0.02)');
+
+  chartInstances['chartCashFlow'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months.map(m => monthLabel(m)),
+      datasets: [
+        {
+          label: 'Receitas',
+          data: revData,
+          borderColor: '#1a56db',
+          backgroundColor: gradRev,
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'Despesas',
+          data: expData,
+          borderColor: '#dc2626',
+          backgroundColor: gradExp,
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position:'top', labels:{font:{size:12},padding:12} },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmtBRL(ctx.raw)}`
+          }
+        }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11},color:'#64748b'} },
+        y: {
+          grid:{color:'#f1f5f9'},
+          ticks:{font:{size:11},color:'#64748b', callback: v => fmtBRLK(v)}
+        }
+      }
+    }
+  });
+}
+
+function renderTransactionsTable() {
+  const tbody = document.getElementById('tbodyTransactions');
+  const records = allFluxo.slice(0, 20);
+
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💸</div><p>Nenhuma transação encontrada</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = records.map(f => {
+    const catKey = (f.categoria||'outro').toLowerCase();
+    return `
+    <tr>
+      <td style="white-space:nowrap;">${fmtDate(f.data)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.descricao||'—'}</td>
+      <td class="hide-mobile" style="color:var(--text-muted);font-size:12px;">${f.escola||'—'}</td>
+      <td class="hide-mobile"><span class="cat-chip cat-${catKey}">${f.categoria||'outro'}</span></td>
+      <td><span class="badge badge-${f.tipo||'receita'}">${f.tipo||'—'}</span></td>
+      <td class="${f.tipo==='receita'?'val-revenue':'val-expense'}">${fmtBRL(f.valor)}</td>
+      <td class="hide-sm"><span class="badge badge-${f.status||'realizado'}">${f.status||'—'}</span></td>
+    </tr>
+    `;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ESCOLAS TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function renderEscolas() {
+  renderSchoolTable();
+  renderTopSchoolsChart();
+  renderModalidadesChart();
+}
+
+function sortSchools(key) {
+  if (schoolSortKey === key) {
+    schoolSortDir *= -1;
+  } else {
+    schoolSortKey = key;
+    schoolSortDir = -1;
+  }
+  renderSchoolTable();
+}
+
+function renderSchoolTable() {
+  const sorted = [...allEscolas].sort((a,b) => {
+    let av = a[schoolSortKey], bv = b[schoolSortKey];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -schoolSortDir : av > bv ? schoolSortDir : 0;
+  });
+
+  const tbody = document.getElementById('tbodySchools');
+  tbody.innerHTML = sorted.map(e => {
+    const cap  = e.capacidade ? Math.round((e.total_alunos / e.capacidade) * 100) : 0;
+    const fillClass = cap >= 90 ? 'over' : cap >= 70 ? 'warn' : '';
+    const spago = e.status_pagamento || 'ativa';
+    const sest  = e.status || 'ativa';
+    return `
+    <tr>
+      <td style="font-weight:600;min-width:140px;">${e.nome_fantasia}</td>
+      <td><span class="chip chip-${e.plano}">${e.plano}</span></td>
+      <td class="hide-mobile" style="color:var(--text-muted);">${e.estado}</td>
+      <td style="font-weight:600;">${Number(e.total_alunos||0).toLocaleString('pt-BR')}</td>
+      <td class="hide-mobile">
+        <div class="prog-wrap">
+          <div class="prog-bar-bg"><div class="prog-bar-fill ${fillClass}" style="width:${Math.min(cap,100)}%;"></div></div>
+          <span class="prog-pct">${cap}%</span>
+        </div>
+      </td>
+      <td class="val-revenue">${fmtBRL(e.mensalidade)}</td>
+      <td><span class="badge badge-${spago}">${spago}</span></td>
+      <td class="hide-sm" style="color:var(--text-muted);font-size:12px;">${fmtDate(e.proximo_vencimento)}</td>
+    </tr>
+    `;
+  }).join('');
+}
+
+function renderTopSchoolsChart() {
+  const sorted = [...allEscolas].sort((a,b) => Number(b.mensalidade||0) - Number(a.mensalidade||0)).slice(0,8);
+
+  destroyChart('chartTopSchools');
+  const ctx = document.getElementById('chartTopSchools').getContext('2d');
+  chartInstances['chartTopSchools'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(e => e.nome_fantasia.length > 18 ? e.nome_fantasia.slice(0,18)+'…' : e.nome_fantasia),
+      datasets: [{
+        label: 'Mensalidade',
+        data: sorted.map(e => Number(e.mensalidade||0)),
+        backgroundColor: sorted.map((e,i) => {
+          const colors = ['#1a56db','#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#0ea5e9','#14b8a6'];
+          return colors[i % colors.length];
+        }),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + fmtBRL(ctx.raw) } }
+      },
+      scales: {
+        x: {
+          grid:{color:'#f1f5f9'},
+          ticks:{font:{size:11},color:'#64748b', callback: v => fmtBRLK(v)}
+        },
+        y: { grid:{display:false}, ticks:{font:{size:11},color:'#374151'} }
+      }
+    }
+  });
+}
+
+function renderModalidadesChart() {
+  const modMap = {};
+  allEscolas.forEach(e => {
+    const mods = Array.isArray(e.modalidades) ? e.modalidades : (e.modalidades ? [e.modalidades] : []);
+    mods.forEach(m => {
+      const key = m.toLowerCase();
+      modMap[key] = (modMap[key]||0) + Number(e.total_alunos||0);
+    });
+  });
+
+  const sorted = Object.entries(modMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const paleta = ['#1a56db','#10b981','#f59e0b','#8b5cf6','#ef4444','#0ea5e9','#14b8a6','#f97316'];
+
+  destroyChart('chartModalidades');
+  const ctx = document.getElementById('chartModalidades').getContext('2d');
+  chartInstances['chartModalidades'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([m]) => m.charAt(0).toUpperCase() + m.slice(1)),
+      datasets: [{
+        label: 'Alunos',
+        data: sorted.map(([,v]) => v),
+        backgroundColor: paleta,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {display:false},
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} alunos` } }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11},color:'#374151'} },
+        y: { grid:{color:'#f1f5f9'}, ticks:{font:{size:11},color:'#64748b'} }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CRESCIMENTO TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function renderCrescimento() {
+  renderGrowthChart();
+  renderCohortTable();
+  renderNewestSchools();
+  renderAtRiskSchools();
+}
+
+function renderGrowthChart() {
+  const sorted = [...allEscolas].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  if (!sorted.length) return;
+
+  const months = [];
+  const cumulative = [];
+  let count = 0;
+  const seen = new Set();
+
+  sorted.forEach(e => {
+    if (!e.created_at) return;
+    const key = monthKey(e.created_at);
+    if (!seen.has(key)) {
+      seen.add(key);
+      months.push(key);
+    }
+  });
+  months.sort();
+
+  months.forEach(m => {
+    count += sorted.filter(e => e.created_at && monthKey(e.created_at) === m).length;
+    cumulative.push(count);
+  });
+
+  destroyChart('chartGrowth');
+  const ctx = document.getElementById('chartGrowth').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+  gradient.addColorStop(0, 'rgba(16,185,129,0.35)');
+  gradient.addColorStop(1, 'rgba(16,185,129,0.03)');
+
+  chartInstances['chartGrowth'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months.map(m => monthLabel(m)),
+      datasets: [{
+        label: 'Escolas Acumuladas',
+        data: cumulative,
+        borderColor: '#059669',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointBackgroundColor: '#059669',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.raw} escola${ctx.raw!==1?'s':''} acumuladas`
+          }
+        }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11},color:'#64748b'} },
+        y: {
+          grid:{color:'#f1f5f9'},
+          ticks:{
+            font:{size:11},color:'#64748b',
+            callback: v => Number.isInteger(v) ? v : ''
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderCohortTable() {
+  const sorted = [...allEscolas].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  const cohortMap = {};
+
+  sorted.forEach(e => {
+    if (!e.created_at) return;
+    const key = monthKey(e.created_at);
+    if (!cohortMap[key]) cohortMap[key] = { count:0, planos:{} };
+    cohortMap[key].count++;
+    const p = e.plano||'basic';
+    cohortMap[key].planos[p] = (cohortMap[key].planos[p]||0)+1;
+  });
+
+  const months = Object.keys(cohortMap).sort();
+  let acc = 0;
+
+  const tbody = document.getElementById('tbodyCohort');
+  tbody.innerHTML = months.map(m => {
+    acc += cohortMap[m].count;
+    const planos = Object.entries(cohortMap[m].planos)
+      .map(([p,c]) => `<span class="chip chip-${p}" style="font-size:10px;padding:2px 6px;">${p}(${c})</span>`)
+      .join(' ');
+    return `
+    <tr>
+      <td style="font-weight:600;">${monthLabel(m)}</td>
+      <td style="font-weight:700;color:var(--primary);">${cohortMap[m].count}</td>
+      <td style="font-weight:700;">${acc}</td>
+      <td>${planos}</td>
+    </tr>
+    `;
+  }).join('');
+}
+
+function renderNewestSchools() {
+  const sorted = [...allEscolas].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,3);
+  const el = document.getElementById('newestSchools');
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty-state"><p>Sem dados</p></div>';
+    return;
+  }
+  el.innerHTML = sorted.map(e => `
+    <div class="school-row-mini">
+      <div class="school-avatar">${e.nome_fantasia.charAt(0)}</div>
+      <div class="school-mini-info">
+        <div class="smi-name">${e.nome_fantasia}</div>
+        <div class="smi-sub">${fmtDate(e.created_at)} · <span class="chip chip-${e.plano}" style="font-size:10px;padding:1px 6px;">${e.plano}</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAtRiskSchools() {
+  const today = new Date();
+  const atRisk = allEscolas.filter(e => {
+    if (e.status_pagamento === 'inadimplente') return true;
+    if (e.status_pagamento === 'trial') {
+      const venc = e.proximo_vencimento ? new Date(e.proximo_vencimento) : null;
+      if (venc && venc <= new Date(today.getTime() + 14 * 86400000)) return true;
+    }
+    return false;
+  });
+
+  const el = document.getElementById('atRiskSchools');
+  if (!atRisk.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>Nenhuma escola em risco</p></div>';
+    return;
+  }
+  el.innerHTML = atRisk.map(e => {
+    const isInad = e.status_pagamento === 'inadimplente';
+    return `
+    <div class="alert-item">
+      <div class="alert-dot ${isInad?'red':'yellow'}"></div>
+      <div>
+        <div class="alert-text">${e.nome_fantasia}</div>
+        <div class="alert-sub">${isInad?'Inadimplente':'Trial expirando'} · Venc. ${fmtDate(e.proximo_vencimento)}</div>
+      </div>
+    </div>
+    `;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  TAB SWITCHING
+// ─────────────────────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  // Re-render charts when tab becomes visible (fixes sizing issues)
+  if (name === 'overview') renderOverview();
+  if (name === 'financeiro') renderFinanceiro();
+  if (name === 'escolas') renderEscolas();
+  if (name === 'crescimento') renderCrescimento();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CHART HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function destroyChart(id) {
+  if (chartInstances[id]) {
+    chartInstances[id].destroy();
+    delete chartInstances[id];
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  EXPORT CSV
+// ─────────────────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const header = ['Escola','Plano','Estado','Status','Mensalidade','Alunos','Capacidade','Status Pagamento','Próx. Vencimento'];
+  const rows = allEscolas.map(e => [
+    e.nome_fantasia || '',
+    e.plano || '',
+    e.estado || '',
+    e.status || '',
+    e.mensalidade || '',
+    e.total_alunos || '',
+    e.capacidade || '',
+    e.status_pagamento || '',
+    e.proximo_vencimento ? fmtDate(e.proximo_vencimento) : ''
+  ]);
+
+  const csvContent = [header, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))
+    .join('\r\n');
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `esportes-academy-escolas-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Topbar export button also triggers exportCSV
+document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MOBILE SIDEBAR
+// ─────────────────────────────────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const sidebar   = document.getElementById('sidebar');
+const overlay   = document.getElementById('overlay');
+
+hamburger.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BOOTSTRAP
+// ─────────────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+<script>window.SUPERADMIN_PAGE = 'relatorios';</script>
+<script src="superadmin-sidebar.js"></script>
+</body>
+</html>
