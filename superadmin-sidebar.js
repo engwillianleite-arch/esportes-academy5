@@ -32,7 +32,7 @@ const SUPERADMIN_NAV_ITEMS = [
   { section: 'Financeiro' },
   { id: 'cobrancas',    label: 'Fluxo de Caixa',     icon: '💸', href: 'SuperAdmin-cobrancas.html'    },
   { id: 'planos',       label: 'Planos & Licenças',  icon: '📦', href: 'SuperAdmin-planos.html'       },
-  { id: 'relatorios',   label: 'Relatórios',         icon: '📈', href: '#'                            },
+  { id: 'relatorios',   label: 'Relatórios',         icon: '📈', href: 'SuperAdmin-relatorios.html'  },
   { id: 'notasfiscais', label: 'Notas Fiscais',      icon: '🧾', href: '#'                            },
 
   { section: 'Sistema' },
