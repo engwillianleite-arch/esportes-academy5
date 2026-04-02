@@ -1,6 +1,7 @@
 ﻿'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { StatusCobranca } from '@/types'
 
 type MatriculaFinanceiroOption = {
@@ -35,6 +36,18 @@ async function assertFinanceiroEscola(
   } = await supabase.auth.getUser()
 
   if (authError || !user) return { error: 'Usuário não autenticado' }
+
+  // Super_admin bypass: check plataforma_usuarios first
+  const admin = createAdminClient()
+  const { data: plataformaUser } = await admin
+    .from('plataforma_usuarios')
+    .select('perfil, ativo, deleted_at')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (plataformaUser?.ativo && !plataformaUser.deleted_at) {
+    return { ok: true }
+  }
 
   const { data: membership } = await supabase
     .from('escola_usuarios')
