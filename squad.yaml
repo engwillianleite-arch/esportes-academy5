@@ -1,0 +1,158 @@
+# Squad: Esportes Academy — Time de Desenvolvimento
+# SaaS B2B para gestão de escolas esportivas. Você define a tarefa; o squad planeja, implementa e entrega.
+
+name: esportes-academy
+displayName: Esportes Academy — Time de Desenvolvimento
+description: >
+  Squad completo de desenvolvimento da plataforma Esportes Academy, um SaaS B2B
+  para gestão de escolas esportivas. Inclui Tech Lead, Frontend Web, Mobile (React Native),
+  Backend, DBA Supabase, UX/UI Designer, QA e DevOps/SRE.
+  O Product Owner define a tarefa; o squad analisa, planeja, implementa, testa e faz deploy.
+
+# Fonte da Verdade: prd Esportes Academy.md (em squads/)
+# Todos os agentes devem consultar prd Esportes Academy.md antes de iniciar qualquer tarefa.
+
+skills:
+  - web_search
+  - web_fetch
+
+steps:
+  - id: checkpoint-tarefa
+    type: checkpoint
+    name: Product Owner — Definir tarefa
+    action: |
+      Perguntar ao usuário qual tarefa será executada nesta rodada. Exemplos:
+      - "Implementar módulo de gestão de presenças com chamada digital"
+      - "Criar webhook do Asaas para processar pagamentos recebidos"
+      - "Redesenhar o dashboard do painel administrativo com novos KPIs"
+      - "Escrever migrations Supabase para o módulo financeiro"
+      - "Configurar pipeline CI/CD no GitHub Actions"
+      Salvar o objetivo em output/objetivo-tarefa.md.
+      Só prosseguir após confirmação.
+
+  - id: tech-lead-analise
+    agent: tech-lead
+    name: Tech Lead — Análise técnica e plano de ação
+    action: |
+      Ler output/objetivo-tarefa.md e o prd Esportes Academy.md (em squads/).
+      Produzir output/plano-tecnico.md com:
+      - Resumo da tarefa
+      - Impacto arquitetural (mudanças no schema, APIs, integrações)
+      - Plano de implementação: quais agentes atuam, em que ordem, com quais responsabilidades
+      - Riscos técnicos e mitigações
+      - Decisões de arquitetura relevantes (ADR resumido se necessário)
+      - Critérios de aceite técnicos
+
+  - id: ux-design
+    agent: ux-designer
+    name: UX/UI Designer — Wireframes e especificações visuais
+    action: |
+      Ler output/objetivo-tarefa.md e output/plano-tecnico.md.
+      Se a tarefa envolver interface (web ou mobile), produzir output/ux-specs.md com:
+      - Perfil de usuário alvo e contexto de uso
+      - Fluxo de usuário (user flow) descrito em texto
+      - Especificações de componentes: layout, hierarquia visual, cores (design system Esportes Academy)
+      - Comportamentos interativos e estados (vazio, loading, erro, sucesso)
+      - Acessibilidade e responsividade
+      Se a tarefa for puramente backend/infra, registrar "N/A para esta execução" e justificar.
+
+  - id: dba-supabase
+    agent: dba-supabase
+    name: DBA Supabase — Schema, migrations e RLS
+    action: |
+      Ler output/objetivo-tarefa.md e output/plano-tecnico.md.
+      Se a tarefa envolver banco de dados, produzir output/migrations-rls.md com:
+      - SQL completo das migrations versionadas (padrão YYYYMMDD_descricao.sql)
+      - Políticas RLS para isolamento multi-tenant (escola_id)
+      - Índices necessários para performance
+      - Configuração Realtime se aplicável
+      - Rollback instructions
+      Se não houver impacto no banco, registrar "N/A para esta execução".
+
+  - id: backend-dev
+    agent: backend-dev
+    name: Backend Developer — Edge Functions e integrações
+    action: |
+      Ler output/objetivo-tarefa.md, output/plano-tecnico.md e output/migrations-rls.md.
+      Se a tarefa envolver backend, produzir output/backend-impl.md com:
+      - Código TypeScript completo das Edge Functions ou APIs envolvidas
+      - Documentação de endpoints (método, URL, body, resposta, erros)
+      - Lógica de integração (Asaas, WhatsApp, Google Calendar, Push Notifications)
+      - Tratamento de erros, validações e logs estruturados
+      - Variáveis de ambiente necessárias
+      Se não houver impacto backend, registrar "N/A para esta execução".
+
+  - id: frontend-web
+    agent: frontend-web
+    name: Frontend Web Developer — Interfaces Next.js
+    action: |
+      Ler output/objetivo-tarefa.md, output/plano-tecnico.md, output/ux-specs.md e output/backend-impl.md.
+      Se a tarefa envolver frontend web, produzir output/frontend-web-impl.md com:
+      - Código TypeScript completo para páginas e componentes Next.js 14
+      - Integração com Supabase Client e React Query
+      - Estrutura de rotas e proteção por perfil (admin, professor, pai)
+      - Loading states, error boundaries e feedback visual
+      - Convenções: Server Components, React Hook Form + Zod, shadcn/ui
+      Se não houver impacto frontend web, registrar "N/A para esta execução".
+
+  - id: mobile-dev
+    agent: mobile-dev
+    name: Mobile Developer — App React Native / Expo
+    action: |
+      Ler output/objetivo-tarefa.md, output/plano-tecnico.md, output/ux-specs.md e output/backend-impl.md.
+      Se a tarefa envolver o app mobile, produzir output/mobile-impl.md com:
+      - Código TypeScript completo para telas e componentes React Native / Expo
+      - Integração com Supabase e notificações push
+      - Navegação com Expo Router (grupos: auth, pais, professor)
+      - Tratamento de iOS e Android (diferenças de auth, UI nativa)
+      - Configurações nativas necessárias (Info.plist, permissões)
+      Se não houver impacto mobile, registrar "N/A para esta execução".
+
+  - id: qa-engineer
+    agent: qa-engineer
+    name: QA Engineer — Casos de teste e validação
+    action: |
+      Ler output/objetivo-tarefa.md, output/plano-tecnico.md e todos os arquivos de implementação gerados.
+      Produzir output/qa-plano-testes.md com:
+      - Casos de teste em formato Given/When/Then para cada critério de aceite
+      - Fluxos críticos identificados (E2E obrigatório)
+      - Testes de segurança multi-tenant (tenant isolation)
+      - Scripts Playwright ou Jest completos para os fluxos principais
+      - Checklist de validação antes do deploy
+      - Severidade de cada cenário de bug potencial
+
+  - id: checkpoint-revisao
+    type: checkpoint
+    name: Tech Lead + PO — Revisão antes do deploy
+    action: |
+      Apresentar ao usuário um resumo consolidado:
+      - Plano técnico (output/plano-tecnico.md)
+      - O que foi implementado (backend, frontend, mobile, banco)
+      - Plano de testes (output/qa-plano-testes.md)
+      - Impactos de segurança ou breaking changes identificados
+      Perguntar: aprovar para deploy ou há ajustes necessários?
+      Só prosseguir após aprovação explícita.
+
+  - id: devops-sre
+    agent: devops-sre
+    name: DevOps/SRE — Pipeline e deploy
+    action: |
+      Ler output/objetivo-tarefa.md, output/plano-tecnico.md e output/backend-impl.md.
+      Produzir output/devops-deploy.md com:
+      - Workflow GitHub Actions completo para a tarefa (se necessário novo workflow ou modificação)
+      - Checklist de variáveis de ambiente e secrets necessários
+      - Passos para deploy: migrations → backend → frontend → mobile OTA
+      - Health checks pós-deploy
+      - Rollback procedure se algo der errado
+      - Alertas e monitoramento no Sentry relacionados à feature
+
+  - id: checkpoint-final
+    type: checkpoint
+    name: Conclusão — Entrega ao PO
+    action: |
+      Apresentar ao usuário o resumo final da entrega:
+      - O que foi implementado (lista dos outputs gerados)
+      - Pendências ou débitos técnicos identificados
+      - Próximos passos sugeridos
+      Perguntar se há algo para ajustar ou se a tarefa está concluída.
+      Atualizar _memory/memories.md com decisões importantes desta execução.

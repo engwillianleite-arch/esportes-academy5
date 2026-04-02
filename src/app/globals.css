@@ -8,11 +8,13 @@
    DESIGN SYSTEM — Esportes Academy
    ───────────────────────────────────────────────────── */
 
-/* Portal Escola (Verde Vitória) */
+/* Portal Escola (Verde Vitória) — override shadcn defaults */
 :root {
-  --primary: oklch(0.205 0 0);
+  --primary: #20c997;
+  --primary-foreground: #ffffff;
   --primary-dark: #17a07a;
-  --secondary: oklch(0.97 0 0);
+  --secondary: #5bc0eb;
+  --secondary-foreground: #0f172a;
   --sidebar-bg: #0d2112;
   --sidebar-hover: #162e1c;
   --bg: #f7f9fa;
