@@ -4,8 +4,8 @@ import type { Database } from '@/types/database'
 import type { PerfilUsuario } from '@/types'
 import { getModuloFromPath, hasModuloAccess } from '@/lib/modulo-access'
 
-// Routes that trigger the escola flow — super_admin must be bypassed on these
-const ESCOLA_FLOW_ROUTES = ['/cadastrar-escola', '/selecionar-escola', '/no-access']
+// Routes where super_admin must be bypassed and sent to /superadmin
+const ESCOLA_FLOW_ROUTES = ['/cadastrar-escola', '/selecionar-escola', '/no-access', '/completar-cadastro']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
