@@ -219,6 +219,7 @@ export type CriarLancamentoInput = {
   status:          FluxoCaixaStatus
   forma_pagamento: FormaPagamento
   recorrencia:     FluxoCaixaRecorrencia
+  parcelas?:       number   // quantidade de ocorrências a gerar (só para recorrente)
   percentual?:     number
   base_calculo?:   number
 }
@@ -295,8 +296,9 @@ function buildOcorrencias(
     return [{ ...base, data_lancamento: input.data_lancamento }]
   }
 
-  const mesesPorCiclo = { mensal: 1, trimestral: 3, anual: 12 }[input.recorrencia] ?? 1
-  const quantidadeCiclos = { mensal: 12, trimestral: 4, anual: 3 }[input.recorrencia] ?? 12
+  const mesesPorCiclo    = { mensal: 1, trimestral: 3, anual: 12 }[input.recorrencia] ?? 1
+  const defaultCiclos    = { mensal: 12, trimestral: 4, anual: 3 }[input.recorrencia] ?? 12
+  const quantidadeCiclos = (input.parcelas && input.parcelas > 0) ? input.parcelas : defaultCiclos
 
   const result = []
   for (let i = 0; i < quantidadeCiclos; i++) {

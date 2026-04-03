@@ -124,6 +124,7 @@ export default function FluxoCaixaClient({
   const [fStatus, setFStatus]             = useState<FluxoCaixaStatus>('realizado')
   const [fForma, setFForma]               = useState<FormaPagamento>('manual')
   const [fRec, setFRec]                   = useState<FluxoCaixaRecorrencia>('unico')
+  const [fParcelas, setFParcelas]         = useState<string>('')
   const [fPercentual, setFPercentual]     = useState('')
   const [fBaseCalculo, setFBaseCalculo]   = useState('')
   const [fEscolaNome, setFEscolaNome]     = useState('')
@@ -158,7 +159,7 @@ export default function FluxoCaixaClient({
     setFCategoria(tipo === 'receita' ? 'mensalidade_escola' : 'payroll')
     setFDescricao(''); setFObservacao(''); setFValor(''); setFEscolaNome('')
     setFData(new Date().toISOString().slice(0, 10))
-    setFStatus('realizado'); setFForma('manual'); setFRec('unico')
+    setFStatus('realizado'); setFForma('manual'); setFRec('unico'); setFParcelas('')
     setFPercentual(''); setFBaseCalculo('')
     setDrawerOpen(true)
   }
@@ -199,6 +200,7 @@ export default function FluxoCaixaClient({
         status: fStatus,
         forma_pagamento: fForma,
         recorrencia: fRec,
+        parcelas: fParcelas ? parseInt(fParcelas, 10) : undefined,
         percentual: fPercentual ? parseFloat(fPercentual) : undefined,
         base_calculo: fBaseCalculo ? parseFloat(fBaseCalculo) : undefined,
       }
@@ -601,7 +603,11 @@ export default function FluxoCaixaClient({
                     <Field label="Recorrência">
                       <div className="grid grid-cols-4 gap-2">
                         {(['unico', 'mensal', 'trimestral', 'anual'] as FluxoCaixaRecorrencia[]).map(r => (
-                          <button key={r} onClick={() => setFRec(r)}
+                          <button key={r} onClick={() => {
+                            setFRec(r)
+                            // reset parcelas ao padrão ao trocar tipo
+                            setFParcelas(r === 'unico' ? '' : r === 'mensal' ? '12' : r === 'trimestral' ? '4' : '3')
+                          }}
                             className={`rounded-xl border-2 py-2 text-[11px] font-semibold transition ${
                               fRec === r ? 'border-[#4f46e5] bg-[#4f46e5]/10 text-[#4f46e5]' : 'border-[#e2e8f0] text-[#64748b]'
                             }`}>
@@ -610,9 +616,25 @@ export default function FluxoCaixaClient({
                         ))}
                       </div>
                       {fRec !== 'unico' && (
-                        <p className="mt-1.5 text-[11px] text-[#94a3b8]">
-                          Serão gerados lançamentos previstos para os próximos {fRec === 'mensal' ? '12 meses' : fRec === 'trimestral' ? '4 trimestres' : '3 anos'}.
-                        </p>
+                        <div className="mt-3 flex items-center gap-3">
+                          <label className="text-[12px] font-medium text-[#475569] whitespace-nowrap">
+                            Nº de parcelas
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={120}
+                            value={fParcelas}
+                            onChange={e => setFParcelas(e.target.value)}
+                            className="w-20 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 text-center text-sm font-semibold"
+                          />
+                          <p className="text-[11px] text-[#94a3b8]">
+                            {fParcelas
+                              ? `${fParcelas} ${fRec === 'mensal' ? 'meses' : fRec === 'trimestral' ? 'trimestres' : 'anos'}`
+                              : `padrão: ${fRec === 'mensal' ? '12 meses' : fRec === 'trimestral' ? '4 trimestres' : '3 anos'}`
+                            }
+                          </p>
+                        </div>
                       )}
                     </Field>
                   )}
