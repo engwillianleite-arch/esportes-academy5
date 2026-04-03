@@ -5,14 +5,30 @@ import {
   selectEscola,
 } from '@/lib/escola-context'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { listarContextosUsuarioAtual, syncUsuarioEscolaTiposAtual } from '@/lib/usuario-contexto'
 import { getRouteForPerfil } from '@/lib/perfil-route'
+
+async function isSuperAdminUser(userId: string): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('plataforma_usuarios')
+    .select('ativo, deleted_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return !!(data?.ativo && !data.deleted_at)
+}
 
 export default async function HomePage() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // Super_admin: skip escola context entirely — go straight to /superadmin
+  if (user && await isSuperAdminUser(user.id)) {
+    redirect('/superadmin')
+  }
 
   if (user) {
     await syncUsuarioEscolaTiposAtual()
