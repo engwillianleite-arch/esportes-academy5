@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { listarContextosUsuarioAtual } from '@/lib/usuario-contexto'
 import { RegistrationWizard } from '@/components/escola/registration-wizard'
@@ -13,8 +14,13 @@ export default async function CadastrarEscolaPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg space-y-3">
         <RegistrationWizard />
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href="/selecionar-escola" className="underline underline-offset-4 hover:text-foreground">
+            Pular por agora
+          </Link>
+        </p>
       </div>
     </div>
   )
