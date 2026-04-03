@@ -15,28 +15,33 @@ const BG            = '#f8fafc'
 
 // ─── Nav definition ───────────────────────────────────────────────────────────
 type NavSection = { type: 'section'; label: string }
-type NavLink    = { type: 'link'; id: string; label: string; icon: string; href: string }
+type NavLink    = { type: 'link'; id: string; label: string; icon: string; href: string; stub?: true }
 type NavEntry   = NavSection | NavLink
 
 const NAV: NavEntry[] = [
   { type: 'section', label: 'Principal' },
-  { type: 'link', id: 'dashboard',   label: 'Dashboard',   icon: '📊', href: '/superadmin' },
-  { type: 'link', id: 'escolas',     label: 'Escolas',     icon: '🏫', href: '/superadmin/escolas' },
-  { type: 'link', id: 'usuarios',    label: 'Usuários',    icon: '👥', href: '/superadmin/usuarios' },
+  { type: 'link', id: 'dashboard',     label: 'Dashboard',        icon: '📊', href: '/superadmin'           },
+  { type: 'link', id: 'escolas',       label: 'Escolas',          icon: '🏫', href: '/superadmin/escolas'   },
+  { type: 'link', id: 'usuarios',      label: 'Usuários',         icon: '👤', href: '/superadmin/usuarios'  },
 
   { type: 'section', label: 'Financeiro' },
-  { type: 'link', id: 'faturamento', label: 'Faturamento', icon: '💳', href: '/superadmin/faturamento' },
+  { type: 'link', id: 'cobrancas',     label: 'Fluxo de Caixa',   icon: '💸', href: '/superadmin/faturamento' },
+  { type: 'link', id: 'planos',        label: 'Planos & Licenças',icon: '📦', href: '#', stub: true          },
+  { type: 'link', id: 'relatorios',    label: 'Relatórios',       icon: '📈', href: '#', stub: true          },
+  { type: 'link', id: 'notasfiscais',  label: 'Notas Fiscais',    icon: '🧾', href: '#', stub: true          },
 
-  { type: 'section', label: 'Configurações' },
-  { type: 'link', id: 'permissoes',  label: 'Permissões',  icon: '🔐', href: '/superadmin/permissoes' },
-  { type: 'link', id: 'auditoria',   label: 'Auditoria',   icon: '📋', href: '/superadmin/auditoria' },
+  { type: 'section', label: 'Sistema' },
+  { type: 'link', id: 'notificacoes',  label: 'Notificações',     icon: '🔔', href: '#', stub: true          },
+  { type: 'link', id: 'permissoes',    label: 'Permissões',       icon: '🛡️', href: '/superadmin/permissoes' },
+  { type: 'link', id: 'auditoria',     label: 'Auditoria',        icon: '📋', href: '/superadmin/auditoria'  },
+  { type: 'link', id: 'configuracoes', label: 'Configurações',    icon: '⚙️', href: '#', stub: true          },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
   '/superadmin':              'Dashboard',
   '/superadmin/escolas':      'Escolas',
   '/superadmin/usuarios':     'Usuários Internos',
-  '/superadmin/faturamento':  'Faturamento',
+  '/superadmin/faturamento':  'Fluxo de Caixa',
   '/superadmin/permissoes':   'Matriz de Permissões',
   '/superadmin/auditoria':    'Auditoria de Permissões',
 }
@@ -124,6 +129,19 @@ export function SuperAdminShell({ perfil, userName, children }: SuperAdminShellP
                 >
                   {item.label}
                 </p>
+              )
+            }
+
+            if (item.stub) {
+              return (
+                <span
+                  key={item.id}
+                  className="mb-px flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium opacity-35"
+                >
+                  <span className="w-5 flex-shrink-0 text-center text-[15px]">{item.icon}</span>
+                  <span className="flex-1 text-white/55">{item.label}</span>
+                  <span className="rounded-full bg-white/10 px-1.5 py-px text-[9px] font-semibold text-white/40 uppercase tracking-wide">em breve</span>
+                </span>
               )
             }
 
