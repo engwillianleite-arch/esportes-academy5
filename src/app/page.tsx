@@ -47,47 +47,18 @@ export default async function HomePage() {
 
     await clearEscolaCookiesOnly()
 
-    if (contextos.length === 0) {
-      if (user) {
-        const { data: responsavelByEmail } = await supabase
-          .from('responsaveis')
-          .select('id')
-          .eq('email', user.email?.trim().toLowerCase() ?? '')
-          .is('deleted_at', null)
-          .limit(1)
-          .maybeSingle()
-
-        if (responsavelByEmail) redirect('/pais/vincular')
-      }
-
-      redirect('/cadastrar-escola')
-    }
-
+    if (contextos.length === 0) redirect('/login')
     if (contextos.length === 1) {
       await selectEscola(contextos[0].escola_id, contextos[0].tipo_usuario)
     }
-
     redirect('/selecionar-escola')
   }
 
+  // No escola context cookie — resolve from user's contextos
   const contextosResult = user ? await listarContextosUsuarioAtual() : { rows: [] as never[] }
   const contextos = contextosResult.rows ?? []
 
-  if (contextos.length === 0) {
-    if (user) {
-      const { data: responsavelByEmail } = await supabase
-        .from('responsaveis')
-        .select('id')
-        .eq('email', user.email?.trim().toLowerCase() ?? '')
-        .is('deleted_at', null)
-        .limit(1)
-        .maybeSingle()
-
-      if (responsavelByEmail) redirect('/pais/vincular')
-    }
-
-    redirect('/cadastrar-escola')
-  }
+  if (contextos.length === 0) redirect('/login')
 
   if (contextos.length === 1) {
     await selectEscola(contextos[0].escola_id, contextos[0].tipo_usuario)

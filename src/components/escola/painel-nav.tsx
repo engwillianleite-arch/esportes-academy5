@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
-  { href: '/painel', label: 'InÃ­cio' },
+  { href: '/painel', label: 'Início' },
   { href: '/painel/dashboard', label: 'Dashboard' },
   { href: '/painel/atletas', label: 'Atletas' },
   { href: '/painel/turmas', label: 'Turmas' },
@@ -16,7 +16,7 @@ const LINKS = [
   { href: '/painel/saude', label: 'Saúde' },
   { href: '/painel/cursos', label: 'Cursos' },
   { href: '/painel/comunicacao-basica', label: 'Comunicação' },
-  { href: '/painel/configuracoes', label: 'ConfiguraÃ§Ãµes' },
+  { href: '/painel/configuracoes', label: 'Configurações' },
 ]
 
 export function PainelNav() {
@@ -42,6 +42,12 @@ export function PainelNav() {
             </Link>
           )
         })}
+        <Link
+          href="/selecionar-escola"
+          className="ml-auto rounded-md border px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          Trocar perfil
+        </Link>
       </div>
     </nav>
   )
