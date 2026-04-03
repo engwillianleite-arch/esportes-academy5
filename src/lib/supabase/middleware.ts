@@ -50,25 +50,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (
-    user &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/completar-cadastro')
-  ) {
-    const { data: usuarioGlobal } = await supabase
-      .from('usuarios')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .is('deleted_at', null)
-      .maybeSingle()
-
-    if (!usuarioGlobal) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/completar-cadastro'
-      return NextResponse.redirect(url)
-    }
-  }
-
   // Module feature flag + permission matrix enforcement (Story 1.6)
   if (user && request.nextUrl.pathname.startsWith('/painel/')) {
     const escolaId = request.cookies.get('ea-escola-id')?.value

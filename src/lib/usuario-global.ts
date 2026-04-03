@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { cleanCpf, validateCpf } from '@/lib/cpf'
 
 export type UsuarioGlobalState = {
@@ -88,7 +89,8 @@ export async function salvarUsuarioGlobal(
     deleted_at: null,
   }
 
-  const { error } = await supabase.from('usuarios').upsert(payload, {
+  const admin = createAdminClient()
+  const { error } = await admin.from('usuarios').upsert(payload, {
     onConflict: 'auth_user_id',
   })
 
