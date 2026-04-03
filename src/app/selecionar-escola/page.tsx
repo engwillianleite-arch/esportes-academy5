@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { selectEscolaFormAction } from '@/lib/escola-context'
 import { listarContextosUsuarioAtual } from '@/lib/usuario-contexto'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,6 +15,19 @@ function getPerfilLabel(perfil: string): string {
 }
 
 export default async function SelecionarEscolaPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('plataforma_usuarios')
+      .select('ativo, deleted_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (data?.ativo && !data.deleted_at) redirect('/superadmin')
+  }
+
   const result = await listarContextosUsuarioAtual()
 
   if (result.error) {

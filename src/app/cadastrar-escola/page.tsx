@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { listarContextosUsuarioAtual } from '@/lib/usuario-contexto'
 import { RegistrationWizard } from '@/components/escola/registration-wizard'
 import type { Metadata } from 'next'
@@ -9,6 +11,19 @@ export const metadata: Metadata = {
 }
 
 export default async function CadastrarEscolaPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('plataforma_usuarios')
+      .select('ativo, deleted_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (data?.ativo && !data.deleted_at) redirect('/superadmin')
+  }
+
   const result = await listarContextosUsuarioAtual()
   if ((result.rows ?? []).length > 0) redirect('/selecionar-escola')
 
