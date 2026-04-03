@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import type { Metadata } from 'next'
 
@@ -14,7 +15,23 @@ async function signOut() {
   redirect('/login')
 }
 
-export default function NoAccessPage() {
+export default async function NoAccessPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('plataforma_usuarios')
+      .select('ativo, deleted_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (data?.ativo && !data.deleted_at) {
+      redirect('/superadmin')
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-8">
       <div className="w-full max-w-md space-y-4 text-center">
