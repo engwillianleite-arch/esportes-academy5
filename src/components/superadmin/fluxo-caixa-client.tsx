@@ -7,6 +7,8 @@ import {
   atualizarLancamento,
   deletarLancamento,
   marcarRealizado,
+} from '@/lib/fluxo-caixa-actions'
+import {
   CATEGORIAS_RECEITA,
   CATEGORIAS_DESPESA,
   CATEGORIA_LABEL,
@@ -20,7 +22,7 @@ import {
   type KpiFluxo,
   type MonthlyAggregate,
   type CategoriaAggregate,
-} from '@/lib/fluxo-caixa-actions'
+} from '@/lib/fluxo-caixa-constants'
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
