@@ -211,8 +211,8 @@ export default function CadastroAtletaDrawer({ escolaId, open, onOpenChange }: P
       valor: String(p.valor),
       desconto_pct: String(p.desconto_pct),
       dia_vencimento: String(p.dia_vencimento),
-      forma_pagamento: p.metodo_pagamento,
-      tipo_periodo: p.frequencia,
+      forma_pagamento: p.metodo_pagamento as FormaMatricula,
+      tipo_periodo: p.frequencia as FrequenciaTipo,
     }))
   }
 

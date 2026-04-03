@@ -527,7 +527,7 @@ async function registrarAuditoria(params: {
     perfil: params.perfil ?? null,
     valor_antes: params.valorAntes ?? null,
     valor_depois: params.valorDepois ?? null,
-    detalhes: params.detalhes ?? null,
+    detalhes: (params.detalhes ?? null) as import('@/types/database').Json | null,
   })
   if (error) console.error('[registrarAuditoria]', error.message)
 }

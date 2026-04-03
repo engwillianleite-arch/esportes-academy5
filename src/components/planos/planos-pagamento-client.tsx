@@ -86,11 +86,11 @@ function emptyForm(): FormState {
 function planoToForm(p: PlanoPagamento): FormState {
   return {
     nome:             p.nome,
-    frequencia:       p.frequencia,
+    frequencia:       p.frequencia as FrequenciaTipo,
     valor:            String(p.valor),
     desconto_pct:     String(p.desconto_pct),
     dia_vencimento:   String(p.dia_vencimento),
-    metodo_pagamento: p.metodo_pagamento,
+    metodo_pagamento: p.metodo_pagamento as MetodoPagamento,
     cor:              p.cor,
   }
 }
@@ -380,7 +380,7 @@ export function PlanosPagamentoClient({
             <div className="flex items-center gap-2">
               <span className="truncate font-medium">{p.nome}</span>
               <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
-                {FREQUENCIA_LABELS[p.frequencia]}
+                {FREQUENCIA_LABELS[p.frequencia as FrequenciaTipo]}
               </span>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -389,7 +389,7 @@ export function PlanosPagamentoClient({
                 <span className="text-xs">({p.desconto_pct}% desc.)</span>
               )}
               <span>Dia {p.dia_vencimento}</span>
-              <span>{METODO_LABELS[p.metodo_pagamento]}</span>
+              <span>{METODO_LABELS[p.metodo_pagamento as MetodoPagamento]}</span>
             </div>
             <p className="text-xs text-muted-foreground">
               {p.linked_count} {p.linked_count === 1 ? 'atleta vinculado' : 'atletas vinculados'}

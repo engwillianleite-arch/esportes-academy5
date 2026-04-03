@@ -173,7 +173,7 @@ export async function enqueueEventoNotificacao(
     evento_tipo: eventoTipo,
     ref_tipo: (payload.ref_tipo as string | undefined) ?? null,
     ref_id: (payload.ref_id as string | undefined) ?? null,
-    payload,
+    payload: payload as import('@/types/database').Json,
     status: 'queued',
     idempotency_key: idempotencyKey ?? null,
   })

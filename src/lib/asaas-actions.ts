@@ -119,7 +119,8 @@ export async function salvarConfiguracaoAsaas(
     if (!token.startsWith('$aact_')) {
       return { error: 'Token inválido — deve começar com $aact_' }
     }
-    const { data: secretId, error: vaultError } = await supabase.rpc('salvar_asaas_token', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: secretId, error: vaultError } = await (supabase as any).rpc('salvar_asaas_token', {
       p_escola_id: escolaId,
       p_token: token,
     })
@@ -127,7 +128,7 @@ export async function salvarConfiguracaoAsaas(
       console.error('[salvarConfiguracaoAsaas] vault', vaultError.message)
       return { error: 'Erro ao salvar token. Tente novamente.' }
     }
-    vaultSecretId = secretId
+    vaultSecretId = secretId as string
   }
 
   // Single UPDATE: all Asaas config fields + vault secret id (if token was updated)

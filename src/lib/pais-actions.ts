@@ -463,10 +463,10 @@ export async function listarNotificacoesPais(): Promise<{
       .map((d) => ({
         id: d.id,
         evento_tipo: outboxMap.get(d.outbox_id)?.evento_tipo ?? 'evento',
-        mensagem:
-          typeof outboxMap.get(d.outbox_id)?.payload?.mensagem === 'string'
-            ? (outboxMap.get(d.outbox_id)?.payload?.mensagem as string)
-            : null,
+        mensagem: (() => {
+          const p = outboxMap.get(d.outbox_id)?.payload as Record<string, unknown> | null | undefined
+          return typeof p?.mensagem === 'string' ? p.mensagem : null
+        })(),
         canal: d.canal,
         status: d.status,
         created_at: d.created_at,

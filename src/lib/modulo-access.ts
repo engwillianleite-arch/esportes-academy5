@@ -38,6 +38,16 @@ export const PLAN_MODULES: Record<PlanoTipo, ModuloSlug[]> = {
     'financeiro',
     'comunicacao_basica',
   ],
+  premium: [
+    'administrativo',
+    'financeiro',
+    'comunicacao_basica',
+    'saude',
+    'eventos',
+    'treinamentos',
+    'comunicacao_avancada',
+    'relatorios',
+  ],
   pro: [
     'administrativo',
     'financeiro',

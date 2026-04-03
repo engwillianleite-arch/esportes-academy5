@@ -1,1655 +1,2379 @@
-// ─── Enums ────────────────────────────────────────────────────────────────────
-
-export type PlanoTipo = 'starter' | 'pro' | 'enterprise'
-
-export type FrequenciaTipo = 'mensal' | 'trimestral' | 'semestral' | 'anual'
-
-export type MetodoPagamento = 'boleto' | 'pix' | 'cartao_credito'
-
-export type SexoTipo = 'M' | 'F' | 'outro'
-
-export type PerfilUsuario =
-  | 'admin_escola'
-  | 'coordenador'
-  | 'professor'
-  | 'financeiro'
-  | 'secretaria'
-  | 'saude'
-  | 'marketing'
-  | 'responsavel'
-
-export type ModuloSlug =
-  | 'administrativo'
-  | 'financeiro'
-  | 'comunicacao_basica'
-  | 'saude'
-  | 'eventos'
-  | 'treinamentos'
-  | 'comunicacao_avancada'
-  | 'relatorios'
-  | 'competicoes'
-  | 'metodologia'
-  | 'cursos'
-
-// ─── Row types ────────────────────────────────────────────────────────────────
-
-// Must be `type` (not `interface`) — Supabase SDK checks Row extends Record<string, unknown>
-// in conditional types, which fails for interface types due to TypeScript's index-signature rules.
-export type Escola = {
-  id: string
-  nome: string
-  cnpj: string | null
-  email: string | null
-  telefone: string | null
-  plano: PlanoTipo
-  ativo: boolean
-  logo_url: string | null
-  modalidades: string[]
-  onboarding_completo: boolean
-  // Address fields (Story 2.2)
-  cep: string | null
-  logradouro: string | null
-  numero: string | null
-  complemento: string | null
-  bairro: string | null
-  cidade: string | null
-  estado: string | null
-  // Operational fields (Story 2.2)
-  janela_chamada_h: number
-  capacidade_padrao: number | null
-  /** % mínimo esperado; abaixo disso o atleta é sinalizado (Story 5.2) */
-  limiar_freq_pct: number
-  fuso_horario: string
-  // Asaas integration fields (Story 2.3)
-  asaas_env: string
-  asaas_vault_secret_id: string | null
-  asaas_wallet_id: string | null
-  asaas_webhook_secret: string | null
-  dias_antecipacao: number
-  multa_pct: number
-  juros_pct: number
-  desconto_antecip_pct: number
-  // Notification settings (Story 2.4)
-  notif_email: boolean
-  notif_push: boolean
-  notif_whatsapp: boolean
-  notif_sms: boolean
-  notif_cobranca_lembrete_d3: boolean
-  notif_cobranca_lembrete_d1: boolean
-  notif_cobranca_vencida: boolean
-  notif_cobranca_confirmacao: boolean
-  notif_frequencia_baixa: boolean
-  notif_ausencia: boolean
-  notif_relatorio_mensal: boolean
-  notif_aniversario_atleta: boolean
-  checkin_checkout_ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type EscolaUsuario = {
-  id: string
-  user_id: string
-  escola_id: string
-  perfil: PerfilUsuario
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type EscolaModulo = {
-  id: string
-  escola_id: string
-  modulo_slug: ModuloSlug
-  ativo: boolean
-  liberado_por: string | null
-  liberado_em: string | null
-  expira_em: string | null
-  nota: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type Atleta = {
-  id: string
-  cpf: string
-  nome: string
-  data_nascimento: string // date as ISO string
-  sexo: SexoTipo
-  foto_url: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type Responsavel = {
-  id: string
-  nome: string
-  /** CPF 11 dígitos — identificador único da pessoa (ver migration responsaveis.cpf) */
-  cpf: string | null
-  email: string | null
-  telefone: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type AtletaResponsavel = {
-  id: string
-  atleta_id: string
-  responsavel_id: string
-  financeiro: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type AtletaResponsavelWithResponsavel = AtletaResponsavel & {
-  responsavel: Responsavel
-}
-
-export type ResponsavelUsuario = {
-  id: string
-  responsavel_id: string
-  user_id: string
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type UsuarioGlobal = {
-  id: string
-  auth_user_id: string
-  cpf: string
-  nome: string
-  email: string | null
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type UsuarioEscolaTipo = {
-  id: string
-  usuario_id: string
-  escola_id: string
-  tipo_usuario: PerfilUsuario
-  principal: boolean
-  origem: string | null
-  ref_id: string | null
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type AtletaCarteirinha = {
-  id: string
-  atleta_id: string
-  escola_id: string
-  matricula_id: string | null
-  qr_token: string
-  ativo: boolean
-  impresso_em: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type TipoAcessoAtleta = 'check_in' | 'check_out'
-
-export type AtletaAcesso = {
-  id: string
-  atleta_id: string
-  escola_id: string
-  matricula_id: string | null
-  carteirinha_id: string | null
-  tipo: TipoAcessoAtleta
-  lido_por_user_id: string | null
-  qr_token_snapshot: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type TipoExameAtleta = 'clinico' | 'esportivo' | 'laboratorial'
-
-export type AtletaExame = {
-  id: string
-  atleta_id: string
-  escola_id: string
-  matricula_id: string | null
-  tipo_exame: TipoExameAtleta
-  titulo: string
-  data_exame: string
-  resultado_resumido: string | null
-  arquivo_url: string | null
-  recorrente: boolean
-  proximo_vencimento: string | null
-  criado_por: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type AtletaAtestado = {
-  id: string
-  atleta_id: string
-  escola_id: string
-  matricula_id: string | null
-  titulo: string
-  observacao: string | null
-  data_emissao: string
-  validade_ate: string | null
-  arquivo_url: string | null
-  criado_por: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type PlanoPagamento = {
-  id: string
-  escola_id: string
-  nome: string
-  frequencia: FrequenciaTipo
-  valor: number
-  desconto_pct: number
-  valor_liquido: number
-  dia_vencimento: number
-  metodo_pagamento: MetodoPagamento
-  cor: string
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type TipoPeriodoMatricula =
-  | 'mensal'
-  | 'trimestral'
-  | 'semestral'
-  | 'anual'
-  | 'personalizado'
-
-export type StatusMatricula = 'ativa' | 'suspensa' | 'cancelada' | 'encerrada'
-
-export type FormaPagamentoMatricula = 'boleto' | 'pix' | 'cartao_credito' | 'qualquer'
-export type StatusCobranca = 'pendente' | 'pago' | 'vencido' | 'cancelado'
-export type PerfilPlataforma = 'super_admin' | 'suporte' | 'financeiro_interno'
-export type StatusAssinaturaPlataforma = 'adimplente' | 'atraso' | 'suspenso'
-export type StatusNotificacaoOutbox = 'queued' | 'processing' | 'sent' | 'failed'
-export type CanalNotificacao = 'email' | 'push'
-export type StatusEntregaNotificacao = 'queued' | 'sent' | 'failed'
-
-export type Matricula = {
-  id: string
-  atleta_id: string
-  escola_id: string
-  turma_id: string | null
-  plano_id: string | null
-  data_inicio: string
-  data_fim: string | null
-  tipo_periodo: TipoPeriodoMatricula
-  valor: number
-  desconto_pct: number
-  desconto_motivo: string | null
-  valor_liquido: number
-  dia_vencimento: number
-  forma_pagamento: FormaPagamentoMatricula
-  gerar_auto: boolean
-  total_parcelas: number | null
-  parcelas_geradas: number
-  status: StatusMatricula
-  motivo_status: string | null
-  obs: string | null
-  criado_por: string | null
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-}
-
-export type Cobranca = {
-  id: string
-  escola_id: string
-  matricula_id: string | null
-  valor: number
-  vencimento: string
-  descricao: string | null
-  referencia: string | null
-  asaas_charge_id: string | null
-  status: StatusCobranca
-  data_pagamento: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type PlataformaUsuario = {
-  id: string
-  user_id: string
-  perfil: PerfilPlataforma
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type AssinaturaPlataforma = {
-  id: string
-  escola_id: string
-  valor_mensal: number
-  dia_vencimento: number
-  status: StatusAssinaturaPlataforma
-  referencia_externa: string | null
-  proximo_vencimento: string | null
-  observacoes: string | null
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type PublicoAlvoCurso = 'professor' | 'admin' | 'responsavel' | 'atleta' | 'todos'
-export type StatusCurso = 'rascunho' | 'publicado' | 'arquivado'
-export type ModalidadeComercialCurso = 'assinatura' | 'individual'
-
-export type Curso = {
-  id: string
-  escola_id: string
-  titulo: string
-  descricao: string | null
-  publico_alvo: PublicoAlvoCurso
-  status: StatusCurso
-  modalidade_comercial: ModalidadeComercialCurso
-  preco: number
-  periodo_acesso_dias: number | null
-  oferta_ativa: boolean
-  interno: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type CursoModulo = {
-  id: string
-  curso_id: string
-  titulo: string
-  descricao: string | null
-  ordem: number
-  published: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type CursoAula = {
-  id: string
-  curso_id: string
-  modulo_id: string
-  titulo: string
-  descricao: string | null
-  ordem: number
-  video_url: string | null
-  pdf_url: string | null
-  texto_conteudo: string | null
-  quiz_habilitado: boolean
-  published: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type TipoCursoQuiz = 'aula' | 'modulo' | 'curso_final'
-
-export type CursoQuiz = {
-  id: string
-  curso_id: string
-  modulo_id: string | null
-  aula_id: string | null
-  tipo: TipoCursoQuiz
-  titulo: string
-  descricao: string | null
-  nota_minima: number
-  tentativas_max: number
-  published: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type CursoQuizPergunta = {
-  id: string
-  quiz_id: string
-  enunciado: string
-  ordem: number
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type CursoQuizAlternativa = {
-  id: string
-  pergunta_id: string
-  texto: string
-  ordem: number
-  correta: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type CursoQuizTentativa = {
-  id: string
-  quiz_id: string
-  user_id: string
-  tentativa_numero: number
-  nota: number
-  aprovado: boolean
-  respostas: Record<string, unknown>[]
-  created_at: string
-  updated_at: string
-}
-
-export type NotificacaoOutbox = {
-  id: string
-  escola_id: string
-  evento_tipo: string
-  ref_tipo: string | null
-  ref_id: string | null
-  payload: Record<string, unknown>
-  status: StatusNotificacaoOutbox
-  tentativas: number
-  next_retry_at: string | null
-  idempotency_key: string | null
-  erro: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type NotificacaoEntrega = {
-  id: string
-  outbox_id: string
-  escola_id: string
-  canal: CanalNotificacao
-  destinatario_id: string | null
-  destinatario_contato: string | null
-  status: StatusEntregaNotificacao
-  provider_message_id: string | null
-  erro: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type Turma = {
-  id: string
-  escola_id: string
-  nome: string
-  modalidade: string
-  local: string | null
-  capacidade_max: number
-  idade_min: number | null
-  idade_max: number | null
-  professor_nome: string | null
-  /** Usuário logado responsável pela turma (chamada / Story 5.1) */
-  professor_user_id: string | null
-  dia_semana: number | null
-  hora_inicio: string | null
-  hora_fim: string | null
-  ativo: boolean
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type StatusPresenca = 'presente' | 'ausente' | 'justificada'
-
-export type Aula = {
-  id: string
-  escola_id: string
-  turma_id: string
-  data_aula: string
-  created_at: string
-  updated_at: string
-}
-
-export type PresencaRegistro = {
-  id: string
-  aula_id: string
-  matricula_id: string
-  status: StatusPresenca
-  observacao: string | null
-  created_at: string
-  updated_at: string
-}
-
-// ─── Joined types ─────────────────────────────────────────────────────────────
-
-// Used when escola data is fetched alongside escola_usuarios
-// Matches: .from('escola_usuarios').select('*, escola:escolas(*)')
-export type EscolaUsuarioWithEscola = EscolaUsuario & {
-  escola: Escola
-}
-
-// ─── Supabase Database type (for typed client generics) ───────────────────────
-// Uses flat inline types (not Partial<Omit<...>>) to match Supabase SDK's
-// generic resolution — Supabase SDK collapses Partial<Omit<...>> to `never`
-// when resolving .update() and .insert() parameter types.
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.4"
+  }
   public: {
     Tables: {
-      escolas: {
-        Row: Escola
-        Insert: {
-          id?: string
-          nome: string
-          cnpj?: string | null
-          email?: string | null
-          telefone?: string | null
-          plano?: PlanoTipo
-          ativo?: boolean
-          logo_url?: string | null
-          modalidades?: string[] | null
-          onboarding_completo?: boolean | null
-          cep?: string | null
-          logradouro?: string | null
-          numero?: string | null
-          complemento?: string | null
-          bairro?: string | null
-          cidade?: string | null
-          estado?: string | null
-          janela_chamada_h?: number
-          capacidade_padrao?: number | null
-          limiar_freq_pct?: number
-          fuso_horario?: string
-          asaas_env?: string
-          asaas_vault_secret_id?: string | null
-          asaas_wallet_id?: string | null
-          asaas_webhook_secret?: string | null
-          dias_antecipacao?: number
-          multa_pct?: number
-          juros_pct?: number
-          desconto_antecip_pct?: number
-          notif_email?: boolean
-          notif_push?: boolean
-          notif_whatsapp?: boolean
-          notif_sms?: boolean
-          notif_cobranca_lembrete_d3?: boolean
-          notif_cobranca_lembrete_d1?: boolean
-          notif_cobranca_vencida?: boolean
-          notif_cobranca_confirmacao?: boolean
-          notif_frequencia_baixa?: boolean
-          notif_ausencia?: boolean
-          notif_relatorio_mensal?: boolean
-          notif_aniversario_atleta?: boolean
-          checkin_checkout_ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          nome?: string
-          cnpj?: string | null
-          email?: string | null
-          telefone?: string | null
-          plano?: PlanoTipo
-          ativo?: boolean
-          logo_url?: string | null
-          modalidades?: string[] | null
-          onboarding_completo?: boolean | null
-          cep?: string | null
-          logradouro?: string | null
-          numero?: string | null
-          complemento?: string | null
-          bairro?: string | null
-          cidade?: string | null
-          estado?: string | null
-          janela_chamada_h?: number
-          capacidade_padrao?: number | null
-          limiar_freq_pct?: number
-          fuso_horario?: string
-          asaas_env?: string
-          asaas_vault_secret_id?: string | null
-          asaas_wallet_id?: string | null
-          asaas_webhook_secret?: string | null
-          dias_antecipacao?: number
-          multa_pct?: number
-          juros_pct?: number
-          desconto_antecip_pct?: number
-          notif_email?: boolean
-          notif_push?: boolean
-          notif_whatsapp?: boolean
-          notif_sms?: boolean
-          notif_cobranca_lembrete_d3?: boolean
-          notif_cobranca_lembrete_d1?: boolean
-          notif_cobranca_vencida?: boolean
-          notif_cobranca_confirmacao?: boolean
-          notif_frequencia_baixa?: boolean
-          notif_ausencia?: boolean
-          notif_relatorio_mensal?: boolean
-          notif_aniversario_atleta?: boolean
-          checkin_checkout_ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      escola_usuarios: {
-        Row: EscolaUsuario
-        Insert: {
-          id?: string
-          user_id: string
+      assinaturas_plataforma: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          dia_vencimento: number
           escola_id: string
-          perfil?: PerfilUsuario
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
+          id: string
+          observacoes: string | null
+          proximo_vencimento: string | null
+          referencia_externa: string | null
+          status: string
+          updated_at: string
+          valor_mensal: number
         }
-        Update: {
-          id?: string
-          user_id?: string
-          escola_id?: string
-          perfil?: PerfilUsuario
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      escola_modulos: {
-        Row: EscolaModulo
         Insert: {
-          id?: string
+          created_at?: string
+          deleted_at?: string | null
+          dia_vencimento?: number
           escola_id: string
-          modulo_slug: ModuloSlug
-          ativo?: boolean
-          liberado_por?: string | null
-          liberado_em?: string | null
-          expira_em?: string | null
-          nota?: string | null
-          created_at?: string
+          id?: string
+          observacoes?: string | null
+          proximo_vencimento?: string | null
+          referencia_externa?: string | null
+          status?: string
           updated_at?: string
+          valor_mensal?: number
         }
         Update: {
-          id?: string
+          created_at?: string
+          deleted_at?: string | null
+          dia_vencimento?: number
           escola_id?: string
-          modulo_slug?: ModuloSlug
-          ativo?: boolean
-          liberado_por?: string | null
-          liberado_em?: string | null
-          expira_em?: string | null
-          nota?: string | null
-          created_at?: string
+          id?: string
+          observacoes?: string | null
+          proximo_vencimento?: string | null
+          referencia_externa?: string | null
+          status?: string
           updated_at?: string
+          valor_mensal?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "assinaturas_plataforma_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: true
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      atletas: {
-        Row: Atleta
-        Insert: {
-          id?: string
-          cpf: string
-          nome: string
-          data_nascimento: string
-          sexo: SexoTipo
-          foto_url?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          cpf?: string
-          nome?: string
-          data_nascimento?: string
-          sexo?: SexoTipo
-          foto_url?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      responsaveis: {
-        Row: Responsavel
-        Insert: {
-          id?: string
-          nome: string
-          cpf?: string | null
-          email?: string | null
-          telefone?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          nome?: string
-          cpf?: string | null
-          email?: string | null
-          telefone?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      atleta_responsaveis: {
-        Row: AtletaResponsavel
-        Insert: {
-          id?: string
+      atleta_acessos: {
+        Row: {
           atleta_id: string
-          responsavel_id: string
-          financeiro?: boolean
-          deleted_at?: string | null
+          carteirinha_id: string | null
+          created_at: string
+          deleted_at: string | null
+          escola_id: string
+          id: string
+          lido_por_user_id: string | null
+          matricula_id: string | null
+          qr_token_snapshot: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          atleta_id: string
+          carteirinha_id?: string | null
           created_at?: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          lido_por_user_id?: string | null
+          matricula_id?: string | null
+          qr_token_snapshot?: string | null
+          tipo: string
           updated_at?: string
         }
         Update: {
-          id?: string
           atleta_id?: string
-          responsavel_id?: string
-          financeiro?: boolean
-          deleted_at?: string | null
+          carteirinha_id?: string | null
           created_at?: string
+          deleted_at?: string | null
+          escola_id?: string
+          id?: string
+          lido_por_user_id?: string | null
+          matricula_id?: string | null
+          qr_token_snapshot?: string | null
+          tipo?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'atleta_responsaveis_responsavel_id_fkey'
-            columns: ['responsavel_id']
-            referencedRelation: 'responsaveis'
-            referencedColumns: ['id']
+            foreignKeyName: "atleta_acessos_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'atleta_responsaveis_atleta_id_fkey'
-            columns: ['atleta_id']
-            referencedRelation: 'atletas'
-            referencedColumns: ['id']
+            foreignKeyName: "atleta_acessos_carteirinha_id_fkey"
+            columns: ["carteirinha_id"]
+            isOneToOne: false
+            referencedRelation: "atleta_carteirinhas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_acessos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_acessos_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
           },
         ]
       }
-      responsavel_usuarios: {
-        Row: ResponsavelUsuario
-        Insert: {
-          id?: string
-          responsavel_id: string
-          user_id: string
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          responsavel_id?: string
-          user_id?: string
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      usuarios: {
-        Row: UsuarioGlobal
-        Insert: {
-          id?: string
-          auth_user_id: string
-          cpf: string
-          nome: string
-          email?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          auth_user_id?: string
-          cpf?: string
-          nome?: string
-          email?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      usuario_escola_tipos: {
-        Row: UsuarioEscolaTipo
-        Insert: {
-          id?: string
-          usuario_id: string
+      atleta_atestados: {
+        Row: {
+          arquivo_url: string | null
+          atleta_id: string
+          created_at: string
+          criado_por: string | null
+          data_emissao: string
+          deleted_at: string | null
           escola_id: string
-          tipo_usuario: PerfilUsuario
-          principal?: boolean
-          origem?: string | null
-          ref_id?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
+          id: string
+          matricula_id: string | null
+          observacao: string | null
+          titulo: string
+          updated_at: string
+          validade_ate: string | null
+        }
+        Insert: {
+          arquivo_url?: string | null
+          atleta_id: string
           created_at?: string
+          criado_por?: string | null
+          data_emissao: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          matricula_id?: string | null
+          observacao?: string | null
+          titulo: string
           updated_at?: string
+          validade_ate?: string | null
         }
         Update: {
-          id?: string
-          usuario_id?: string
-          escola_id?: string
-          tipo_usuario?: PerfilUsuario
-          principal?: boolean
-          origem?: string | null
-          ref_id?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
+          arquivo_url?: string | null
+          atleta_id?: string
           created_at?: string
+          criado_por?: string | null
+          data_emissao?: string
+          deleted_at?: string | null
+          escola_id?: string
+          id?: string
+          matricula_id?: string | null
+          observacao?: string | null
+          titulo?: string
           updated_at?: string
+          validade_ate?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "atleta_atestados_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_atestados_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_atestados_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       atleta_carteirinhas: {
-        Row: AtletaCarteirinha
-        Insert: {
-          id?: string
+        Row: {
+          ativo: boolean
           atleta_id: string
+          created_at: string
+          deleted_at: string | null
           escola_id: string
+          id: string
+          impresso_em: string | null
+          matricula_id: string | null
+          qr_token: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          atleta_id: string
+          created_at?: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          impresso_em?: string | null
           matricula_id?: string | null
           qr_token: string
-          ativo?: boolean
-          impresso_em?: string | null
-          deleted_at?: string | null
-          created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: string
+          ativo?: boolean
           atleta_id?: string
+          created_at?: string
+          deleted_at?: string | null
           escola_id?: string
+          id?: string
+          impresso_em?: string | null
           matricula_id?: string | null
           qr_token?: string
-          ativo?: boolean
-          impresso_em?: string | null
-          deleted_at?: string | null
-          created_at?: string
           updated_at?: string
         }
-        Relationships: []
-      }
-      atleta_acessos: {
-        Row: AtletaAcesso
-        Insert: {
-          id?: string
-          atleta_id: string
-          escola_id: string
-          matricula_id?: string | null
-          carteirinha_id?: string | null
-          tipo: TipoAcessoAtleta
-          lido_por_user_id?: string | null
-          qr_token_snapshot?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          atleta_id?: string
-          escola_id?: string
-          matricula_id?: string | null
-          carteirinha_id?: string | null
-          tipo?: TipoAcessoAtleta
-          lido_por_user_id?: string | null
-          qr_token_snapshot?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "atleta_carteirinhas_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_carteirinhas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_carteirinhas_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       atleta_exames: {
-        Row: AtletaExame
-        Insert: {
-          id?: string
+        Row: {
+          arquivo_url: string | null
           atleta_id: string
-          escola_id: string
-          matricula_id?: string | null
-          tipo_exame: TipoExameAtleta
-          titulo: string
+          created_at: string
+          criado_por: string | null
           data_exame: string
-          resultado_resumido?: string | null
+          deleted_at: string | null
+          escola_id: string
+          id: string
+          matricula_id: string | null
+          proximo_vencimento: string | null
+          recorrente: boolean
+          resultado_resumido: string | null
+          tipo_exame: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
           arquivo_url?: string | null
-          recorrente?: boolean
-          proximo_vencimento?: string | null
-          criado_por?: string | null
-          deleted_at?: string | null
+          atleta_id: string
           created_at?: string
+          criado_por?: string | null
+          data_exame: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          matricula_id?: string | null
+          proximo_vencimento?: string | null
+          recorrente?: boolean
+          resultado_resumido?: string | null
+          tipo_exame: string
+          titulo: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          atleta_id?: string
-          escola_id?: string
-          matricula_id?: string | null
-          tipo_exame?: TipoExameAtleta
-          titulo?: string
-          data_exame?: string
-          resultado_resumido?: string | null
           arquivo_url?: string | null
-          recorrente?: boolean
-          proximo_vencimento?: string | null
-          criado_por?: string | null
-          deleted_at?: string | null
+          atleta_id?: string
           created_at?: string
+          criado_por?: string | null
+          data_exame?: string
+          deleted_at?: string | null
+          escola_id?: string
+          id?: string
+          matricula_id?: string | null
+          proximo_vencimento?: string | null
+          recorrente?: boolean
+          resultado_resumido?: string | null
+          tipo_exame?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atleta_exames_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_exames_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_exames_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atleta_responsaveis: {
+        Row: {
+          atleta_id: string
+          created_at: string
+          deleted_at: string | null
+          financeiro: boolean
+          id: string
+          responsavel_id: string
+          updated_at: string
+        }
+        Insert: {
+          atleta_id: string
+          created_at?: string
+          deleted_at?: string | null
+          financeiro?: boolean
+          id?: string
+          responsavel_id: string
+          updated_at?: string
+        }
+        Update: {
+          atleta_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          financeiro?: boolean
+          id?: string
+          responsavel_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atleta_responsaveis_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atleta_responsaveis_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "responsaveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atletas: {
+        Row: {
+          cpf: string
+          created_at: string
+          data_nascimento: string
+          deleted_at: string | null
+          foto_url: string | null
+          id: string
+          nome: string
+          sexo: string
+          updated_at: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          data_nascimento: string
+          deleted_at?: string | null
+          foto_url?: string | null
+          id?: string
+          nome: string
+          sexo: string
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          data_nascimento?: string
+          deleted_at?: string | null
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          sexo?: string
           updated_at?: string
         }
         Relationships: []
       }
-      atleta_atestados: {
-        Row: AtletaAtestado
+      auditoria_permissoes: {
+        Row: {
+          ator_email: string | null
+          ator_id: string
+          criado_em: string
+          detalhes: Json | null
+          escola_id: string | null
+          id: string
+          ip: string | null
+          modulo_slug: string | null
+          perfil: string | null
+          tipo: string
+          valor_antes: boolean | null
+          valor_depois: boolean | null
+        }
         Insert: {
+          ator_email?: string | null
+          ator_id: string
+          criado_em?: string
+          detalhes?: Json | null
+          escola_id?: string | null
           id?: string
-          atleta_id: string
+          ip?: string | null
+          modulo_slug?: string | null
+          perfil?: string | null
+          tipo: string
+          valor_antes?: boolean | null
+          valor_depois?: boolean | null
+        }
+        Update: {
+          ator_email?: string | null
+          ator_id?: string
+          criado_em?: string
+          detalhes?: Json | null
+          escola_id?: string | null
+          id?: string
+          ip?: string | null
+          modulo_slug?: string | null
+          perfil?: string | null
+          tipo?: string
+          valor_antes?: boolean | null
+          valor_depois?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_permissoes_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aulas: {
+        Row: {
+          created_at: string
+          data_aula: string
           escola_id: string
-          matricula_id?: string | null
-          titulo: string
-          observacao?: string | null
-          data_emissao: string
-          validade_ate?: string | null
-          arquivo_url?: string | null
-          criado_por?: string | null
-          deleted_at?: string | null
+          id: string
+          turma_id: string
+          updated_at: string
+        }
+        Insert: {
           created_at?: string
+          data_aula: string
+          escola_id: string
+          id?: string
+          turma_id: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          atleta_id?: string
-          escola_id?: string
-          matricula_id?: string | null
-          titulo?: string
-          observacao?: string | null
-          data_emissao?: string
-          validade_ate?: string | null
-          arquivo_url?: string | null
-          criado_por?: string | null
-          deleted_at?: string | null
           created_at?: string
+          data_aula?: string
+          escola_id?: string
+          id?: string
+          turma_id?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aulas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aulas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cobrancas: {
+        Row: {
+          asaas_charge_id: string | null
+          created_at: string
+          data_pagamento: string | null
+          deleted_at: string | null
+          descricao: string | null
+          escola_id: string
+          id: string
+          matricula_id: string | null
+          referencia: string | null
+          status: string
+          updated_at: string
+          valor: number
+          vencimento: string
+        }
+        Insert: {
+          asaas_charge_id?: string | null
+          created_at?: string
+          data_pagamento?: string | null
+          deleted_at?: string | null
+          descricao?: string | null
+          escola_id: string
+          id?: string
+          matricula_id?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          valor: number
+          vencimento: string
+        }
+        Update: {
+          asaas_charge_id?: string | null
+          created_at?: string
+          data_pagamento?: string | null
+          deleted_at?: string | null
+          descricao?: string | null
+          escola_id?: string
+          id?: string
+          matricula_id?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_assinaturas_usuarios: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          escola_id: string
+          fim_em: string | null
+          id: string
+          inicio_em: string
+          origem: string
+          status: string
+          titulo: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          escola_id: string
+          fim_em?: string | null
+          id?: string
+          inicio_em: string
+          origem?: string
+          status?: string
+          titulo?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          escola_id?: string
+          fim_em?: string | null
+          id?: string
+          inicio_em?: string
+          origem?: string
+          status?: string
+          titulo?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_assinaturas_usuarios_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_aula_progresso: {
+        Row: {
+          aula_id: string
+          concluida: boolean
+          concluida_em: string | null
+          created_at: string
+          curso_id: string
+          id: string
+          matricula_id: string | null
+          ultima_interacao_em: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aula_id: string
+          concluida?: boolean
+          concluida_em?: string | null
+          created_at?: string
+          curso_id: string
+          id?: string
+          matricula_id?: string | null
+          ultima_interacao_em?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aula_id?: string
+          concluida?: boolean
+          concluida_em?: string | null
+          created_at?: string
+          curso_id?: string
+          id?: string
+          matricula_id?: string | null
+          ultima_interacao_em?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_aula_progresso_aula_id_fkey"
+            columns: ["aula_id"]
+            isOneToOne: false
+            referencedRelation: "curso_aulas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_aula_progresso_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_aula_progresso_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "curso_matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_aulas: {
+        Row: {
+          created_at: string
+          curso_id: string
+          deleted_at: string | null
+          descricao: string | null
+          id: string
+          modulo_id: string
+          ordem: number
+          pdf_url: string | null
+          published: boolean
+          quiz_habilitado: boolean
+          texto_conteudo: string | null
+          titulo: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          curso_id: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          modulo_id: string
+          ordem: number
+          pdf_url?: string | null
+          published?: boolean
+          quiz_habilitado?: boolean
+          texto_conteudo?: string | null
+          titulo: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          curso_id?: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          modulo_id?: string
+          ordem?: number
+          pdf_url?: string | null
+          published?: boolean
+          quiz_habilitado?: boolean
+          texto_conteudo?: string | null
+          titulo?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_aulas_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_aulas_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "curso_modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_matriculas: {
+        Row: {
+          aprovado: boolean
+          assinatura_id: string | null
+          created_at: string
+          curso_id: string
+          deleted_at: string | null
+          escola_id: string
+          expira_em: string | null
+          id: string
+          liberado_em: string
+          origem_liberacao: string
+          progresso_pct: number
+          status: string
+          ultima_atividade_em: string | null
+          updated_at: string
+          user_id: string
+          valor_pago: number
+        }
+        Insert: {
+          aprovado?: boolean
+          assinatura_id?: string | null
+          created_at?: string
+          curso_id: string
+          deleted_at?: string | null
+          escola_id: string
+          expira_em?: string | null
+          id?: string
+          liberado_em?: string
+          origem_liberacao: string
+          progresso_pct?: number
+          status?: string
+          ultima_atividade_em?: string | null
+          updated_at?: string
+          user_id: string
+          valor_pago?: number
+        }
+        Update: {
+          aprovado?: boolean
+          assinatura_id?: string | null
+          created_at?: string
+          curso_id?: string
+          deleted_at?: string | null
+          escola_id?: string
+          expira_em?: string | null
+          id?: string
+          liberado_em?: string
+          origem_liberacao?: string
+          progresso_pct?: number
+          status?: string
+          ultima_atividade_em?: string | null
+          updated_at?: string
+          user_id?: string
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_matriculas_assinatura_id_fkey"
+            columns: ["assinatura_id"]
+            isOneToOne: false
+            referencedRelation: "curso_assinaturas_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_matriculas_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_matriculas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_modulos: {
+        Row: {
+          created_at: string
+          curso_id: string
+          deleted_at: string | null
+          descricao: string | null
+          id: string
+          ordem: number
+          published: boolean
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          curso_id: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          ordem: number
+          published?: boolean
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          curso_id?: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          ordem?: number
+          published?: boolean
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_modulos_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_quiz_alternativas: {
+        Row: {
+          correta: boolean
+          created_at: string
+          deleted_at: string | null
+          id: string
+          ordem: number
+          pergunta_id: string
+          texto: string
+          updated_at: string
+        }
+        Insert: {
+          correta?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          ordem: number
+          pergunta_id: string
+          texto: string
+          updated_at?: string
+        }
+        Update: {
+          correta?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          ordem?: number
+          pergunta_id?: string
+          texto?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_quiz_alternativas_pergunta_id_fkey"
+            columns: ["pergunta_id"]
+            isOneToOne: false
+            referencedRelation: "curso_quiz_perguntas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_quiz_perguntas: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          enunciado: string
+          id: string
+          ordem: number
+          quiz_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          enunciado: string
+          id?: string
+          ordem: number
+          quiz_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          enunciado?: string
+          id?: string
+          ordem?: number
+          quiz_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_quiz_perguntas_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "curso_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_quiz_tentativas: {
+        Row: {
+          aprovado: boolean
+          created_at: string
+          id: string
+          nota: number
+          quiz_id: string
+          respostas: Json
+          tentativa_numero: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aprovado?: boolean
+          created_at?: string
+          id?: string
+          nota?: number
+          quiz_id: string
+          respostas?: Json
+          tentativa_numero: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aprovado?: boolean
+          created_at?: string
+          id?: string
+          nota?: number
+          quiz_id?: string
+          respostas?: Json
+          tentativa_numero?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_quiz_tentativas_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "curso_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curso_quizzes: {
+        Row: {
+          aula_id: string | null
+          created_at: string
+          curso_id: string
+          deleted_at: string | null
+          descricao: string | null
+          id: string
+          modulo_id: string | null
+          nota_minima: number
+          published: boolean
+          tentativas_max: number
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          aula_id?: string | null
+          created_at?: string
+          curso_id: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          modulo_id?: string | null
+          nota_minima?: number
+          published?: boolean
+          tentativas_max?: number
+          tipo: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          aula_id?: string | null
+          created_at?: string
+          curso_id?: string
+          deleted_at?: string | null
+          descricao?: string | null
+          id?: string
+          modulo_id?: string | null
+          nota_minima?: number
+          published?: boolean
+          tentativas_max?: number
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curso_quizzes_aula_id_fkey"
+            columns: ["aula_id"]
+            isOneToOne: false
+            referencedRelation: "curso_aulas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_quizzes_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curso_quizzes_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "curso_modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cursos: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          descricao: string | null
+          escola_id: string
+          id: string
+          interno: boolean
+          modalidade_comercial: string
+          oferta_ativa: boolean
+          periodo_acesso_dias: number | null
+          preco: number
+          publico_alvo: string
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          descricao?: string | null
+          escola_id: string
+          id?: string
+          interno?: boolean
+          modalidade_comercial: string
+          oferta_ativa?: boolean
+          periodo_acesso_dias?: number | null
+          preco?: number
+          publico_alvo: string
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          descricao?: string | null
+          escola_id?: string
+          id?: string
+          interno?: boolean
+          modalidade_comercial?: string
+          oferta_ativa?: boolean
+          periodo_acesso_dias?: number | null
+          preco?: number
+          publico_alvo?: string
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cursos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escola_modulos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          escola_id: string
+          expira_em: string | null
+          id: string
+          liberado_em: string | null
+          liberado_por: string | null
+          modulo_slug: string
+          nota: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          escola_id: string
+          expira_em?: string | null
+          id?: string
+          liberado_em?: string | null
+          liberado_por?: string | null
+          modulo_slug: string
+          nota?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          escola_id?: string
+          expira_em?: string | null
+          id?: string
+          liberado_em?: string | null
+          liberado_por?: string | null
+          modulo_slug?: string
+          nota?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escola_modulos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escola_usuarios: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          deleted_at: string | null
+          escola_id: string
+          id: string
+          perfil: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          perfil?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          escola_id?: string
+          id?: string
+          perfil?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escola_usuarios_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escolas: {
+        Row: {
+          asaas_env: string
+          asaas_vault_secret_id: string | null
+          asaas_wallet_id: string | null
+          asaas_webhook_secret: string | null
+          ativo: boolean
+          bairro: string | null
+          capacidade_padrao: number | null
+          cep: string | null
+          checkin_checkout_ativo: boolean
+          cidade: string | null
+          cnpj: string | null
+          complemento: string | null
+          created_at: string
+          deleted_at: string | null
+          desconto_antecip_pct: number
+          dias_antecipacao: number
+          email: string | null
+          estado: string | null
+          fuso_horario: string
+          id: string
+          janela_chamada_h: number
+          juros_pct: number
+          limiar_freq_pct: number
+          logo_url: string | null
+          logradouro: string | null
+          modalidades: string[]
+          multa_pct: number
+          nome: string
+          notif_aniversario_atleta: boolean
+          notif_ausencia: boolean
+          notif_cobranca_confirmacao: boolean
+          notif_cobranca_lembrete_d1: boolean
+          notif_cobranca_lembrete_d3: boolean
+          notif_cobranca_vencida: boolean
+          notif_email: boolean
+          notif_frequencia_baixa: boolean
+          notif_push: boolean
+          notif_relatorio_mensal: boolean
+          notif_sms: boolean
+          notif_whatsapp: boolean
+          numero: string | null
+          onboarding_completo: boolean
+          plano: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          asaas_env?: string
+          asaas_vault_secret_id?: string | null
+          asaas_wallet_id?: string | null
+          asaas_webhook_secret?: string | null
+          ativo?: boolean
+          bairro?: string | null
+          capacidade_padrao?: number | null
+          cep?: string | null
+          checkin_checkout_ativo?: boolean
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          desconto_antecip_pct?: number
+          dias_antecipacao?: number
+          email?: string | null
+          estado?: string | null
+          fuso_horario?: string
+          id?: string
+          janela_chamada_h?: number
+          juros_pct?: number
+          limiar_freq_pct?: number
+          logo_url?: string | null
+          logradouro?: string | null
+          modalidades?: string[]
+          multa_pct?: number
+          nome: string
+          notif_aniversario_atleta?: boolean
+          notif_ausencia?: boolean
+          notif_cobranca_confirmacao?: boolean
+          notif_cobranca_lembrete_d1?: boolean
+          notif_cobranca_lembrete_d3?: boolean
+          notif_cobranca_vencida?: boolean
+          notif_email?: boolean
+          notif_frequencia_baixa?: boolean
+          notif_push?: boolean
+          notif_relatorio_mensal?: boolean
+          notif_sms?: boolean
+          notif_whatsapp?: boolean
+          numero?: string | null
+          onboarding_completo?: boolean
+          plano?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asaas_env?: string
+          asaas_vault_secret_id?: string | null
+          asaas_wallet_id?: string | null
+          asaas_webhook_secret?: string | null
+          ativo?: boolean
+          bairro?: string | null
+          capacidade_padrao?: number | null
+          cep?: string | null
+          checkin_checkout_ativo?: boolean
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          desconto_antecip_pct?: number
+          dias_antecipacao?: number
+          email?: string | null
+          estado?: string | null
+          fuso_horario?: string
+          id?: string
+          janela_chamada_h?: number
+          juros_pct?: number
+          limiar_freq_pct?: number
+          logo_url?: string | null
+          logradouro?: string | null
+          modalidades?: string[]
+          multa_pct?: number
+          nome?: string
+          notif_aniversario_atleta?: boolean
+          notif_ausencia?: boolean
+          notif_cobranca_confirmacao?: boolean
+          notif_cobranca_lembrete_d1?: boolean
+          notif_cobranca_lembrete_d3?: boolean
+          notif_cobranca_vencida?: boolean
+          notif_email?: boolean
+          notif_frequencia_baixa?: boolean
+          notif_push?: boolean
+          notif_relatorio_mensal?: boolean
+          notif_sms?: boolean
+          notif_whatsapp?: boolean
+          numero?: string | null
+          onboarding_completo?: boolean
+          plano?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fluxo_caixa_plataforma: {
+        Row: {
+          asaas_payment_id: string | null
+          ator_email: string | null
+          ator_id: string | null
+          base_calculo: number | null
+          categoria: string
+          created_at: string
+          data_lancamento: string
+          deleted_at: string | null
+          descricao: string
+          escola_id: string | null
+          escola_nome_cache: string | null
+          forma_pagamento: string
+          id: string
+          observacao: string | null
+          percentual: number | null
+          recorrencia: string
+          recorrencia_grupo_id: string | null
+          status: string
+          tipo: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          asaas_payment_id?: string | null
+          ator_email?: string | null
+          ator_id?: string | null
+          base_calculo?: number | null
+          categoria: string
+          created_at?: string
+          data_lancamento?: string
+          deleted_at?: string | null
+          descricao: string
+          escola_id?: string | null
+          escola_nome_cache?: string | null
+          forma_pagamento?: string
+          id?: string
+          observacao?: string | null
+          percentual?: number | null
+          recorrencia?: string
+          recorrencia_grupo_id?: string | null
+          status?: string
+          tipo: string
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          asaas_payment_id?: string | null
+          ator_email?: string | null
+          ator_id?: string | null
+          base_calculo?: number | null
+          categoria?: string
+          created_at?: string
+          data_lancamento?: string
+          deleted_at?: string | null
+          descricao?: string
+          escola_id?: string | null
+          escola_nome_cache?: string | null
+          forma_pagamento?: string
+          id?: string
+          observacao?: string | null
+          percentual?: number | null
+          recorrencia?: string
+          recorrencia_grupo_id?: string | null
+          status?: string
+          tipo?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fluxo_caixa_plataforma_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matriculas: {
+        Row: {
+          atleta_id: string
+          created_at: string
+          criado_por: string | null
+          data_fim: string | null
+          data_inicio: string
+          deleted_at: string | null
+          desconto_motivo: string | null
+          desconto_pct: number
+          dia_vencimento: number
+          escola_id: string
+          forma_pagamento: string
+          gerar_auto: boolean
+          id: string
+          motivo_status: string | null
+          obs: string | null
+          parcelas_geradas: number
+          plano_id: string | null
+          status: string
+          tipo_periodo: string
+          total_parcelas: number | null
+          turma_id: string | null
+          updated_at: string
+          valor: number
+          valor_liquido: number
+        }
+        Insert: {
+          atleta_id: string
+          created_at?: string
+          criado_por?: string | null
+          data_fim?: string | null
+          data_inicio: string
+          deleted_at?: string | null
+          desconto_motivo?: string | null
+          desconto_pct?: number
+          dia_vencimento: number
+          escola_id: string
+          forma_pagamento?: string
+          gerar_auto?: boolean
+          id?: string
+          motivo_status?: string | null
+          obs?: string | null
+          parcelas_geradas?: number
+          plano_id?: string | null
+          status?: string
+          tipo_periodo?: string
+          total_parcelas?: number | null
+          turma_id?: string | null
+          updated_at?: string
+          valor: number
+          valor_liquido: number
+        }
+        Update: {
+          atleta_id?: string
+          created_at?: string
+          criado_por?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          deleted_at?: string | null
+          desconto_motivo?: string | null
+          desconto_pct?: number
+          dia_vencimento?: number
+          escola_id?: string
+          forma_pagamento?: string
+          gerar_auto?: boolean
+          id?: string
+          motivo_status?: string | null
+          obs?: string | null
+          parcelas_geradas?: number
+          plano_id?: string | null
+          status?: string
+          tipo_periodo?: string
+          total_parcelas?: number | null
+          turma_id?: string | null
+          updated_at?: string
+          valor?: number
+          valor_liquido?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matriculas_atleta_id_fkey"
+            columns: ["atleta_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "escola_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_pagamento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes_entregas: {
+        Row: {
+          canal: string
+          created_at: string
+          destinatario_contato: string | null
+          destinatario_id: string | null
+          erro: string | null
+          escola_id: string
+          id: string
+          outbox_id: string
+          provider_message_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          canal: string
+          created_at?: string
+          destinatario_contato?: string | null
+          destinatario_id?: string | null
+          erro?: string | null
+          escola_id: string
+          id?: string
+          outbox_id: string
+          provider_message_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          canal?: string
+          created_at?: string
+          destinatario_contato?: string | null
+          destinatario_id?: string | null
+          erro?: string | null
+          escola_id?: string
+          id?: string
+          outbox_id?: string
+          provider_message_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_entregas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_entregas_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "notificacoes_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes_outbox: {
+        Row: {
+          created_at: string
+          erro: string | null
+          escola_id: string
+          evento_tipo: string
+          id: string
+          idempotency_key: string | null
+          next_retry_at: string | null
+          payload: Json
+          ref_id: string | null
+          ref_tipo: string | null
+          status: string
+          tentativas: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          erro?: string | null
+          escola_id: string
+          evento_tipo: string
+          id?: string
+          idempotency_key?: string | null
+          next_retry_at?: string | null
+          payload?: Json
+          ref_id?: string | null
+          ref_tipo?: string | null
+          status?: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          erro?: string | null
+          escola_id?: string
+          evento_tipo?: string
+          id?: string
+          idempotency_key?: string | null
+          next_retry_at?: string | null
+          payload?: Json
+          ref_id?: string | null
+          ref_tipo?: string | null
+          status?: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_outbox_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfil_modulo_acesso: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          atualizado_por: string | null
+          id: string
+          modulo_slug: string
+          perfil: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          modulo_slug: string
+          perfil: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          modulo_slug?: string
+          perfil?: string
         }
         Relationships: []
       }
       planos_pagamento: {
-        Row: PlanoPagamento
-        Insert: {
-          id?: string
-          escola_id: string
-          nome: string
-          frequencia: FrequenciaTipo
-          valor: number
-          desconto_pct?: number
-          valor_liquido: number
+        Row: {
+          cor: string
+          created_at: string
+          deleted_at: string | null
+          desconto_pct: number
           dia_vencimento: number
-          metodo_pagamento: MetodoPagamento
-          cor?: string
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          escola_id?: string
-          nome?: string
-          frequencia?: FrequenciaTipo
-          valor?: number
-          desconto_pct?: number
-          valor_liquido?: number
-          dia_vencimento?: number
-          metodo_pagamento?: MetodoPagamento
-          cor?: string
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      turmas: {
-        Row: Turma
-        Insert: {
-          id?: string
           escola_id: string
+          frequencia: string
+          id: string
+          metodo_pagamento: string
           nome: string
-          modalidade: string
-          local?: string | null
-          capacidade_max?: number
-          idade_min?: number | null
-          idade_max?: number | null
-          professor_nome?: string | null
-          professor_user_id?: string | null
-          dia_semana?: number | null
-          hora_inicio?: string | null
-          hora_fim?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
+          updated_at: string
+          valor: number
+          valor_liquido: number
         }
-        Update: {
-          id?: string
-          escola_id?: string
-          nome?: string
-          modalidade?: string
-          local?: string | null
-          capacidade_max?: number
-          idade_min?: number | null
-          idade_max?: number | null
-          professor_nome?: string | null
-          professor_user_id?: string | null
-          dia_semana?: number | null
-          hora_inicio?: string | null
-          hora_fim?: string | null
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      aulas: {
-        Row: Aula
         Insert: {
-          id?: string
-          escola_id: string
-          turma_id: string
-          data_aula: string
+          cor?: string
           created_at?: string
+          deleted_at?: string | null
+          desconto_pct?: number
+          dia_vencimento: number
+          escola_id: string
+          frequencia: string
+          id?: string
+          metodo_pagamento: string
+          nome: string
           updated_at?: string
+          valor: number
+          valor_liquido: number
         }
         Update: {
-          id?: string
-          escola_id?: string
-          turma_id?: string
-          data_aula?: string
+          cor?: string
           created_at?: string
+          deleted_at?: string | null
+          desconto_pct?: number
+          dia_vencimento?: number
+          escola_id?: string
+          frequencia?: string
+          id?: string
+          metodo_pagamento?: string
+          nome?: string
           updated_at?: string
+          valor?: number
+          valor_liquido?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planos_pagamento_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plataforma_usuarios: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          deleted_at: string | null
+          id: string
+          perfil: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          perfil: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          perfil?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
       presencas_registros: {
-        Row: PresencaRegistro
-        Insert: {
-          id?: string
+        Row: {
           aula_id: string
+          created_at: string
+          id: string
           matricula_id: string
-          status: StatusPresenca
-          observacao?: string | null
+          observacao: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          aula_id: string
           created_at?: string
+          id?: string
+          matricula_id: string
+          observacao?: string | null
+          status: string
           updated_at?: string
         }
         Update: {
-          id?: string
           aula_id?: string
+          created_at?: string
+          id?: string
           matricula_id?: string
-          status?: StatusPresenca
           observacao?: string | null
-          created_at?: string
+          status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "presencas_registros_aula_id_fkey"
+            columns: ["aula_id"]
+            isOneToOne: false
+            referencedRelation: "aulas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presencas_registros_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      matriculas: {
-        Row: Matricula
-        Insert: {
-          id?: string
-          atleta_id: string
-          escola_id: string
-          turma_id?: string | null
-          plano_id?: string | null
-          data_inicio: string
-          data_fim?: string | null
-          tipo_periodo?: TipoPeriodoMatricula
-          valor: number
-          desconto_pct?: number
-          desconto_motivo?: string | null
-          valor_liquido: number
-          dia_vencimento: number
-          forma_pagamento?: FormaPagamentoMatricula
-          gerar_auto?: boolean
-          total_parcelas?: number | null
-          parcelas_geradas?: number
-          status?: StatusMatricula
-          motivo_status?: string | null
-          obs?: string | null
-          criado_por?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-        Update: {
-          id?: string
-          atleta_id?: string
-          escola_id?: string
-          turma_id?: string | null
-          plano_id?: string | null
-          data_inicio?: string
-          data_fim?: string | null
-          tipo_periodo?: TipoPeriodoMatricula
-          valor?: number
-          desconto_pct?: number
-          desconto_motivo?: string | null
-          valor_liquido?: number
-          dia_vencimento?: number
-          forma_pagamento?: FormaPagamentoMatricula
-          gerar_auto?: boolean
-          total_parcelas?: number | null
-          parcelas_geradas?: number
-          status?: StatusMatricula
-          motivo_status?: string | null
-          obs?: string | null
-          criado_por?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-        Relationships: []
-      }
-      cobrancas: {
-        Row: Cobranca
-        Insert: {
-          id?: string
-          escola_id: string
-          matricula_id?: string | null
-          valor: number
-          vencimento: string
-          descricao?: string | null
-          referencia?: string | null
-          asaas_charge_id?: string | null
-          status?: StatusCobranca
-          data_pagamento?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          escola_id?: string
-          matricula_id?: string | null
-          valor?: number
-          vencimento?: string
-          descricao?: string | null
-          referencia?: string | null
-          asaas_charge_id?: string | null
-          status?: StatusCobranca
-          data_pagamento?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      plataforma_usuarios: {
-        Row: PlataformaUsuario
-        Insert: {
-          id?: string
-          user_id: string
-          perfil: PerfilPlataforma
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          perfil?: PerfilPlataforma
-          ativo?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      assinaturas_plataforma: {
-        Row: AssinaturaPlataforma
-        Insert: {
-          id?: string
-          escola_id: string
-          valor_mensal?: number
-          dia_vencimento?: number
-          status?: StatusAssinaturaPlataforma
-          referencia_externa?: string | null
-          proximo_vencimento?: string | null
-          observacoes?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          escola_id?: string
-          valor_mensal?: number
-          dia_vencimento?: number
-          status?: StatusAssinaturaPlataforma
-          referencia_externa?: string | null
-          proximo_vencimento?: string | null
-          observacoes?: string | null
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      cursos: {
-        Row: Curso
-        Insert: {
-          id?: string
-          escola_id: string
-          titulo: string
-          descricao?: string | null
-          publico_alvo: PublicoAlvoCurso
-          status?: StatusCurso
-          modalidade_comercial: ModalidadeComercialCurso
-          preco?: number
-          periodo_acesso_dias?: number | null
-          oferta_ativa?: boolean
-          interno?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          escola_id?: string
-          titulo?: string
-          descricao?: string | null
-          publico_alvo?: PublicoAlvoCurso
-          status?: StatusCurso
-          modalidade_comercial?: ModalidadeComercialCurso
-          preco?: number
-          periodo_acesso_dias?: number | null
-          oferta_ativa?: boolean
-          interno?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_modulos: {
-        Row: CursoModulo
-        Insert: {
-          id?: string
-          curso_id: string
-          titulo: string
-          descricao?: string | null
-          ordem: number
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          curso_id?: string
-          titulo?: string
-          descricao?: string | null
-          ordem?: number
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_aulas: {
-        Row: CursoAula
-        Insert: {
-          id?: string
-          curso_id: string
-          modulo_id: string
-          titulo: string
-          descricao?: string | null
-          ordem: number
-          video_url?: string | null
-          pdf_url?: string | null
-          texto_conteudo?: string | null
-          quiz_habilitado?: boolean
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          curso_id?: string
-          modulo_id?: string
-          titulo?: string
-          descricao?: string | null
-          ordem?: number
-          video_url?: string | null
-          pdf_url?: string | null
-          texto_conteudo?: string | null
-          quiz_habilitado?: boolean
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_quizzes: {
-        Row: CursoQuiz
-        Insert: {
-          id?: string
-          curso_id: string
-          modulo_id?: string | null
-          aula_id?: string | null
-          tipo: TipoCursoQuiz
-          titulo: string
-          descricao?: string | null
-          nota_minima?: number
-          tentativas_max?: number
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          curso_id?: string
-          modulo_id?: string | null
-          aula_id?: string | null
-          tipo?: TipoCursoQuiz
-          titulo?: string
-          descricao?: string | null
-          nota_minima?: number
-          tentativas_max?: number
-          published?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_quiz_perguntas: {
-        Row: CursoQuizPergunta
-        Insert: {
-          id?: string
-          quiz_id: string
-          enunciado: string
-          ordem: number
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          quiz_id?: string
-          enunciado?: string
-          ordem?: number
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_quiz_alternativas: {
-        Row: CursoQuizAlternativa
-        Insert: {
-          id?: string
-          pergunta_id: string
-          texto: string
-          ordem: number
-          correta?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pergunta_id?: string
-          texto?: string
-          ordem?: number
-          correta?: boolean
-          deleted_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      curso_quiz_tentativas: {
-        Row: CursoQuizTentativa
-        Insert: {
-          id?: string
-          quiz_id: string
-          user_id: string
-          tentativa_numero: number
-          nota?: number
-          aprovado?: boolean
-          respostas?: Record<string, unknown>[]
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          quiz_id?: string
-          user_id?: string
-          tentativa_numero?: number
-          nota?: number
-          aprovado?: boolean
-          respostas?: Record<string, unknown>[]
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      notificacoes_outbox: {
-        Row: NotificacaoOutbox
-        Insert: {
-          id?: string
-          escola_id: string
-          evento_tipo: string
-          ref_tipo?: string | null
-          ref_id?: string | null
-          payload?: Record<string, unknown>
-          status?: StatusNotificacaoOutbox
-          tentativas?: number
-          next_retry_at?: string | null
-          idempotency_key?: string | null
-          erro?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          escola_id?: string
-          evento_tipo?: string
-          ref_tipo?: string | null
-          ref_id?: string | null
-          payload?: Record<string, unknown>
-          status?: StatusNotificacaoOutbox
-          tentativas?: number
-          next_retry_at?: string | null
-          idempotency_key?: string | null
-          erro?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      notificacoes_entregas: {
-        Row: NotificacaoEntrega
-        Insert: {
-          id?: string
-          outbox_id: string
-          escola_id: string
-          canal: CanalNotificacao
-          destinatario_id?: string | null
-          destinatario_contato?: string | null
-          status?: StatusEntregaNotificacao
-          provider_message_id?: string | null
-          erro?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          outbox_id?: string
-          escola_id?: string
-          canal?: CanalNotificacao
-          destinatario_id?: string | null
-          destinatario_contato?: string | null
-          status?: StatusEntregaNotificacao
-          provider_message_id?: string | null
-          erro?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      // Story 8.2 — Auditoria de alterações em permissões
-      auditoria_permissoes: {
+      responsaveis: {
         Row: {
+          cpf: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string
           id: string
-          tipo: string
-          escola_id: string | null
-          ator_id: string
-          ator_email: string | null
-          modulo_slug: string | null
-          perfil: string | null
-          valor_antes: boolean | null
-          valor_depois: boolean | null
-          detalhes: Record<string, unknown> | null
-          ip: string | null
-          criado_em: string
+          nome: string
+          telefone: string | null
+          updated_at: string
         }
         Insert: {
+          cpf?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email: string
           id?: string
-          tipo: string
-          escola_id?: string | null
-          ator_id: string
-          ator_email?: string | null
-          modulo_slug?: string | null
-          perfil?: string | null
-          valor_antes?: boolean | null
-          valor_depois?: boolean | null
-          detalhes?: Record<string, unknown> | null
-          ip?: string | null
-          criado_em?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
         }
-        Update: Record<string, never>
+        Update: {
+          cpf?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
         Relationships: []
       }
-      // Story 8.1 — Matriz perfil × módulo editável
-      perfil_modulo_acesso: {
+      responsavel_usuarios: {
         Row: {
-          id: string
-          modulo_slug: string
-          perfil: string
           ativo: boolean
-          atualizado_por: string | null
-          atualizado_em: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          responsavel_id: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          modulo_slug: string
-          perfil: string
           ativo?: boolean
-          atualizado_por?: string | null
-          atualizado_em?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          responsavel_id: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          modulo_slug?: string
-          perfil?: string
           ativo?: boolean
-          atualizado_por?: string | null
-          atualizado_em?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          responsavel_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responsavel_usuarios_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: true
+            referencedRelation: "responsaveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      turmas: {
+        Row: {
+          ativo: boolean
+          capacidade_max: number
+          created_at: string
+          deleted_at: string | null
+          dia_semana: number | null
+          escola_id: string
+          hora_fim: string | null
+          hora_inicio: string | null
+          id: string
+          idade_max: number | null
+          idade_min: number | null
+          local: string | null
+          modalidade: string
+          nome: string
+          professor_nome: string | null
+          professor_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          capacidade_max?: number
+          created_at?: string
+          deleted_at?: string | null
+          dia_semana?: number | null
+          escola_id: string
+          hora_fim?: string | null
+          hora_inicio?: string | null
+          id?: string
+          idade_max?: number | null
+          idade_min?: number | null
+          local?: string | null
+          modalidade: string
+          nome: string
+          professor_nome?: string | null
+          professor_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          capacidade_max?: number
+          created_at?: string
+          deleted_at?: string | null
+          dia_semana?: number | null
+          escola_id?: string
+          hora_fim?: string | null
+          hora_inicio?: string | null
+          id?: string
+          idade_max?: number | null
+          idade_min?: number | null
+          local?: string | null
+          modalidade?: string
+          nome?: string
+          professor_nome?: string | null
+          professor_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turmas_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuario_escola_tipos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          deleted_at: string | null
+          escola_id: string
+          id: string
+          origem: string | null
+          principal: boolean
+          ref_id: string | null
+          tipo_usuario: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          escola_id: string
+          id?: string
+          origem?: string | null
+          principal?: boolean
+          ref_id?: string | null
+          tipo_usuario: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          escola_id?: string
+          id?: string
+          origem?: string | null
+          principal?: boolean
+          ref_id?: string | null
+          tipo_usuario?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_escola_tipos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_escola_tipos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios: {
+        Row: {
+          ativo: boolean
+          auth_user_id: string
+          cpf: string
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          auth_user_id: string
+          cpf: string
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          auth_user_id?: string
+          cpf?: string
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
         }
         Relationships: []
       }
     }
     Views: {
       modulos_ativos: {
-        Row: EscolaModulo
-        Relationships: []
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          escola_id: string | null
+          expira_em: string | null
+          id: string | null
+          liberado_em: string | null
+          liberado_por: string | null
+          modulo_slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          escola_id?: string | null
+          expira_em?: string | null
+          id?: string | null
+          liberado_em?: string | null
+          liberado_por?: string | null
+          modulo_slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          escola_id?: string | null
+          expira_em?: string | null
+          id?: string | null
+          liberado_em?: string | null
+          liberado_por?: string | null
+          modulo_slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escola_modulos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
-      is_module_active: {
-        Args: { p_escola_id: string; p_modulo_slug: string }
-        Returns: boolean
-      }
-      criar_escola_completo: {
-        Args: {
-          p_nome: string
-          p_cnpj: string
-          p_email: string
-          p_telefone: string
-          p_plano: string
-          p_modalidades: string[]
-          p_modulos: string[]
-        }
-        Returns: string
-      }
-      salvar_asaas_token: {
-        Args: { p_escola_id: string; p_token: string }
-        Returns: string
-      }
-      obter_asaas_token: {
-        Args: { p_escola_id: string }
-        Returns: string | null
+      aulas_hoje_status: {
+        Args: { p_escola_id: string; p_perfil: string; p_user_id: string }
+        Returns: {
+          chamada_feita: boolean
+          matriculas_ativas: number
+          registros_presenca: number
+          turma_id: string
+          turma_nome: string
+        }[]
       }
       buscar_atleta_por_cpf: {
         Args: { p_cpf: string; p_escola_id: string }
-        Returns: Array<{
+        Returns: {
+          atleta_id: string
+          data_nascimento: string
+          foto_url: string
+          nome: string
+          sexo: string
           status: string
-          atleta_id: string | null
-          nome: string | null
-          data_nascimento: string | null
-          sexo: string | null
-          foto_url: string | null
-        }>
+        }[]
       }
       chamada_pode_editar: {
         Args: { p_data: string; p_escola_id: string }
         Returns: boolean
       }
-      listar_membros_escola: {
-        Args: { p_escola_id: string }
-        Returns: Array<{ user_id: string; perfil: string; email: string | null }>
-      }
-      frequencia_resumo_matriculas: {
-        Args: { p_escola_id: string; p_matricula_ids: string[] }
-        Returns: Array<{ matricula_id: string; total: number; presentes: number }>
-      }
-      historico_presencas_matricula: {
-        Args: { p_escola_id: string; p_matricula_id: string }
-        Returns: Array<{ data_aula: string; turma_nome: string; status: string }>
+      criar_escola_completo: {
+        Args: {
+          p_cnpj: string
+          p_email: string
+          p_modalidades: string[]
+          p_modulos: string[]
+          p_nome: string
+          p_plano: string
+          p_telefone: string
+        }
+        Returns: string
       }
       dashboard_kpis_escola: {
         Args: { p_escola_id: string }
-        Returns: Array<{
+        Returns: {
           atletas_ativos: number
-          turmas_ativas: number
-          aulas_hoje: number
           aulas_com_chamada: number
-        }>
+          aulas_hoje: number
+          turmas_ativas: number
+        }[]
       }
-      aulas_hoje_status: {
-        Args: { p_escola_id: string; p_user_id: string; p_perfil: string }
-        Returns: Array<{
-          turma_id: string
+      frequencia_resumo_matriculas: {
+        Args: { p_escola_id: string; p_matricula_ids: string[] }
+        Returns: {
+          matricula_id: string
+          presentes: number
+          total: number
+        }[]
+      }
+      historico_presencas_matricula: {
+        Args: { p_escola_id: string; p_matricula_id: string }
+        Returns: {
+          data_aula: string
+          status: string
           turma_nome: string
-          matriculas_ativas: number
-          registros_presenca: number
-          chamada_feita: boolean
-        }>
+        }[]
       }
+      is_module_active: {
+        Args: { p_escola_id: string; p_modulo_slug: string }
+        Returns: boolean
+      }
+      listar_membros_escola: {
+        Args: { p_escola_id: string }
+        Returns: {
+          email: string
+          perfil: string
+          user_id: string
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
+
+// ─── Custom type aliases ──────────────────────────────────────────────────────
+export type Escola                         = Tables<'escolas'>
+export type EscolaUsuario                  = Tables<'escola_usuarios'>
+export type EscolaModulo                   = Tables<'escola_modulos'>
+export type PlanoPagamento                 = Tables<'planos_pagamento'>
+export type Matricula                      = Tables<'matriculas'>
+export type Cobranca                       = Tables<'cobrancas'>
+export type PlataformaUsuario              = Tables<'plataforma_usuarios'>
+export type AssinaturaPlataforma           = Tables<'assinaturas_plataforma'>
+export type Curso                          = Tables<'cursos'>
+export type CursoModulo                    = Tables<'curso_modulos'>
+export type CursoAula                      = Tables<'curso_aulas'>
+export type CursoQuiz                      = Tables<'curso_quizzes'>
+export type CursoQuizPergunta              = Tables<'curso_quiz_perguntas'>
+export type CursoQuizAlternativa           = Tables<'curso_quiz_alternativas'>
+export type CursoQuizTentativa             = Tables<'curso_quiz_tentativas'>
+export type NotificacaoOutbox              = Tables<'notificacoes_outbox'>
+export type NotificacaoEntrega             = Tables<'notificacoes_entregas'>
+export type Turma                          = Tables<'turmas'>
+export type Atleta                         = Tables<'atletas'>
+export type Responsavel                    = Tables<'responsaveis'>
+export type ResponsavelUsuario             = Tables<'responsavel_usuarios'>
+export type AtletaResponsavel              = Tables<'atleta_responsaveis'>
+export type AtletaCarteirinha              = Tables<'atleta_carteirinhas'>
+export type AtletaAcesso                   = Tables<'atleta_acessos'>
+export type AtletaExame                    = Tables<'atleta_exames'>
+export type AtletaAtestado                 = Tables<'atleta_atestados'>
+export type Aula                           = Tables<'aulas'>
+export type PresencaRegistro               = Tables<'presencas_registros'>
+export type FluxoCaixaPlataforma           = Tables<'fluxo_caixa_plataforma'>
+
+export type EscolaUsuarioWithEscola        = EscolaUsuario & { escola: Escola | null }
+export type AtletaResponsavelWithResponsavel = AtletaResponsavel & { responsavel: Responsavel }
+export type UsuarioGlobal                  = Tables<'usuarios'>
+export type UsuarioEscolaTipo              = Tables<'usuario_escola_tipos'>
+
+// ─── Scalar type aliases ──────────────────────────────────────────────────────
+export type PlanoTipo                 = 'starter' | 'pro' | 'premium' | 'enterprise'
+export type FrequenciaTipo            = 'mensal' | 'trimestral' | 'semestral' | 'anual'
+export type MetodoPagamento           = 'pix' | 'boleto' | 'cartao_credito'
+export type SexoTipo                  = 'M' | 'F' | 'outro'
+export type PerfilUsuario             = 'admin_escola' | 'professor' | 'secretaria' | 'financeiro' | 'visualizador' | 'coordenador' | 'saude' | 'marketing' | 'responsavel'
+export type PerfilPlataforma          = 'super_admin' | 'suporte' | 'financeiro_interno'
+export type ModuloSlug                = string
+export type StatusPresenca            = 'presente' | 'ausente' | 'justificado' | 'justificada'
+export type StatusCobranca            = 'pendente' | 'pago' | 'vencido' | 'cancelado'
+export type StatusAssinaturaPlataforma = 'adimplente' | 'inadimplente' | 'atraso' | 'suspenso' | 'cancelado'
+export type StatusMatricula           = 'ativa' | 'inativa' | 'cancelada' | 'suspensa' | 'trancada' | 'encerrada'
+export type PublicoAlvoCurso          = 'alunos' | 'professores' | 'responsaveis' | 'publico'
+export type StatusCurso               = 'rascunho' | 'publicado' | 'arquivado'
+export type ModalidadeComercialCurso  = 'gratuito' | 'pago' | 'assinatura'
+export type TipoCursoQuiz             = 'multipla_escolha' | 'verdadeiro_falso'
+export type TipoAcessoAtleta          = 'entrada' | 'saida'
+export type TipoExameAtleta           = 'admissional' | 'periodico' | 'demissional' | 'retorno' | 'mudanca_funcao'
+export type StatusNotificacaoOutbox   = 'pendente' | 'processando' | 'enviado' | 'erro' | 'cancelado'
+export type CanalNotificacao          = 'whatsapp' | 'email' | 'sms' | 'push'
+export type StatusEntregaNotificacao  = 'pendente' | 'entregue' | 'falhou' | 'lido'
