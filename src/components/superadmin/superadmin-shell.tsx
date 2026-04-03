@@ -26,7 +26,7 @@ const NAV: NavEntry[] = [
 
   { type: 'section', label: 'Financeiro' },
   { type: 'link', id: 'cobrancas',     label: 'Fluxo de Caixa',   icon: '💸', href: '/superadmin/faturamento' },
-  { type: 'link', id: 'planos',        label: 'Planos & Licenças',icon: '📦', href: '#', stub: true          },
+  { type: 'link', id: 'planos',        label: 'Planos & Licenças',icon: '📦', href: '/superadmin/planos'   },
   { type: 'link', id: 'relatorios',    label: 'Relatórios',       icon: '📈', href: '#', stub: true          },
   { type: 'link', id: 'notasfiscais',  label: 'Notas Fiscais',    icon: '🧾', href: '#', stub: true          },
 
@@ -44,6 +44,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/superadmin/faturamento':  'Fluxo de Caixa',
   '/superadmin/permissoes':   'Matriz de Permissões',
   '/superadmin/auditoria':    'Auditoria de Permissões',
+  '/superadmin/planos':       'Planos & Licenças',
 }
 
 const PERFIL_LABEL: Record<string, string> = {
