@@ -47,7 +47,7 @@ export default async function HomePage() {
 
     await clearEscolaCookiesOnly()
 
-    if (contextos.length === 0) redirect('/login')
+    if (contextos.length === 0) redirect('/completar-cadastro')
     if (contextos.length === 1) {
       await selectEscola(contextos[0].escola_id, contextos[0].tipo_usuario)
     }
@@ -58,7 +58,8 @@ export default async function HomePage() {
   const contextosResult = user ? await listarContextosUsuarioAtual() : { rows: [] as never[] }
   const contextos = contextosResult.rows ?? []
 
-  if (contextos.length === 0) redirect('/login')
+  // Authenticated user with no escola context: go to completar-cadastro (not /login which loops)
+  if (contextos.length === 0) redirect('/completar-cadastro')
 
   if (contextos.length === 1) {
     await selectEscola(contextos[0].escola_id, contextos[0].tipo_usuario)

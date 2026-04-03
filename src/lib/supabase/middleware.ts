@@ -120,11 +120,16 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated users away from /login
+  // Redirect authenticated users away from /login → only if they have an escola cookie
+  // (avoids loop: authenticated user with no escola context bouncing between / and /login)
   if (user && request.nextUrl.pathname.startsWith('/login')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    return NextResponse.redirect(url)
+    const escolaId = request.cookies.get('ea-escola-id')?.value
+    if (escolaId) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
+    // No escola cookie — let page.tsx handle the routing to avoid loops
   }
 
   // Redirect unauthenticated users to /login for all routes except /login and /auth/**
