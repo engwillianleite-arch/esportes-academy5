@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
 import type { PerfilUsuario } from '@/types'
@@ -7,24 +6,6 @@ import { getModuloFromPath, hasModuloAccess } from '@/lib/modulo-access'
 
 // Routes that trigger the escola flow — super_admin must be bypassed on these
 const ESCOLA_FLOW_ROUTES = ['/cadastrar-escola', '/selecionar-escola', '/no-access']
-
-async function isSuperAdmin(userId: string): Promise<boolean> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !serviceRole) return false
-
-  const admin = createClient<Database>(url, serviceRole, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-
-  const { data } = await admin
-    .from('plataforma_usuarios')
-    .select('ativo, deleted_at')
-    .eq('user_id', userId)
-    .maybeSingle()
-
-  return !!(data?.ativo && !data.deleted_at)
-}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -63,14 +44,23 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Super_admin bypass: redirect to /superadmin from any escola flow route
+  // Uses the anon client with user session — RLS allows users to see their own plataforma_usuarios row
   if (user) {
     const path = request.nextUrl.pathname
     const isEscolaFlowRoute = ESCOLA_FLOW_ROUTES.some((r) => path === r || path.startsWith(r + '/'))
     const isRootRoute = path === '/'
-    if ((isEscolaFlowRoute || isRootRoute) && await isSuperAdmin(user.id)) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/superadmin'
-      return NextResponse.redirect(url)
+    if (isEscolaFlowRoute || isRootRoute) {
+      const { data: plataformaRow } = await supabase
+        .from('plataforma_usuarios')
+        .select('ativo, deleted_at')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (plataformaRow?.ativo && !plataformaRow.deleted_at) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/superadmin'
+        return NextResponse.redirect(url)
+      }
     }
   }
 
