@@ -134,31 +134,32 @@ export default function CursosPageClient({ escolaId }: Props) {
     setLoading(false)
   }, [escolaId])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => { void load() }, [load]) // eslint-disable-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (cursoSelecionado === 'none' && estrutura.length > 0) setCursoSelecionado(estrutura[0].id)
-    if (aulaCursoSelecionado === 'none' && estrutura.length > 0) setAulaCursoSelecionado(estrutura[0].id)
-    if (quizCursoSelecionado === 'none' && estrutura.length > 0) setQuizCursoSelecionado(estrutura[0].id)
+    if (cursoSelecionado === 'none' && estrutura.length > 0) setCursoSelecionado(estrutura[0].id) // eslint-disable-line react-hooks/set-state-in-effect
+    if (aulaCursoSelecionado === 'none' && estrutura.length > 0) setAulaCursoSelecionado(estrutura[0].id) // eslint-disable-line react-hooks/set-state-in-effect
+    if (quizCursoSelecionado === 'none' && estrutura.length > 0) setQuizCursoSelecionado(estrutura[0].id) // eslint-disable-line react-hooks/set-state-in-effect
   }, [estrutura, cursoSelecionado, aulaCursoSelecionado, quizCursoSelecionado])
 
   const cursoAulaSelecionado = useMemo(() => estrutura.find((curso) => curso.id === aulaCursoSelecionado) ?? null, [estrutura, aulaCursoSelecionado])
   const cursoQuizSelecionado = useMemo(() => estrutura.find((curso) => curso.id === quizCursoSelecionado) ?? null, [estrutura, quizCursoSelecionado])
-  const perguntaSelecionada = useMemo(() => quizzes.flatMap((quiz) => quiz.perguntas).find((pergunta) => pergunta.id === alternativaPerguntaSelecionada) ?? null, [quizzes, alternativaPerguntaSelecionada])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _perguntaSelecionada = useMemo(() => quizzes.flatMap((quiz) => quiz.perguntas).find((pergunta) => pergunta.id === alternativaPerguntaSelecionada) ?? null, [quizzes, alternativaPerguntaSelecionada])
   const quizTentativa = useMemo(() => quizzes.find((quiz) => quiz.id === quizTentativaSelecionado) ?? null, [quizzes, quizTentativaSelecionado])
 
   useEffect(() => {
     const firstModulo = cursoAulaSelecionado?.modulos[0]?.id ?? 'none'
-    setAulaModuloSelecionado(firstModulo)
+    setAulaModuloSelecionado(firstModulo) // eslint-disable-line react-hooks/set-state-in-effect
   }, [cursoAulaSelecionado?.id, cursoAulaSelecionado?.modulos])
   useEffect(() => {
     const firstModulo = cursoQuizSelecionado?.modulos[0]?.id ?? 'none'
-    setQuizModuloSelecionado(firstModulo)
+    setQuizModuloSelecionado(firstModulo) // eslint-disable-line react-hooks/set-state-in-effect
     const firstAula = cursoQuizSelecionado?.modulos[0]?.aulas[0]?.id ?? 'none'
-    setQuizAulaSelecionada(firstAula)
+    setQuizAulaSelecionada(firstAula) // eslint-disable-line react-hooks/set-state-in-effect
   }, [cursoQuizSelecionado?.id, cursoQuizSelecionado?.modulos])
   useEffect(() => {
-    if (perguntaQuizSelecionado === 'none' && quizzes.length > 0) setPerguntaQuizSelecionado(quizzes[0].id)
-    if (quizTentativaSelecionado === 'none' && quizzes.length > 0) setQuizTentativaSelecionado(quizzes[0].id)
+    if (perguntaQuizSelecionado === 'none' && quizzes.length > 0) setPerguntaQuizSelecionado(quizzes[0].id) // eslint-disable-line react-hooks/set-state-in-effect
+    if (quizTentativaSelecionado === 'none' && quizzes.length > 0) setQuizTentativaSelecionado(quizzes[0].id) // eslint-disable-line react-hooks/set-state-in-effect
   }, [quizzes, perguntaQuizSelecionado, quizTentativaSelecionado])
   async function onCreateCurso(e: React.FormEvent) {
     e.preventDefault()

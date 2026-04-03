@@ -137,7 +137,7 @@ export async function listarCobrancasEscola(
   }
 
   const matriculaIds = [...new Set((data ?? []).map((d) => d.matricula_id).filter(Boolean))] as string[]
-  let atletaPorMatricula = new Map<string, string>()
+  const atletaPorMatricula = new Map<string, string>()
 
   if (matriculaIds.length > 0) {
     const { data: mats } = await supabase

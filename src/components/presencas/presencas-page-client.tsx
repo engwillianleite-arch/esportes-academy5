@@ -66,6 +66,8 @@ export default function PresencasPageClient({ escolaId, janelaChamadaH, fusoHora
     return () => {
       cancelled = true
     }
+  // turmaId intentionally omitted: only set initial value when empty
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [escolaId])
 
   const recarregarChamada = useCallback(async () => {

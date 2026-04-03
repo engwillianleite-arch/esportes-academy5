@@ -327,8 +327,8 @@ export async function listarNotificacoesOutboxEscola(
   }
 
   const ids = (data ?? []).map((r) => r.id)
-  let sentMap = new Map<string, number>()
-  let failedMap = new Map<string, number>()
+  const sentMap = new Map<string, number>()
+  const failedMap = new Map<string, number>()
   if (ids.length > 0) {
     const { data: entregas } = await supabase
       .from('notificacoes_entregas')

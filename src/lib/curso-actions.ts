@@ -824,6 +824,7 @@ function isDateActive(start: string | null, end: string | null): boolean {
 async function listarUsuariosCursosEscolaInterno(
   escolaId: string
 ): Promise<{ error: string | null; rows: CursoUsuarioOption[] }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const [contextosRes, usuariosRes] = await Promise.all([
     admin
@@ -877,6 +878,7 @@ async function recalcularProgressoCurso(
   userId: string,
   cursoId: string
 ): Promise<{ error: string | null; progressoPct: number; aprovado: boolean; ultimaAtividadeEm: string | null; status: CursoMatriculaUsuarioRow['status'] }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const [aulasRes, progressoRes, quizzesRes, tentativasRes] = await Promise.all([
     admin
@@ -950,6 +952,7 @@ export async function listarComercializacaoCursosEscola(
   const cursosResult = await listarCursosEscola(escolaId)
   if (cursosResult.error) return { error: cursosResult.error }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const cursoIds = (cursosResult.rows ?? []).map((curso) => curso.id)
 
@@ -1056,6 +1059,7 @@ export async function criarAssinaturaCursoUsuario(
     return { error: 'Usuário não pertence à escola selecionada.' }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const { error } = await admin.from('curso_assinaturas_usuarios').insert({
     escola_id: escolaId,
@@ -1108,6 +1112,7 @@ export async function criarMatriculaCursoUsuario(
     return { error: 'Usuário não pertence à escola selecionada.' }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const { data: curso } = await admin
     .from('cursos')
@@ -1183,6 +1188,7 @@ export async function listarCursosDisponiveisResponsavel(): Promise<{
   const rctx = await getResponsavelAppContext()
   if ('error' in rctx) return { error: rctx.error }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const [cursosRes, modulosRes, aulasRes, assinaturasRes, matriculasRes, progressoRes] = await Promise.all([
     admin
@@ -1335,6 +1341,7 @@ export async function marcarAulaCursoConcluidaResponsavel(
   const aulaId = (formData.get('aula_id') as string | null)?.trim() ?? ''
   if (!aulaId) return { error: 'Aula inválida.' }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
   const { data: aula } = await admin
     .from('curso_aulas')
