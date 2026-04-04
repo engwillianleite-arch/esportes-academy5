@@ -4,20 +4,28 @@ import { useState, useEffect, useRef } from 'react'
 import { atualizarConfiguracoesEscola, uploadLogoEscola } from '@/lib/settings-actions'
 import { testarConexaoAsaas, salvarConfiguracaoAsaas } from '@/lib/asaas-actions'
 import { salvarConfiguracoesNotificacoes } from '@/lib/notification-actions'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import type { Escola } from '@/types'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const PRIMARY   = '#20c997'
+const PRIMARY_D = '#17a57a'
+const PRIMARY_L = '#e6faf4'
+const SECONDARY = '#5bc0eb'
+const SEC_L     = '#e8f6fd'
+const ACCENT    = '#ffa552'
+const ACCENT_L  = '#fff4e8'
+const DANGER    = '#ef4444'
+const DANGER_L  = '#fee2e2'
+const BORDER    = '#e5e7eb'
+const BG        = '#f7f9fa'
+const TEXT      = '#1b1b1b'
+const MUTED     = '#6b7280'
+const CARD      = '#ffffff'
+const SHADOW    = '0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05)'
+const RADIUS    = '12px'
+const RADIUS_SM = '8px'
 
+// ─── Constants ────────────────────────────────────────────────────────────────
 const MODALITIES = [
   'Futebol', 'Futsal', 'Natação', 'Basquete', 'Voleibol',
   'Jiu-Jitsu', 'Muay Thai', 'Boxe', 'Atletismo', 'Tênis',
@@ -26,22 +34,21 @@ const MODALITIES = [
 
 const TIMEZONES = [
   { value: 'America/Sao_Paulo', label: 'São Paulo (UTC-3)' },
-  { value: 'America/Manaus', label: 'Manaus (UTC-4)' },
-  { value: 'America/Belem', label: 'Belém (UTC-3)' },
-  { value: 'America/Noronha', label: 'Fernando de Noronha (UTC-2)' },
-  { value: 'America/Rio_Branco', label: 'Rio Branco (UTC-5)' },
+  { value: 'America/Manaus',    label: 'Manaus (UTC-4)' },
+  { value: 'America/Belem',     label: 'Belém (UTC-3)' },
+  { value: 'America/Noronha',   label: 'Fernando de Noronha (UTC-2)' },
+  { value: 'America/Rio_Branco',label: 'Rio Branco (UTC-5)' },
 ]
 
 const JANELA_OPTIONS = [
-  { value: '24', label: '24 horas' },
-  { value: '48', label: '48 horas (padrão)' },
-  { value: '72', label: '72 horas' },
-  { value: '96', label: '96 horas' },
+  { value: '24',  label: '24 horas' },
+  { value: '48',  label: '48 horas (padrão)' },
+  { value: '72',  label: '72 horas' },
+  { value: '96',  label: '96 horas' },
   { value: '168', label: '1 semana' },
 ]
 
 // ─── CNPJ formatting ──────────────────────────────────────────────────────────
-
 function formatCnpj(raw: string): string {
   const digits = (raw ?? '').replace(/\D/g, '').slice(0, 14)
   return digits
@@ -52,80 +59,101 @@ function formatCnpj(raw: string): string {
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
 type Tab = 'identidade' | 'endereco' | 'configuracoes' | 'integracao' | 'notificacoes'
 
 type FormState = {
-  nome: string
-  email: string
-  telefone: string
-  modalidades: string[]
-  cep: string
-  logradouro: string
-  numero: string
-  complemento: string
-  bairro: string
-  cidade: string
-  estado: string
-  janela_chamada_h: string
-  capacidade_padrao: string
-  limiar_freq_pct: string
-  fuso_horario: string
-  asaasEnv: string
-  asaasToken: string
-  asaasWalletId: string
-  diasAntecipacao: string
-  multaPct: string
-  jurosPct: string
-  descontoAntecipPct: string
-  notifEmail: boolean
-  notifPush: boolean
-  notifWhatsapp: boolean
-  notifSms: boolean
-  notifCobrancaLembreteD3: boolean
-  notifCobrancaLembreteD1: boolean
-  notifCobrancaVencida: boolean
-  notifCobrancaConfirmacao: boolean
-  notifFrequenciaBaixa: boolean
-  notifAusencia: boolean
-  notifRelatorioMensal: boolean
-  notifAniversarioAtleta: boolean
+  nome: string; email: string; telefone: string; modalidades: string[]
+  cep: string; logradouro: string; numero: string; complemento: string
+  bairro: string; cidade: string; estado: string
+  janela_chamada_h: string; capacidade_padrao: string
+  limiar_freq_pct: string; fuso_horario: string
+  asaasEnv: string; asaasToken: string; asaasWalletId: string
+  diasAntecipacao: string; multaPct: string; jurosPct: string; descontoAntecipPct: string
+  notifEmail: boolean; notifPush: boolean; notifWhatsapp: boolean; notifSms: boolean
+  notifCobrancaLembreteD3: boolean; notifCobrancaLembreteD1: boolean
+  notifCobrancaVencida: boolean; notifCobrancaConfirmacao: boolean
+  notifFrequenciaBaixa: boolean; notifAusencia: boolean
+  notifRelatorioMensal: boolean; notifAniversarioAtleta: boolean
   checkinCheckoutAtivo: boolean
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Helper: Toggle switch ────────────────────────────────────────────────────
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
+  return (
+    <label style={{ position: 'relative', display: 'inline-flex', width: 42, height: 24, flexShrink: 0, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? .5 : 1 }}>
+      <input type="checkbox" checked={checked} onChange={onChange} disabled={disabled} style={{ opacity: 0, width: 0, height: 0 }} />
+      <span
+        onClick={!disabled ? onChange : undefined}
+        style={{
+          position: 'absolute', inset: 0, borderRadius: 12, cursor: disabled ? 'not-allowed' : 'pointer',
+          background: checked ? PRIMARY : BORDER, transition: 'background .2s',
+        }}
+      >
+        <span style={{
+          position: 'absolute', left: checked ? 21 : 3, top: 3, width: 18, height: 18,
+          borderRadius: '50%', background: '#fff', transition: 'left .2s',
+          boxShadow: '0 1px 3px rgba(0,0,0,.2)',
+        }} />
+      </span>
+    </label>
+  )
+}
 
-export function ConfiguracoesEscolaForm({
-  escola,
-  isAdmin,
-}: {
-  escola: Escola
-  isAdmin: boolean
+// ─── Helper: Section card ─────────────────────────────────────────────────────
+function SCard({ title, subtitle, children }: { title: React.ReactNode; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: RADIUS, marginBottom: 16, overflow: 'hidden', boxShadow: SHADOW }}>
+      <div style={{ padding: '14px 20px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, color: TEXT }}>{title}</div>
+        {subtitle && <span style={{ fontSize: 12, color: MUTED }}>{subtitle}</span>}
+      </div>
+      <div style={{ padding: 20 }}>{children}</div>
+    </div>
+  )
+}
+
+// ─── Helper: Toggle row ───────────────────────────────────────────────────────
+function ToggleRow({ label, desc, checked, onChange, disabled, badge }: {
+  label: string; desc: string; checked: boolean; onChange: () => void; disabled?: boolean
+  badge?: React.ReactNode
 }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <strong style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{label}</strong>
+          {badge}
+        </div>
+        <small style={{ fontSize: 11.5, color: MUTED }}>{desc}</small>
+      </div>
+      <Toggle checked={checked} onChange={onChange} disabled={disabled} />
+    </div>
+  )
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+export function ConfiguracoesEscolaForm({ escola, isAdmin }: { escola: Escola; isAdmin: boolean }) {
   const [tab, setTab] = useState<Tab>('identidade')
+  const [saving, setSaving]             = useState(false)
+  const [uploading, setUploading]       = useState(false)
+  const [error, setError]               = useState<string | null>(null)
+  const [cepError, setCepError]         = useState<string | null>(null)
+  const [cepLoading, setCepLoading]     = useState(false)
+  const [testLoading, setTestLoading]   = useState(false)
+  const [testResult, setTestResult]     = useState<{ success: boolean; message: string } | null>(null)
+  const [copied, setCopied]             = useState(false)
+  const [webhookUrl, setWebhookUrl]     = useState('')
+  const [showToken, setShowToken]       = useState(false)
+
+  useEffect(() => { setWebhookUrl(`${window.location.origin}/api/webhooks/asaas`) }, [])
 
   function handleTabChange(t: Tab) {
-    // P8: clear token on tab switch so it doesn't bleed into other tab's save action
-    // P6: clear stale test result on tab switch
     if (t !== tab) {
       setValues(prev => ({ ...prev, asaasToken: '' }))
       setTestResult(null)
     }
     setTab(t)
   }
-  const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [cepError, setCepError] = useState<string | null>(null)
-  const [cepLoading, setCepLoading] = useState(false)
-  const [testLoading, setTestLoading] = useState(false)
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
-  const [copied, setCopied] = useState(false)
-  const [webhookUrl, setWebhookUrl] = useState('')
-
-  useEffect(() => {
-    setWebhookUrl(`${window.location.origin}/api/webhooks/asaas`)
-  }, [])
 
   const [values, setValues] = useState<FormState>({
     nome: escola.nome ?? '',
@@ -165,11 +193,9 @@ export function ConfiguracoesEscolaForm({
     checkinCheckoutAtivo: escola.checkin_checkout_ativo ?? false,
   })
 
-  // Track dirty state by comparing to original values
   const original = useRef(values)
-  const isDirty = JSON.stringify(values) !== JSON.stringify(original.current)
+  const isDirty  = JSON.stringify(values) !== JSON.stringify(original.current)
 
-  // beforeunload guard
   useEffect(() => {
     if (!isDirty) return
     const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
@@ -192,15 +218,13 @@ export function ConfiguracoesEscolaForm({
     setError(null)
   }
 
-  // CEP auto-fill on blur
   async function handleCepBlur() {
     if (cepLoading) return
     const digits = values.cep.replace(/\D/g, '')
     if (digits.length !== 8) return
-    setCepLoading(true)
-    setCepError(null)
+    setCepLoading(true); setCepError(null)
     try {
-      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
+      const res  = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
       const data = await res.json()
       if (data.erro) {
         setCepError('CEP não encontrado')
@@ -213,54 +237,37 @@ export function ConfiguracoesEscolaForm({
           estado: data.uf ?? prev.estado,
         }))
       }
-    } catch {
-      setCepError('Erro ao consultar CEP. Verifique sua conexão.')
-    } finally {
-      setCepLoading(false)
-    }
+    } catch { setCepError('Erro ao consultar CEP.') }
+    finally { setCepLoading(false) }
   }
 
   async function handleTestConnection() {
     if (testLoading) return
-    if (!values.asaasToken) {
-      setTestResult({ success: false, message: 'Insira um token para testar' })
-      return
-    }
-    setTestLoading(true)
-    setTestResult(null)
+    if (!values.asaasToken) { setTestResult({ success: false, message: 'Insira um token para testar' }); return }
+    setTestLoading(true); setTestResult(null)
     try {
       const fd = new FormData()
       fd.append('token', values.asaasToken)
       fd.append('env', values.asaasEnv)
       const result = await testarConexaoAsaas(escola.id, fd)
-      if (result.error) {
-        setTestResult({ success: false, message: result.error })
-      } else {
-        setTestResult({ success: true, message: 'Conexão bem-sucedida' })
-      }
-    } catch {
-      setTestResult({ success: false, message: 'Erro inesperado. Tente novamente.' })
-    } finally {
-      setTestLoading(false)
-    }
+      setTestResult(result.error
+        ? { success: false, message: result.error }
+        : { success: true, message: 'Conexão bem-sucedida' })
+    } catch { setTestResult({ success: false, message: 'Erro inesperado.' }) }
+    finally { setTestLoading(false) }
   }
 
   async function handleCopyWebhook() {
     try {
       await navigator.clipboard.writeText(webhookUrl || window.location.origin + '/api/webhooks/asaas')
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard API unavailable (non-HTTPS or permission denied) — no-op, user can copy manually
-    }
+      setCopied(true); setTimeout(() => setCopied(false), 2000)
+    } catch { /* no-op */ }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (saving) return
-    setSaving(true)
-    setError(null)
-
+    setSaving(true); setError(null)
     try {
       if (tab === 'integracao') {
         const fd = new FormData()
@@ -272,24 +279,22 @@ export function ConfiguracoesEscolaForm({
         fd.append('juros_pct', values.jurosPct)
         fd.append('desconto_antecip_pct', values.descontoAntecipPct)
         const result = await salvarConfiguracaoAsaas(escola.id, fd)
-        // On success the action redirects — only reaches here on error
         if (result.error) setError(result.error)
       } else if (tab === 'notificacoes') {
         const fd = new FormData()
-        fd.append('notif_email', String(values.notifEmail))
-        fd.append('notif_push', String(values.notifPush))
-        fd.append('notif_whatsapp', String(values.notifWhatsapp))
-        fd.append('notif_sms', String(values.notifSms))
-        fd.append('notif_cobranca_lembrete_d3', String(values.notifCobrancaLembreteD3))
-        fd.append('notif_cobranca_lembrete_d1', String(values.notifCobrancaLembreteD1))
-        fd.append('notif_cobranca_vencida', String(values.notifCobrancaVencida))
-        fd.append('notif_cobranca_confirmacao', String(values.notifCobrancaConfirmacao))
-        fd.append('notif_frequencia_baixa', String(values.notifFrequenciaBaixa))
-        fd.append('notif_ausencia', String(values.notifAusencia))
-        fd.append('notif_relatorio_mensal', String(values.notifRelatorioMensal))
-        fd.append('notif_aniversario_atleta', String(values.notifAniversarioAtleta))
+        fd.append('notif_email',                   String(values.notifEmail))
+        fd.append('notif_push',                    String(values.notifPush))
+        fd.append('notif_whatsapp',                String(values.notifWhatsapp))
+        fd.append('notif_sms',                     String(values.notifSms))
+        fd.append('notif_cobranca_lembrete_d3',    String(values.notifCobrancaLembreteD3))
+        fd.append('notif_cobranca_lembrete_d1',    String(values.notifCobrancaLembreteD1))
+        fd.append('notif_cobranca_vencida',        String(values.notifCobrancaVencida))
+        fd.append('notif_cobranca_confirmacao',    String(values.notifCobrancaConfirmacao))
+        fd.append('notif_frequencia_baixa',        String(values.notifFrequenciaBaixa))
+        fd.append('notif_ausencia',                String(values.notifAusencia))
+        fd.append('notif_relatorio_mensal',        String(values.notifRelatorioMensal))
+        fd.append('notif_aniversario_atleta',      String(values.notifAniversarioAtleta))
         const result = await salvarConfiguracoesNotificacoes(escola.id, fd)
-        // On success the action redirects — only reaches here on error
         if (result.error) setError(result.error)
       } else {
         const fd = new FormData()
@@ -310,771 +315,554 @@ export function ConfiguracoesEscolaForm({
         fd.append('fuso_horario', values.fuso_horario)
         fd.append('checkin_checkout_ativo', String(values.checkinCheckoutAtivo))
         const result = await atualizarConfiguracoesEscola(escola.id, fd)
-        // On success the action redirects — only reaches here on error
         if (result.error) setError(result.error)
       }
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
-    if (uploading) return
-    setUploading(true)
-    setError(null)
-
+    if (!file || uploading) return
+    setUploading(true); setError(null)
     const fd = new FormData()
     fd.append('logo', file)
-
     const result = await uploadLogoEscola(escola.id, fd)
-    // On success the action redirects — only reaches here on error
-    if (result.error) {
-      setError(result.error)
-      e.target.value = '' // allow re-selecting the same file
-      setUploading(false)
-    }
+    if (result.error) { setError(result.error); e.target.value = ''; setUploading(false) }
   }
 
-  const ro = !isAdmin // read-only flag
+  const ro = !isAdmin
+
+  // ── Shared input style ─────────────────────────────────────────────────────
+  const inp = (extra?: React.CSSProperties): React.CSSProperties => ({
+    padding: '9px 12px', border: `1.5px solid ${BORDER}`, borderRadius: RADIUS_SM,
+    fontSize: 13.5, fontFamily: 'Inter, system-ui, sans-serif', color: TEXT,
+    background: ro ? BG : CARD, outline: 'none', transition: 'border-color .15s', width: '100%',
+    cursor: ro ? 'not-allowed' : 'auto',
+    ...extra,
+  })
+
+  const lbl: React.CSSProperties = { fontSize: 12.5, fontWeight: 600, color: TEXT }
+  const hint: React.CSSProperties = { fontSize: 11, color: MUTED }
+
+  function Field({ label, req, hint: h, children }: { label: string; req?: boolean; hint?: string; children: React.ReactNode }) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <label style={lbl}>{label} {req && <span style={{ color: DANGER }}>*</span>}</label>
+        {children}
+        {h && <span style={hint}>{h}</span>}
+      </div>
+    )
+  }
+
+  // ── Tab definitions ────────────────────────────────────────────────────────
+  const TABS: { id: Tab; icon: string; label: string }[] = [
+    { id: 'identidade',    icon: '🏫', label: 'Dados da Escola' },
+    { id: 'endereco',      icon: '📍', label: 'Endereço' },
+    { id: 'integracao',    icon: '💳', label: 'Integração Asaas' },
+    { id: 'configuracoes', icon: '🛠️', label: 'Configurações Gerais' },
+    { id: 'notificacoes',  icon: '🔔', label: 'Notificações' },
+  ]
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      {/* Acesso restrito banner */}
+    <form onSubmit={handleSubmit} style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+
+      {/* Page header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: TEXT }}>⚙️ Configurações da Escola</h1>
+          <p style={{ fontSize: 13, color: MUTED, marginTop: 3 }}>Informações, integrações e preferências da sua escola.</p>
+        </div>
+        {isAdmin && (
+          <button
+            type="submit" disabled={saving}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: RADIUS_SM, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', border: 'none', background: saving ? '#a7f3d0' : PRIMARY, color: '#fff', boxShadow: `0 2px 8px rgba(32,201,151,.3)`, transition: 'background .15s' }}
+          >
+            💾 {saving ? 'Salvando...' : 'Salvar alterações'}
+          </button>
+        )}
+      </div>
+
       {!isAdmin && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: DANGER_L, border: `1px solid #fecaca`, borderRadius: RADIUS_SM, fontSize: 13, color: '#b91c1c' }}>
           Acesso restrito — somente administradores podem editar as configurações.
         </div>
       )}
 
-      {/* Tab headers */}
-      <div className="flex gap-0 border-b">
-        {(['identidade', 'endereco', 'configuracoes', 'integracao', 'notificacoes'] as Tab[]).map(t => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => handleTabChange(t)}
-            className={[
-              'px-4 py-2 text-sm font-medium transition-colors',
-              tab === t
-                ? 'border-b-2 border-primary text-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-            ].join(' ')}
-          >
-            {t === 'identidade' ? 'Identidade' : t === 'endereco' ? 'Endereço' : t === 'configuracoes' ? 'Configurações' : t === 'integracao' ? 'Integração' : 'Notificações'}
-          </button>
-        ))}
-      </div>
+      {/* Settings layout */}
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
 
-      {/* ── Tab: Identidade ─────────────────────────────────────────────── */}
-      {tab === 'identidade' && (
-        <div className="flex flex-col gap-4">
-          {/* Logo */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Logo da escola</Label>
-            <div className="flex items-center gap-4">
-              {escola.logo_url ? (
-                <div className="relative h-16 w-16 overflow-hidden rounded-full border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={escola.logo_url} alt="Logo" className="h-full w-full object-cover" />
-                </div>
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#20c997] text-2xl font-semibold text-white">
-                  {(escola.nome ?? '?').charAt(0).toUpperCase()}
-                </div>
-              )}
-              {isAdmin && (
-                <div className="flex flex-col gap-1">
-                  <label className="cursor-pointer text-sm text-primary underline underline-offset-2">
-                    {uploading ? 'Enviando...' : 'Alterar logo'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploading}
-                      onChange={handleLogoChange}
-                    />
-                  </label>
-                  <span className="text-xs text-muted-foreground">JPEG, PNG, WebP · máx. 2 MB</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Nome */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="nome">Nome da escola *</Label>
-            <Input
-              id="nome"
-              value={values.nome}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('nome', e.target.value)}
-            />
-          </div>
-
-          {/* CNPJ — always read-only */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cnpj">CNPJ</Label>
-            <Input
-              id="cnpj"
-              value={formatCnpj(escola.cnpj ?? '')}
-              readOnly
-              disabled
-            />
-          </div>
-
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">E-mail de contato</Label>
-            <Input
-              id="email"
-              type="email"
-              value={values.email}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('email', e.target.value)}
-            />
-          </div>
-
-          {/* Telefone */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              value={values.telefone}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('telefone', e.target.value)}
-            />
-          </div>
-
-          {/* Modalidades */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Modalidades</Label>
-            <div className="flex flex-wrap gap-2">
-              {MODALITIES.map(mod => {
-                const active = values.modalidades.includes(mod)
-                return (
+        {/* ── Tab nav (sticky left sidebar) ─────────────────────────────── */}
+        <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 80 }}>
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: RADIUS, overflow: 'hidden', boxShadow: SHADOW }}>
+            {TABS.map((t, i) => {
+              const active = tab === t.id
+              return (
+                <div key={t.id}>
+                  {i > 0 && <div style={{ height: 1, background: BORDER }} />}
                   <button
-                    key={mod}
                     type="button"
-                    disabled={ro}
-                    onClick={() => !ro && toggleModalidade(mod)}
-                    className={
-                      active
-                        ? 'rounded-full border bg-primary px-3 py-1 text-sm font-medium text-primary-foreground disabled:opacity-70'
-                        : 'rounded-full border px-3 py-1 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:hover:bg-transparent'
-                    }
+                    onClick={() => handleTabChange(t.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px',
+                      fontSize: 13, fontWeight: active ? 600 : 500, cursor: 'pointer',
+                      color: active ? PRIMARY_D : MUTED, background: active ? PRIMARY_L : 'transparent',
+                      border: 'none', borderLeft: `3px solid ${active ? PRIMARY : 'transparent'}`,
+                      width: '100%', textAlign: 'left', transition: 'all .15s', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = BG; (e.currentTarget as HTMLButtonElement).style.color = TEXT } }}
+                    onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = MUTED } }}
                   >
-                    {mod}
+                    <span style={{ fontSize: 15, width: 18, textAlign: 'center' }}>{t.icon}</span>
+                    {t.label}
                   </button>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
         </div>
-      )}
 
-      {/* ── Tab: Endereço ───────────────────────────────────────────────── */}
-      {tab === 'endereco' && (
-        <div className="flex flex-col gap-4">
-          {/* CEP */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cep">CEP</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="cep"
-                placeholder="00000-000"
-                value={values.cep}
-                readOnly={ro}
-                disabled={ro}
-                maxLength={9}
-                onChange={e => set('cep', e.target.value)}
-                onBlur={!ro ? handleCepBlur : undefined}
-              />
-              {cepLoading && (
-                <span className="text-xs text-muted-foreground">Buscando...</span>
-              )}
-            </div>
-            {cepError && (
-              <p className="text-xs text-destructive">{cepError}</p>
-            )}
-          </div>
+        {/* ── Content ───────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, minWidth: 0 }}>
 
-          {/* Logradouro */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="logradouro">Logradouro</Label>
-            <Input
-              id="logradouro"
-              value={values.logradouro}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('logradouro', e.target.value)}
-            />
-          </div>
+          {/* ── IDENTIDADE ──────────────────────────────────────────────── */}
+          {tab === 'identidade' && (
+            <>
+              <SCard title="🏫 Identidade Visual">
+                <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* Logo upload */}
+                  <div style={{ flexShrink: 0 }}>
+                    <label
+                      style={{ display: 'block', border: `2px dashed ${BORDER}`, borderRadius: RADIUS, padding: 24, textAlign: 'center', cursor: isAdmin ? 'pointer' : 'default', transition: 'all .2s', width: 160 }}
+                      onMouseEnter={e => { if (isAdmin) { (e.currentTarget as HTMLLabelElement).style.borderColor = PRIMARY; (e.currentTarget as HTMLLabelElement).style.background = PRIMARY_L } }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLLabelElement).style.borderColor = BORDER; (e.currentTarget as HTMLLabelElement).style.background = 'transparent' }}
+                    >
+                      {escola.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={escola.logo_url} alt="Logo" style={{ width: 80, height: 80, borderRadius: 12, objectFit: 'cover', margin: '0 auto 10px', display: 'block' }} />
+                      ) : (
+                        <div style={{ width: 80, height: 80, borderRadius: 12, background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontSize: 32 }}>
+                          🏫
+                        </div>
+                      )}
+                      <div style={{ fontSize: 13, color: MUTED }}>
+                        <strong style={{ display: 'block', color: TEXT, fontWeight: 600, marginBottom: 3 }}>
+                          {uploading ? 'Enviando...' : 'Logotipo da escola'}
+                        </strong>
+                        {isAdmin && 'Clique para enviar PNG, JPG ou SVG'}
+                      </div>
+                      {isAdmin && (
+                        <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploading} onChange={handleLogoChange} />
+                      )}
+                    </label>
+                  </div>
 
-          {/* Número + Complemento */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="numero">Número</Label>
-              <Input
-                id="numero"
-                value={values.numero}
-                readOnly={ro}
-                disabled={ro}
-                onChange={e => set('numero', e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="complemento">Complemento</Label>
-              <Input
-                id="complemento"
-                value={values.complemento}
-                readOnly={ro}
-                disabled={ro}
-                onChange={e => set('complemento', e.target.value)}
-              />
-            </div>
-          </div>
+                  {/* Name / email / tel */}
+                  <div style={{ flex: 1, minWidth: 220, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <Field label="Nome da escola" req>
+                      <input
+                        value={values.nome} readOnly={ro} disabled={ro}
+                        onChange={e => set('nome', e.target.value)}
+                        style={inp()}
+                        onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                        onBlur={e => e.currentTarget.style.borderColor = BORDER}
+                      />
+                    </Field>
+                    <Field label="CNPJ">
+                      <input value={formatCnpj(escola.cnpj ?? '')} readOnly disabled style={inp()} />
+                    </Field>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <Field label="E-mail de contato">
+                        <input type="email" value={values.email} readOnly={ro} disabled={ro}
+                          onChange={e => set('email', e.target.value)} style={inp()}
+                          onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                          onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                      </Field>
+                      <Field label="Telefone">
+                        <input value={values.telefone} readOnly={ro} disabled={ro}
+                          onChange={e => set('telefone', e.target.value)} style={inp()}
+                          onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                          onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+              </SCard>
 
-          {/* Bairro */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="bairro">Bairro</Label>
-            <Input
-              id="bairro"
-              value={values.bairro}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('bairro', e.target.value)}
-            />
-          </div>
-
-          {/* Cidade + Estado */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cidade">Cidade</Label>
-              <Input
-                id="cidade"
-                value={values.cidade}
-                readOnly={ro}
-                disabled={ro}
-                onChange={e => set('cidade', e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="estado">Estado (UF)</Label>
-              <Input
-                id="estado"
-                maxLength={2}
-                placeholder="SP"
-                value={values.estado}
-                readOnly={ro}
-                disabled={ro}
-                onChange={e => set('estado', e.target.value.toUpperCase())}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Tab: Configurações ──────────────────────────────────────────── */}
-      {tab === 'configuracoes' && (
-        <div className="flex flex-col gap-4">
-          {/* Janela de chamada */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Janela para chamada</Label>
-            <p className="text-xs text-muted-foreground">
-              Período máximo (em horas) no passado em que a chamada pode ser registrada.
-            </p>
-            {isAdmin ? (
-              <Select
-                value={values.janela_chamada_h}
-                onValueChange={v => { if (v) set('janela_chamada_h', v) }}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {JANELA_OPTIONS.map(o => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Input
-                value={JANELA_OPTIONS.find(o => o.value === values.janela_chamada_h)?.label ?? `${values.janela_chamada_h}h`}
-                readOnly
-                disabled
-                className="w-48"
-              />
-            )}
-          </div>
-
-          {/* Capacidade padrão */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="capacidade_padrao">Capacidade padrão de turmas</Label>
-            <p className="text-xs text-muted-foreground">Número padrão de alunos por turma (opcional).</p>
-            <Input
-              id="capacidade_padrao"
-              type="number"
-              min={1}
-              max={9999}
-              placeholder="Ex: 20"
-              value={values.capacidade_padrao}
-              readOnly={ro}
-              disabled={ro}
-              className="w-48"
-              onChange={e => set('capacidade_padrao', e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="limiar_freq_pct">Limite de alerta de frequência (%)</Label>
-            <p className="text-xs text-muted-foreground">
-              Atletas com percentual de presença abaixo deste valor são sinalizados na lista.
-            </p>
-            <Input
-              id="limiar_freq_pct"
-              type="number"
-              min={0}
-              max={100}
-              value={values.limiar_freq_pct}
-              readOnly={ro}
-              disabled={ro}
-              className="w-48"
-              onChange={e => set('limiar_freq_pct', e.target.value)}
-            />
-          </div>
-
-          {/* Fuso horário */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Fuso horário</Label>
-            {isAdmin ? (
-              <Select
-                value={values.fuso_horario}
-                onValueChange={v => { if (v) set('fuso_horario', v) }}
-              >
-                <SelectTrigger className="w-72">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIMEZONES.map(tz => (
-                    <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Input
-                value={TIMEZONES.find(tz => tz.value === values.fuso_horario)?.label ?? values.fuso_horario}
-                readOnly
-                disabled
-                className="w-72"
-              />
-            )}
-          </div>
-
-          <div className="flex items-center justify-between rounded-md border px-4 py-3">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium">Check-in / check-out por QR</span>
-              <span className="text-xs text-muted-foreground">
-                Recurso opcional para registrar entrada e saída de atletas na unidade.
-              </span>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={values.checkinCheckoutAtivo}
-              aria-label="Check-in e check-out"
-              disabled={ro}
-              onClick={() => !ro && set('checkinCheckoutAtivo', !values.checkinCheckoutAtivo)}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                values.checkinCheckoutAtivo ? 'bg-primary' : 'bg-muted'
-              }`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                values.checkinCheckoutAtivo ? 'translate-x-6' : 'translate-x-1'
-              }`} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Tab: Integração ─────────────────────────────────────────────── */}
-      {tab === 'integracao' && (
-        <div className="flex flex-col gap-6">
-          {/* Ambiente */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Ambiente</Label>
-            <div className="flex overflow-hidden rounded-md border w-fit">
-              {(['sandbox', 'producao'] as const).map(env => (
-                <button
-                  key={env}
-                  type="button"
-                  disabled={ro}
-                  onClick={() => !ro && set('asaasEnv', env)}
-                  className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-                    values.asaasEnv === env
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-background text-muted-foreground'
-                  }`}
-                >
-                  {env === 'sandbox' ? 'Sandbox' : 'Produção'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Token de acesso */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="asaas_token">Token de acesso Asaas</Label>
-            {escola.asaas_vault_secret_id && (
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                  Token configurado ✓
-                </span>
-                <span className="text-xs text-muted-foreground">Deixe em branco para manter o token atual</span>
-              </div>
-            )}
-            {isAdmin && (
-              <Input
-                id="asaas_token"
-                type="password"
-                placeholder={escola.asaas_vault_secret_id ? '••••••••••••••••' : '$aact_...'}
-                value={values.asaasToken}
-                onChange={e => set('asaasToken', e.target.value)}
-              />
-            )}
-          </div>
-
-          {/* Wallet ID */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="asaas_wallet_id">Wallet ID (opcional)</Label>
-            <p className="text-xs text-muted-foreground">Usado em cenários de split de pagamento.</p>
-            <Input
-              id="asaas_wallet_id"
-              value={values.asaasWalletId}
-              readOnly={ro}
-              disabled={ro}
-              onChange={e => set('asaasWalletId', e.target.value)}
-            />
-          </div>
-
-          {/* Testar conexão */}
-          {isAdmin && (
-            <div className="flex flex-col gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={testLoading}
-                onClick={handleTestConnection}
-                className="w-fit"
-              >
-                {testLoading ? 'Testando...' : 'Testar Conexão'}
-              </Button>
-              {testResult && (
-                <p className={`text-sm ${testResult.success ? 'text-green-600' : 'text-destructive'}`}>
-                  {testResult.success ? '✓ ' : '✗ '}{testResult.message}
-                </p>
-              )}
-            </div>
+              <SCard title="⚽ Modalidades Ofertadas" subtitle="Afeta filtros e relatórios">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {MODALITIES.map(mod => {
+                    const active = values.modalidades.includes(mod)
+                    return (
+                      <button
+                        key={mod} type="button" disabled={ro}
+                        onClick={() => !ro && toggleModalidade(mod)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px',
+                          borderRadius: 20, fontSize: 12, fontWeight: 600,
+                          background: active ? PRIMARY_L : BG,
+                          border: `1px solid ${active ? 'rgba(32,201,151,.35)' : BORDER}`,
+                          color: active ? PRIMARY_D : TEXT,
+                          cursor: ro ? 'not-allowed' : 'pointer', transition: 'all .15s',
+                          opacity: ro ? .6 : 1,
+                        }}
+                      >
+                        {active && <span style={{ fontSize: 10 }}>✓</span>}
+                        {mod}
+                      </button>
+                    )
+                  })}
+                </div>
+              </SCard>
+            </>
           )}
 
-          {/* URL do webhook */}
-          <div className="flex flex-col gap-1.5">
-            <Label>URL do webhook</Label>
-            <p className="text-xs text-muted-foreground">
-              Registre esta URL no painel Asaas para receber eventos de pagamento.
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 rounded-md border bg-muted px-3 py-2 text-xs font-mono break-all">
-                {webhookUrl || '/api/webhooks/asaas'}
-              </code>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCopyWebhook}
-                className="shrink-0"
-              >
-                {copied ? 'Copiado!' : 'Copiar'}
-              </Button>
-            </div>
-          </div>
+          {/* ── ENDEREÇO ────────────────────────────────────────────────── */}
+          {tab === 'endereco' && (
+            <SCard title="📍 Endereço Principal" subtitle="Usado em boletos, contratos e notas fiscais">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* CEP */}
+                <Field label="CEP" req>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input
+                      value={values.cep} readOnly={ro} disabled={ro} maxLength={9}
+                      placeholder="00000-000" style={{ ...inp(), maxWidth: 180 }}
+                      onChange={e => set('cep', e.target.value)}
+                      onBlur={!ro ? handleCepBlur : undefined}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    />
+                    {cepLoading && <span style={{ fontSize: 12, color: MUTED }}>Buscando...</span>}
+                    {!cepLoading && values.cep.replace(/\D/g,'').length === 8 && !cepError && (
+                      <span style={{ fontSize: 11.5, padding: '4px 8px', borderRadius: 6, background: PRIMARY_L, color: PRIMARY_D, fontWeight: 600 }}>✓ Localizado</span>
+                    )}
+                    {cepError && <span style={{ fontSize: 11.5, padding: '4px 8px', borderRadius: 6, background: DANGER_L, color: DANGER, fontWeight: 600 }}>{cepError}</span>}
+                  </div>
+                </Field>
 
-          {/* Preferências de cobrança */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold">Preferências de cobrança</h3>
+                {/* Logradouro */}
+                <Field label="Logradouro" req>
+                  <input value={values.logradouro} readOnly={ro} disabled={ro}
+                    onChange={e => set('logradouro', e.target.value)} style={inp()}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                </Field>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="dias_antecipacao">Dias de antecipação</Label>
-              <p className="text-xs text-muted-foreground">
-                Dias antes do vencimento em que a cobrança é gerada (1–30).
-              </p>
-              <Input
-                id="dias_antecipacao"
-                type="number"
-                min={1}
-                max={30}
-                value={values.diasAntecipacao}
-                readOnly={ro}
-                disabled={ro}
-                className="w-32"
-                onChange={e => set('diasAntecipacao', e.target.value)}
-              />
-            </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label="Número" req>
+                    <input value={values.numero} readOnly={ro} disabled={ro} placeholder="Número ou S/N"
+                      onChange={e => set('numero', e.target.value)} style={inp()}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+                  <Field label="Complemento">
+                    <input value={values.complemento} readOnly={ro} disabled={ro}
+                      onChange={e => set('complemento', e.target.value)} style={inp()}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+                </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="multa_pct">Multa (%)</Label>
-                <Input
-                  id="multa_pct"
-                  type="number"
-                  min={0}
-                  max={10}
-                  step={0.1}
-                  value={values.multaPct}
-                  readOnly={ro}
-                  disabled={ro}
-                  onChange={e => set('multaPct', e.target.value)}
-                />
-                <span className="text-xs text-muted-foreground">0–10%</span>
+                <Field label="Bairro">
+                  <input value={values.bairro} readOnly={ro} disabled={ro}
+                    onChange={e => set('bairro', e.target.value)} style={inp()}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                </Field>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12 }}>
+                  <Field label="Cidade">
+                    <input value={values.cidade} readOnly={ro} disabled={ro}
+                      onChange={e => set('cidade', e.target.value)} style={inp()}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+                  <Field label="Estado (UF)">
+                    <input value={values.estado} readOnly={ro} disabled={ro} maxLength={2} placeholder="SP"
+                      onChange={e => set('estado', e.target.value.toUpperCase())} style={{ ...inp(), width: 80 }}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="juros_pct">Juros ao mês (%)</Label>
-                <Input
-                  id="juros_pct"
-                  type="number"
-                  min={0}
-                  max={10}
-                  step={0.1}
-                  value={values.jurosPct}
-                  readOnly={ro}
-                  disabled={ro}
-                  onChange={e => set('jurosPct', e.target.value)}
-                />
-                <span className="text-xs text-muted-foreground">0–10%</span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="desconto_antecip_pct">Desconto antecipação (%)</Label>
-                <Input
-                  id="desconto_antecip_pct"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.1}
-                  value={values.descontoAntecipPct}
-                  readOnly={ro}
-                  disabled={ro}
-                  onChange={e => set('descontoAntecipPct', e.target.value)}
-                />
-                <span className="text-xs text-muted-foreground">0–100%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </SCard>
+          )}
 
-      {/* ── Tab: Notificações ───────────────────────────────────────────── */}
-      {tab === 'notificacoes' && (
-        <div className="flex flex-col gap-6">
-          {/* Canais de Notificação */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold">Canais de Notificação</h3>
+          {/* ── INTEGRAÇÃO ──────────────────────────────────────────────── */}
+          {tab === 'integracao' && (
+            <>
+              <SCard title="💳 Asaas — Gateway de Pagamento">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-            {/* Email */}
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">Email</span>
-                <span className="text-xs text-muted-foreground">Cobranças, confirmações e alertas por e-mail</span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={values.notifEmail}
-                aria-label="Email"
-                disabled={ro}
-                onClick={() => !ro && set('notifEmail', !values.notifEmail)}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                  values.notifEmail ? 'bg-primary' : 'bg-muted'
-                }`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  values.notifEmail ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-              </button>
-            </div>
+                  {/* Info box */}
+                  <div style={{ background: PRIMARY_L, border: `1px solid rgba(32,201,151,.25)`, borderRadius: RADIUS_SM, padding: '12px 14px', fontSize: 12.5, color: '#166534', lineHeight: 1.6 }}>
+                    O Asaas é o gateway de pagamento integrado para geração de boletos, PIX e cartão.
+                  </div>
 
-            {/* Push */}
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">Push</span>
-                <span className="text-xs text-muted-foreground">Notificacoes no app Esportes Academy por contexto de usuario</span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={values.notifPush}
-                aria-label="Push"
-                disabled={ro}
-                onClick={() => !ro && set('notifPush', !values.notifPush)}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                  values.notifPush ? 'bg-primary' : 'bg-muted'
-                }`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  values.notifPush ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-              </button>
-            </div>
+                  {/* Ambiente toggle */}
+                  <Field label="Ambiente">
+                    <div style={{ display: 'flex', overflow: 'hidden', border: `1.5px solid ${BORDER}`, borderRadius: RADIUS_SM, width: 'fit-content' }}>
+                      {(['sandbox', 'producao'] as const).map(env => (
+                        <button
+                          key={env} type="button" disabled={ro}
+                          onClick={() => !ro && set('asaasEnv', env)}
+                          style={{
+                            padding: '7px 18px', fontSize: 12.5, fontWeight: 600, cursor: ro ? 'not-allowed' : 'pointer',
+                            color: values.asaasEnv === env ? '#fff' : MUTED,
+                            background: values.asaasEnv === env
+                              ? (env === 'sandbox' ? ACCENT : PRIMARY)
+                              : CARD,
+                            border: 'none', transition: 'all .15s', fontFamily: 'inherit',
+                          }}
+                        >
+                          {env === 'sandbox' ? '🧪 Sandbox' : '🚀 Produção'}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
 
-            {/* WhatsApp — locked on Starter plan */}
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">WhatsApp</span>
-                  {escola.plano === 'starter' && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700">
-                      🔒 Pro
-                    </span>
+                  {/* Token */}
+                  <Field label="Token de acesso Asaas">
+                    {escola.asaas_vault_secret_id && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: PRIMARY_L, border: `1px solid rgba(32,201,151,.3)`, fontSize: 12, fontWeight: 600, color: PRIMARY_D }}>
+                          ✓ Token configurado
+                        </span>
+                        <span style={{ fontSize: 11, color: MUTED }}>Deixe em branco para manter o atual</span>
+                      </div>
+                    )}
+                    {isAdmin && (
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showToken ? 'text' : 'password'}
+                          placeholder={escola.asaas_vault_secret_id ? '••••••••••••••••' : '$aact_...'}
+                          value={values.asaasToken}
+                          onChange={e => set('asaasToken', e.target.value)}
+                          style={{ ...inp({ fontFamily: 'Courier New, monospace', fontSize: 12.5, background: '#f8fafc', paddingRight: 42 }) }}
+                          onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.background = CARD }}
+                          onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.background = '#f8fafc' }}
+                        />
+                        <button type="button" onClick={() => setShowToken(v => !v)}
+                          style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: MUTED }}>
+                          {showToken ? '🙈' : '👁'}
+                        </button>
+                      </div>
+                    )}
+                  </Field>
+
+                  {/* Wallet ID */}
+                  <Field label="Wallet ID" hint="Usado em cenários de split de pagamento (opcional).">
+                    <input value={values.asaasWalletId} readOnly={ro} disabled={ro}
+                      onChange={e => set('asaasWalletId', e.target.value)} style={inp()}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+
+                  {/* Test connection */}
+                  {isAdmin && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <button
+                        type="button" disabled={testLoading} onClick={handleTestConnection}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: RADIUS_SM, border: `1.5px solid ${BORDER}`, background: CARD, fontSize: 12.5, fontWeight: 600, cursor: testLoading ? 'not-allowed' : 'pointer', color: TEXT, width: 'fit-content', fontFamily: 'inherit' }}
+                      >
+                        {testLoading ? '⏳ Testando...' : '🔌 Testar Conexão'}
+                      </button>
+                      {testResult && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: testResult.success ? PRIMARY_L : DANGER_L, color: testResult.success ? PRIMARY_D : DANGER }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: testResult.success ? PRIMARY : DANGER, flexShrink: 0, display: 'inline-block' }} />
+                          {testResult.message}
+                        </div>
+                      )}
+                    </div>
                   )}
+
+                  {/* Webhook URL */}
+                  <Field label="URL do Webhook" hint="Registre esta URL no painel Asaas para receber eventos de pagamento.">
+                    <div style={{ background: '#eff6ff', border: `1px solid rgba(91,192,235,.3)`, borderRadius: RADIUS_SM, padding: 12 }}>
+                      <code style={{ display: 'block', fontFamily: 'Courier New, monospace', fontSize: 11.5, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '7px 10px', wordBreak: 'break-all', color: TEXT, marginBottom: 8 }}>
+                        {webhookUrl || '/api/webhooks/asaas'}
+                      </code>
+                      <button
+                        type="button" onClick={handleCopyWebhook}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: RADIUS_SM, border: `1.5px solid ${BORDER}`, background: CARD, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: TEXT, fontFamily: 'inherit' }}
+                      >
+                        {copied ? '✓ Copiado!' : '📋 Copiar URL'}
+                      </button>
+                    </div>
+                  </Field>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {escola.plano === 'starter'
-                    ? 'Disponível no plano Pro'
-                    : 'Mensagens via WhatsApp Business'}
-                </span>
+              </SCard>
+
+              <SCard title="💰 Preferências de Cobrança">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <Field label="Dias de antecipação" hint="Dias antes do vencimento em que a cobrança é gerada (1–30).">
+                    <input type="number" min={1} max={30} value={values.diasAntecipacao} readOnly={ro} disabled={ro}
+                      onChange={e => set('diasAntecipacao', e.target.value)}
+                      style={{ ...inp(), maxWidth: 120 }}
+                      onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                      onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                  </Field>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                    <Field label="Multa (%)" hint="0–10%">
+                      <input type="number" min={0} max={10} step={0.1} value={values.multaPct} readOnly={ro} disabled={ro}
+                        onChange={e => set('multaPct', e.target.value)} style={inp()}
+                        onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                        onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                    </Field>
+                    <Field label="Juros ao mês (%)" hint="0–10%">
+                      <input type="number" min={0} max={10} step={0.1} value={values.jurosPct} readOnly={ro} disabled={ro}
+                        onChange={e => set('jurosPct', e.target.value)} style={inp()}
+                        onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                        onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                    </Field>
+                    <Field label="Desconto antecipação (%)" hint="0–100%">
+                      <input type="number" min={0} max={100} step={0.1} value={values.descontoAntecipPct} readOnly={ro} disabled={ro}
+                        onChange={e => set('descontoAntecipPct', e.target.value)} style={inp()}
+                        onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                        onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                    </Field>
+                  </div>
+                </div>
+              </SCard>
+            </>
+          )}
+
+          {/* ── CONFIGURAÇÕES GERAIS ─────────────────────────────────────── */}
+          {tab === 'configuracoes' && (
+            <SCard title="🛠️ Configurações Gerais">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+                <Field label="Janela para chamada" hint="Período máximo (em horas) no passado em que a chamada pode ser registrada.">
+                  <select
+                    value={values.janela_chamada_h} disabled={ro}
+                    onChange={e => set('janela_chamada_h', e.target.value)}
+                    style={{ ...inp(), maxWidth: 220, cursor: ro ? 'not-allowed' : 'pointer' }}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER}
+                  >
+                    {JANELA_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+
+                <Field label="Capacidade padrão de turmas" hint="Número padrão de alunos por turma (opcional).">
+                  <input type="number" min={1} max={9999} placeholder="Ex: 20" value={values.capacidade_padrao} readOnly={ro} disabled={ro}
+                    onChange={e => set('capacidade_padrao', e.target.value)}
+                    style={{ ...inp(), maxWidth: 150 }}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                </Field>
+
+                <Field label="Limite de alerta de frequência (%)" hint="Atletas com presença abaixo deste valor são sinalizados na lista.">
+                  <input type="number" min={0} max={100} value={values.limiar_freq_pct} readOnly={ro} disabled={ro}
+                    onChange={e => set('limiar_freq_pct', e.target.value)}
+                    style={{ ...inp(), maxWidth: 120 }}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER} />
+                </Field>
+
+                <Field label="Fuso horário">
+                  <select
+                    value={values.fuso_horario} disabled={ro}
+                    onChange={e => set('fuso_horario', e.target.value)}
+                    style={{ ...inp(), maxWidth: 300, cursor: ro ? 'not-allowed' : 'pointer' }}
+                    onFocus={e => { if (!ro) e.currentTarget.style.borderColor = PRIMARY }}
+                    onBlur={e => e.currentTarget.style.borderColor = BORDER}
+                  >
+                    {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
+                  </select>
+                </Field>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', border: `1px solid ${BORDER}`, borderRadius: RADIUS_SM }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <strong style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Check-in / check-out por QR</strong>
+                    <small style={{ fontSize: 11.5, color: MUTED }}>Recurso opcional para registrar entrada e saída de atletas na unidade.</small>
+                  </div>
+                  <Toggle checked={values.checkinCheckoutAtivo} onChange={() => !ro && set('checkinCheckoutAtivo', !values.checkinCheckoutAtivo)} disabled={ro} />
+                </div>
               </div>
-              {escola.plano === 'starter' ? (
-                <span className="text-xs text-muted-foreground">Upgrade necessário</span>
-              ) : (
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={values.notifWhatsapp}
-                  aria-label="WhatsApp"
-                  disabled={ro}
-                  onClick={() => !ro && set('notifWhatsapp', !values.notifWhatsapp)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                    values.notifWhatsapp ? 'bg-primary' : 'bg-muted'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    values.notifWhatsapp ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              )}
+            </SCard>
+          )}
+
+          {/* ── NOTIFICAÇÕES ────────────────────────────────────────────── */}
+          {tab === 'notificacoes' && (
+            <>
+              <SCard title="📡 Canais de Notificação">
+                <ToggleRow label="E-mail" desc="Cobranças, confirmações e alertas por e-mail"
+                  checked={values.notifEmail} onChange={() => !ro && set('notifEmail', !values.notifEmail)} disabled={ro} />
+                <ToggleRow label="Push" desc="Notificações no app Esportes Academy"
+                  checked={values.notifPush} onChange={() => !ro && set('notifPush', !values.notifPush)} disabled={ro} />
+                <ToggleRow
+                  label="WhatsApp" desc={escola.plano === 'starter' ? 'Disponível no plano Pro' : 'Mensagens via WhatsApp Business'}
+                  checked={values.notifWhatsapp}
+                  onChange={() => !ro && escola.plano !== 'starter' && set('notifWhatsapp', !values.notifWhatsapp)}
+                  disabled={ro || escola.plano === 'starter'}
+                  badge={escola.plano === 'starter' && (
+                    <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 20, background: ACCENT_L, color: '#b45309', fontWeight: 700 }}>🔒 Pro</span>
+                  )}
+                />
+                <ToggleRow label="SMS" desc="Mensagens de texto (operadoras)"
+                  checked={values.notifSms} onChange={() => !ro && set('notifSms', !values.notifSms)} disabled={ro} />
+              </SCard>
+
+              <SCard title="💰 Gatilhos Financeiros">
+                {[
+                  { key: 'notifCobrancaLembreteD3' as const, label: 'Lembrete D-3',         desc: '3 dias antes do vencimento' },
+                  { key: 'notifCobrancaLembreteD1' as const, label: 'Lembrete D-1',         desc: '1 dia antes do vencimento' },
+                  { key: 'notifCobrancaVencida'    as const, label: 'Cobrança vencida',      desc: 'Após o dia de vencimento' },
+                  { key: 'notifCobrancaConfirmacao' as const, label: 'Pagamento confirmado', desc: 'Quando o pagamento é processado' },
+                ].map(({ key, label, desc }) => (
+                  <ToggleRow key={key} label={label} desc={desc}
+                    checked={values[key]} onChange={() => !ro && set(key, !values[key])} disabled={ro} />
+                ))}
+              </SCard>
+
+              <SCard title="🎓 Gatilhos Pedagógicos">
+                {[
+                  { key: 'notifFrequenciaBaixa'    as const, label: 'Frequência baixa',         desc: 'Quando aluno atinge abaixo do mínimo' },
+                  { key: 'notifAusencia'            as const, label: 'Ausência',                 desc: 'Quando aluno falta à aula' },
+                  { key: 'notifRelatorioMensal'     as const, label: 'Relatório mensal',          desc: 'Enviado no início de cada mês' },
+                  { key: 'notifAniversarioAtleta'   as const, label: 'Parabéns de aniversário',  desc: 'Mensagem automática no dia do aniversário do atleta' },
+                ].map(({ key, label, desc }) => (
+                  <ToggleRow key={key} label={label} desc={desc}
+                    checked={values[key]} onChange={() => !ro && set(key, !values[key])} disabled={ro} />
+                ))}
+              </SCard>
+            </>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div style={{ marginTop: 8, padding: '10px 14px', background: DANGER_L, border: `1px solid #fecaca`, borderRadius: RADIUS_SM, fontSize: 13, color: '#b91c1c' }}>
+              {error}
             </div>
-
-            {/* SMS */}
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">SMS</span>
-                <span className="text-xs text-muted-foreground">Mensagens de texto (operadoras)</span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={values.notifSms}
-                aria-label="SMS"
-                disabled={ro}
-                onClick={() => !ro && set('notifSms', !values.notifSms)}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                  values.notifSms ? 'bg-primary' : 'bg-muted'
-                }`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  values.notifSms ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Gatilhos Financeiros */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold">Gatilhos Financeiros</h3>
-
-            {[
-              { key: 'notifCobrancaLembreteD3' as const, label: 'Lembrete D-3', desc: '3 dias antes do vencimento' },
-              { key: 'notifCobrancaLembreteD1' as const, label: 'Lembrete D-1', desc: '1 dia antes do vencimento' },
-              { key: 'notifCobrancaVencida' as const, label: 'Cobrança vencida', desc: 'Após o dia de vencimento' },
-              { key: 'notifCobrancaConfirmacao' as const, label: 'Pagamento confirmado', desc: 'Quando o pagamento é processado' },
-            ].map(({ key, label, desc }) => (
-              <div key={key} className="flex items-center justify-between rounded-md border px-4 py-3">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">{label}</span>
-                  <span className="text-xs text-muted-foreground">{desc}</span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={values[key]}
-                  aria-label={label}
-                  disabled={ro}
-                  onClick={() => !ro && set(key, !values[key])}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                    values[key] ? 'bg-primary' : 'bg-muted'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    values[key] ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Gatilhos Pedagógicos */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold">Gatilhos Pedagógicos</h3>
-
-            {[
-              { key: 'notifFrequenciaBaixa' as const, label: 'Frequência baixa', desc: 'Quando aluno atinge abaixo do mínimo' },
-              { key: 'notifAusencia' as const, label: 'Ausência', desc: 'Quando aluno falta à aula' },
-              { key: 'notifRelatorioMensal' as const, label: 'Relatório mensal', desc: 'Enviado no início de cada mês' },
-              { key: 'notifAniversarioAtleta' as const, label: 'Parabéns de aniversário', desc: 'Mensagem automática no dia do aniversário do atleta' },
-            ].map(({ key, label, desc }) => (
-              <div key={key} className="flex items-center justify-between rounded-md border px-4 py-3">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">{label}</span>
-                  <span className="text-xs text-muted-foreground">{desc}</span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={values[key]}
-                  aria-label={label}
-                  disabled={ro}
-                  onClick={() => !ro && set(key, !values[key])}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                    values[key] ? 'bg-primary' : 'bg-muted'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    values[key] ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </div>
-            ))}
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Error */}
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
-
-      {/* Sticky save bar — only when dirty and admin */}
-      {isDirty && isAdmin && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t bg-background px-6 py-4">
-          <p className="text-sm text-muted-foreground">Você tem alterações não salvas.</p>
-          <Button type="submit" disabled={saving}>
+      {/* ── Sticky save bar ─────────────────────────────────────────────── */}
+      <div style={{ position: 'fixed', bottom: 24, left: 0, right: 0, zIndex: 60, pointerEvents: 'none', display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          pointerEvents: 'all', background: TEXT, color: '#fff', borderRadius: RADIUS,
+          padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 14,
+          boxShadow: '0 10px 24px rgba(0,0,0,.15)',
+          transform: isDirty && isAdmin ? 'translateY(0)' : 'translateY(60px)',
+          opacity: isDirty && isAdmin ? 1 : 0,
+          transition: 'transform .25s, opacity .25s',
+        }}>
+          <span style={{ fontSize: 13, fontWeight: 500 }}>● Você tem alterações não salvas</span>
+          <button
+            type="submit" disabled={saving}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 16px', borderRadius: RADIUS_SM, border: 'none', background: PRIMARY, color: '#fff', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+          >
             {saving ? 'Salvando...' : 'Salvar alterações'}
-          </Button>
+          </button>
+          <button
+            type="button" onClick={() => { setValues(original.current); setError(null) }}
+            style={{ fontSize: 12, fontWeight: 500, background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Descartar
+          </button>
         </div>
-      )}
+      </div>
     </form>
   )
 }

@@ -26,12 +26,5 @@ export default async function ConfiguracoesPage() {
 
   const isAdmin = ctx.perfil === 'admin_escola'
 
-  return (
-    <div className="flex min-h-screen flex-col items-center p-6">
-      <div className="w-full max-w-2xl">
-        <h1 className="mb-6 text-2xl font-semibold">Configurações da escola</h1>
-        <ConfiguracoesEscolaForm escola={escola} isAdmin={isAdmin} />
-      </div>
-    </div>
-  )
+  return <ConfiguracoesEscolaForm escola={escola} isAdmin={isAdmin} />
 }
