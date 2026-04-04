@@ -41,6 +41,7 @@ const NAV: NavEntry[] = [
   { type: 'link', id: 'relatorios',   label: 'Relatórios',  icon: '📈', href: '#', lock: 'Pro' },
 
   { type: 'section', label: 'Escola' },
+  { type: 'link', id: 'usuarios',      label: 'Usuários',      icon: '👤', href: '/painel/usuarios'      },
   { type: 'link', id: 'configuracoes', label: 'Configurações', icon: '⚙️', href: '/painel/configuracoes' },
 ]
 
@@ -56,6 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/painel/acessos':            'Acessos',
   '/painel/cursos':             'Cursos',
   '/painel/comunicacao-basica': 'Comunicação',
+  '/painel/usuarios':           'Usuários',
   '/painel/configuracoes':      'Configurações',
   '/painel/sem-permissao':      'Sem Permissão',
   '/painel/modulo-bloqueado':   'Módulo Bloqueado',

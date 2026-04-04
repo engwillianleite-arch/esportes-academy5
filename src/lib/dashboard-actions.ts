@@ -9,6 +9,28 @@ export type DashboardKpis = {
   aulasComChamada: number
 }
 
+export type FinanceiroKpis = {
+  receitaMes: number
+  cobrancasPendentes: number
+  cobrancasVencidas: number
+  inadimplentesPct: number
+}
+
+export type TopTurma = {
+  turmaId: string
+  nome: string
+  totalMatriculas: number
+  capacidade: number | null
+  ocupacaoPct: number
+}
+
+export type AlertaDashboard = {
+  tipo: 'inadimplente' | 'baixa_frequencia' | 'chamada_pendente'
+  texto: string
+  sub: string
+  cor: 'red' | 'orange' | 'blue'
+}
+
 export type AulaHojeStatus = {
   turmaId: string
   turmaNome: string
@@ -150,4 +172,137 @@ export async function carregarAniversariantesMes(
     error: null,
     aniversariantes: [...uniqueByAtleta.values()].sort((a, b) => a.diaAniversario - b.diaAniversario),
   }
+}
+
+// ─── KPIs financeiros do mês atual ───────────────────────────────────────────
+
+export async function carregarFinanceiroKpis(
+  escolaId: string
+): Promise<{ error: string | null; kpis?: FinanceiroKpis }> {
+  const supabase = await createClient()
+  const now      = new Date()
+  const mesStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  const mesEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0, 10)
+
+  const { data: cobsMes } = await supabase
+    .from('cobrancas')
+    .select('valor, status, vencimento')
+    .eq('escola_id', escolaId)
+    .is('deleted_at', null)
+    .gte('vencimento', mesStart)
+    .lt('vencimento', mesEnd)
+
+  const todas   = cobsMes ?? []
+  const pagas   = todas.filter(c => c.status === 'pago')
+  const pend    = todas.filter(c => c.status === 'pendente')
+  const venc    = todas.filter(c => c.status === 'vencido')
+
+  const receitaMes        = pagas.reduce((s, c) => s + Number(c.valor ?? 0), 0)
+  const cobrancasPendentes = pend.length
+  const cobrancasVencidas  = venc.length
+  const inadimplentesPct  = todas.length ? Math.round((venc.length / todas.length) * 100) : 0
+
+  return {
+    error: null,
+    kpis: { receitaMes, cobrancasPendentes, cobrancasVencidas, inadimplentesPct },
+  }
+}
+
+// ─── Top turmas por ocupação ──────────────────────────────────────────────────
+
+export async function carregarTopTurmas(
+  escolaId: string
+): Promise<{ error: string | null; turmas?: TopTurma[] }> {
+  const supabase = await createClient()
+
+  const [{ data: turmas }, { data: matriculas }] = await Promise.all([
+    supabase
+      .from('turmas')
+      .select('id, nome, capacidade_max')
+      .eq('escola_id', escolaId)
+      .eq('ativo', true)
+      .is('deleted_at', null),
+    supabase
+      .from('matriculas')
+      .select('turma_id')
+      .eq('escola_id', escolaId)
+      .eq('status', 'ativa')
+      .is('deleted_at', null),
+  ])
+
+  const matCount = new Map<string, number>()
+  for (const m of matriculas ?? []) {
+    if (m.turma_id) matCount.set(m.turma_id, (matCount.get(m.turma_id) ?? 0) + 1)
+  }
+
+  const result: TopTurma[] = (turmas ?? []).map(t => {
+    const total = matCount.get(t.id) ?? 0
+    const cap   = t.capacidade_max ?? null
+    return {
+      turmaId:        t.id,
+      nome:           t.nome,
+      totalMatriculas: total,
+      capacidade:     cap,
+      ocupacaoPct:    cap ? Math.min(100, Math.round((total / cap) * 100)) : 0,
+    }
+  }).sort((a, b) => b.totalMatriculas - a.totalMatriculas).slice(0, 5)
+
+  return { error: null, turmas: result }
+}
+
+// ─── Alertas do dashboard ─────────────────────────────────────────────────────
+
+export async function carregarAlertas(
+  escolaId: string
+): Promise<{ error: string | null; alertas?: AlertaDashboard[] }> {
+  const supabase = await createClient()
+  const alertas: AlertaDashboard[] = []
+
+  // Cobranças vencidas
+  const { data: vencidas } = await supabase
+    .from('cobrancas')
+    .select('id')
+    .eq('escola_id', escolaId)
+    .eq('status', 'vencido')
+    .is('deleted_at', null)
+
+  const qVencidas = vencidas?.length ?? 0
+  if (qVencidas > 0) {
+    alertas.push({
+      tipo: 'inadimplente',
+      texto: `${qVencidas} cobrança${qVencidas > 1 ? 's' : ''} vencida${qVencidas > 1 ? 's' : ''}`,
+      sub: 'Verifique o módulo Financeiro',
+      cor: 'red',
+    })
+  }
+
+  // Chamadas pendentes de hoje
+  const hoje = new Date().toISOString().slice(0, 10)
+  const { data: turmasAtivas } = await supabase
+    .from('turmas')
+    .select('id, nome')
+    .eq('escola_id', escolaId)
+    .eq('ativo', true)
+    .is('deleted_at', null)
+
+  // aulas table has escola_id + data_aula + turma_id
+  const { data: aulasHojeData } = await supabase
+    .from('aulas')
+    .select('turma_id')
+    .eq('escola_id', escolaId)
+    .eq('data_aula', hoje)
+
+  const turmasComChamada = new Set((aulasHojeData ?? []).map(p => p.turma_id))
+  const turmasSemChamada = (turmasAtivas ?? []).filter(t => !turmasComChamada.has(t.id))
+
+  if (turmasSemChamada.length > 0) {
+    alertas.push({
+      tipo: 'chamada_pendente',
+      texto: `${turmasSemChamada.length} turma${turmasSemChamada.length > 1 ? 's' : ''} sem chamada hoje`,
+      sub: 'Registre a presença antes do fim do dia',
+      cor: 'orange',
+    })
+  }
+
+  return { error: null, alertas }
 }
