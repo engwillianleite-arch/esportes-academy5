@@ -23,13 +23,10 @@ export default async function PlanosPagamentoPage() {
   if (error) {
     console.error('[PlanosPagamentoPage]', error.message)
     return (
-      <div className="flex min-h-screen flex-col items-center p-6">
-        <div className="w-full max-w-3xl">
-          <h1 className="mb-6 text-2xl font-semibold">Planos de Pagamento</h1>
-          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            Erro ao carregar planos de pagamento. Tente recarregar a página.
-          </p>
-        </div>
+      <div style={{ padding: 24 }}>
+        <p style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, color: '#b91c1c' }}>
+          Erro ao carregar planos de pagamento. Tente recarregar a página.
+        </p>
       </div>
     )
   }
@@ -56,15 +53,10 @@ export default async function PlanosPagamentoPage() {
   const isAdmin = ctx.perfil === 'admin_escola'
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-6">
-      <div className="w-full max-w-3xl">
-        <h1 className="mb-6 text-2xl font-semibold">Planos de Pagamento</h1>
-        <PlanosPagamentoClient
-          planos={planosWithCount}
-          escolaId={ctx.escolaId}
-          isAdmin={isAdmin}
-        />
-      </div>
-    </div>
+    <PlanosPagamentoClient
+      planos={planosWithCount}
+      escolaId={ctx.escolaId}
+      isAdmin={isAdmin}
+    />
   )
 }

@@ -871,7 +871,32 @@ async function listarUsuariosCursosEscolaInterno(
     })
     .filter((row): row is CursoUsuarioOption => Boolean(row))
 
-  return { error: null, rows }
+  const deduped = new Map<string, CursoUsuarioOption>()
+
+  for (const row of rows) {
+    const current = deduped.get(row.auth_user_id)
+    if (!current) {
+      deduped.set(row.auth_user_id, row)
+      continue
+    }
+
+    const tipos = new Set(
+      [...current.tipo_usuario.split(',').map((tipo) => tipo.trim()), row.tipo_usuario]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
+    )
+
+    deduped.set(row.auth_user_id, {
+      ...current,
+      tipo_usuario: Array.from(tipos).join(', '),
+      principal: current.principal || row.principal,
+    })
+  }
+
+  return {
+    error: null,
+    rows: Array.from(deduped.values()).sort((a, b) => a.nome.localeCompare(b.nome)),
+  }
 }
 
 async function recalcularProgressoCurso(

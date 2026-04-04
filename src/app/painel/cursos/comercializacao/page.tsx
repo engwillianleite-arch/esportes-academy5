@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   title: 'Cursos · Comercialização',
 }
 
+type SearchParams = {
+  feedback?: string
+  error?: string
+}
+
 function formatDate(value: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
@@ -28,10 +33,15 @@ function formatBRL(value: number): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 }
 
-export default async function CursosComercializacaoPage() {
+export default async function CursosComercializacaoPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>
+}) {
   const ctx = await getEscolaContext()
   if (!ctx) redirect('/selecionar-escola')
   const escolaId = ctx.escolaId
+  const params = (await searchParams) ?? {}
 
   const hasAccess = ['admin_escola', 'coordenador'].includes(ctx.perfil)
   if (!hasAccess) redirect('/painel/sem-permissao')
@@ -56,12 +66,20 @@ export default async function CursosComercializacaoPage() {
 
   async function actionCriarAssinatura(formData: FormData) {
     'use server'
-    await criarAssinaturaCursoUsuario(escolaId, formData)
+    const result = await criarAssinaturaCursoUsuario(escolaId, formData)
+    if (result.error) {
+      redirect(`/painel/cursos/comercializacao?error=${encodeURIComponent(result.error)}`)
+    }
+    redirect('/painel/cursos/comercializacao?feedback=assinatura-criada')
   }
 
   async function actionCriarMatricula(formData: FormData) {
     'use server'
-    await criarMatriculaCursoUsuario(escolaId, formData)
+    const result = await criarMatriculaCursoUsuario(escolaId, formData)
+    if (result.error) {
+      redirect(`/painel/cursos/comercializacao?error=${encodeURIComponent(result.error)}`)
+    }
+    redirect('/painel/cursos/comercializacao?feedback=matricula-criada')
   }
 
   return (
@@ -77,6 +95,24 @@ export default async function CursosComercializacaoPage() {
           Voltar para estrutura do módulo
         </Link>
       </div>
+
+      {params.error && (
+        <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {params.error}
+        </p>
+      )}
+
+      {!params.error && params.feedback === 'assinatura-criada' && (
+        <p className="mt-4 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700">
+          Assinatura criada com sucesso.
+        </p>
+      )}
+
+      {!params.error && params.feedback === 'matricula-criada' && (
+        <p className="mt-4 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700">
+          Matrícula criada com sucesso.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-3 md:grid-cols-4">
         <div className="rounded-lg border bg-card p-4">
@@ -106,7 +142,7 @@ export default async function CursosComercializacaoPage() {
               <select name="user_id" className="h-10 rounded-md border bg-background px-3" required defaultValue="">
                 <option value="" disabled>Selecione</option>
                 {usuarios.map((usuario) => (
-                  <option key={`${usuario.auth_user_id}:${usuario.tipo_usuario}`} value={usuario.auth_user_id}>
+                  <option key={usuario.auth_user_id} value={usuario.auth_user_id}>
                     {usuario.nome} · {usuario.tipo_usuario}{usuario.email ? ` · ${usuario.email}` : ''}
                   </option>
                 ))}
@@ -166,7 +202,7 @@ export default async function CursosComercializacaoPage() {
               <select name="user_id" className="h-10 rounded-md border bg-background px-3" required defaultValue="">
                 <option value="" disabled>Selecione</option>
                 {usuarios.map((usuario) => (
-                  <option key={`${usuario.auth_user_id}:${usuario.tipo_usuario}`} value={usuario.auth_user_id}>
+                  <option key={usuario.auth_user_id} value={usuario.auth_user_id}>
                     {usuario.nome} · {usuario.tipo_usuario}{usuario.email ? ` · ${usuario.email}` : ''}
                   </option>
                 ))}

@@ -73,6 +73,7 @@ Além da operação da escola, a plataforma preserva a **jornada esportiva compl
 - **Portal Escola** — painel web completo para gestão operacional e administrativa
 - **App Esportes Academy** — app único (mobile e web) para responsáveis, professores e demais tipos de usuário elegíveis
 - **Portal SuperAdmin** — painel interno Esportes Academy para gestão da plataforma e dos tenants
+- **Arquitetura de portais independentes** — `Gestão`, `Cursos` e `Competições` devem ser tratados como sistemas separados no produto e no backlog; o único portal em comum entre eles é o `SuperAdmin`
 
 ### Proposta de Valor
 > *"Tudo que a sua escola esportiva precisa em um só lugar — e só o que você precisa pagar."*
@@ -1025,56 +1026,91 @@ cobrancas (
 
 ---
 
-### 7.09 Módulo — Cursos
+### 7.09 M?dulo ? Cursos
 **Slug:** `cursos` | **Planos:** Pro (add-on) e Enterprise
 
-**Objetivo:** Permitir que a escola publique, organize e monetize cursos com módulos, aulas, avaliações e quizzes, atendendo tanto capacitação interna quanto oferta comercial elegível dentro do ecossistema Esportes Academy.
+**Objetivo:** Permitir que a plataforma, escolas e criadores publiquem, organizem e monetizem cursos com m?dulos, aulas, avalia??es e quizzes, atendendo tanto capacita??o interna quanto oferta comercial eleg?vel dentro do ecossistema Esportes Academy.
+
+**Arquitetura de experi?ncia do m?dulo**
+- **Portal SuperAdmin de Cursos** ? governan?a da plataforma, habilita??o do m?dulo, split padr?o, acompanhamento macro e regras comerciais
+- **Portal do Criador de Conte?do** ? experi?ncia editorial independente para treinadores, escolas e demais produtores autorizados
+- **Portal do Aluno** ? experi?ncia independente de consumo de aulas, progresso, quizzes e continuidade
+
+> Refer?ncia de produto para o MVP: inspirar-se em fluxos essenciais de plataformas como Hotmart, mas implementar apenas o necess?rio para o MVP da Esportes Academy.
 
 **Funcionalidades:**
 
-**Criação de Cursos**
-- Título, descrição, carga horária estimada, público-alvo (professor, admin, responsável, atleta, todos)
-- Modalidade comercial do curso: `assinatura` ou `individual`
-- Preço, período de acesso, oferta ativa e status comercial
-- Módulos e aulas dentro do curso
-- Conteúdo: vídeo (upload ou link), PDF, texto, quiz
+**Cria??o de Cursos**
+- T?tulo, descri??o, carga hor?ria estimada, p?blico-alvo (professor, admin, respons?vel, atleta, todos)
+- Modalidade comercial do curso: `gratuito`, `individual` ou `assinatura`
+- Curso pode ser:
+  - totalmente gratuito
+  - totalmente pago
+  - h?brido, com aulas gratuitas de libera??o inicial e restante pago
+- Pre?o, per?odo de acesso, oferta ativa, status comercial e quantidade de aulas gratuitas
+- M?dulos e aulas dentro do curso
+- Conte?do: v?deo, PDF, texto, quiz
+- V?deo inicialmente suportado por:
+  - **YouTube**
+  - **Panda Video**
 - Status: `rascunho`, `publicado`, `arquivado`
 
 **Trilhas de Aprendizado**
-- Sequência de cursos recomendados por função (ex: "Trilha do Professor Iniciante")
+- Sequ?ncia de cursos recomendados por fun??o (ex: "Trilha do Professor Iniciante")
 - Progresso individual rastreado
-- Certificado de conclusão gerado automaticamente
+- Certificado de conclus?o gerado automaticamente
 
-**Matrículas e Progresso**
-- Admin matricula usuário em curso ou trilha
-- Usuário acessa pelo App Esportes Academy ou Portal Escola conforme o contexto
-- Progresso em percentual, aulas concluídas, tempo dedicado
-- Lembretes automáticos para cursos em andamento não concluídos
+**Matr?culas e Progresso**
+- Admin matricula usu?rio em curso ou trilha
+- Usu?rio acessa pelo Portal do Aluno conforme o contexto habilitado
+- Progresso em percentual, aulas conclu?das, tempo dedicado
+- Lembretes autom?ticos para cursos em andamento n?o conclu?dos
 
-**Avaliações e Quizzes**
-- Quiz por aula ou por módulo com nota mínima configurável
-- Avaliação final opcional por curso
-- Tentativas configuráveis por quiz/avaliação
-- Resultado armazenado por usuário com status de aprovação
+**Avalia??es e Quizzes**
+- Quiz por aula ou por m?dulo com nota m?nima configur?vel
+- Avalia??o final opcional por curso
+- Tentativas configur?veis por quiz/avalia??o
+- Resultado armazenado por usu?rio com status de aprova??o
 
-**Comercialização**
-- Curso vendido individualmente
-- Catálogo de cursos vendido por assinatura
-- Liberação e bloqueio de acesso conforme status da compra ou assinatura
-- Histórico de compras, matrículas e consumo por usuário
+**Comercializa??o**
+- Curso pode ser gratuito
+- Curso pode ser vendido individualmente
+- Cat?logo de cursos pode ser vendido por assinatura
+- Curso pago pode conter aulas gratuitas como amostra
+- Libera??o e bloqueio de acesso conforme status da compra ou assinatura
+- Hist?rico de compras, matr?culas e consumo por usu?rio
 
-**Certificações**
-- Certificado digital gerado em PDF com nome, curso, carga horária e data
-- Histórico de certificações na ficha do usuário
-- Visível pelo admin para fins de avaliação de desempenho e acompanhamento comercial
+**Split Financeiro do M?dulo**
+- Cada oferta comercial de curso deve prever participa??o percentual para:
+  - **plataforma / SuperAdmin**
+  - **criador do conte?do**
+  - **escola**, quando aplic?vel
+- O SuperAdmin define um **percentual padr?o da plataforma**
+- O modelo deve permitir configura??o de percentuais por oferta, respeitando a composi??o de 100%
+- No MVP, o split pode ser apenas configurado e exibido na camada de governan?a e nos mocks, sem repasse financeiro automatizado
 
-**Critérios de Aceite:**
-- [ ] Admin cria curso completo com vídeo e quiz em menos de 10 minutos
-- [ ] Curso pode ser configurado como venda individual ou por assinatura
+**Identidade e Controle de Acesso**
+- Todo usu?rio do ecossistema de cursos continua identificado por **CPF ?nico e obrigat?rio**
+- O mesmo usu?rio pode atuar como criador, aluno ou operador em contextos diferentes
+- O acesso efetivo continua dependente de:
+  - usu?rio global
+  - contexto habilitado
+  - permiss?o no portal correspondente
+
+**Certifica??es**
+- Certificado digital gerado em PDF com nome, curso, carga hor?ria e data
+- Hist?rico de certifica??es na ficha do usu?rio
+- Vis?vel pelo admin para fins de avalia??o de desempenho e acompanhamento comercial
+
+**Crit?rios de Aceite:**
+- [ ] Admin cria curso completo com v?deo e quiz em menos de 10 minutos
+- [ ] Curso pode ser configurado como gratuito, individual, por assinatura ou h?brido com aulas gratuitas
+- [ ] SuperAdmin consegue visualizar e definir percentual da plataforma no modelo comercial
+- [ ] Modelo comercial contempla split entre plataforma, criador e escola
 - [ ] Certificado gerado automaticamente ao concluir curso
-- [ ] Progresso salvo e retomável a qualquer momento
-- [ ] Admin visualiza progresso de todos os funcionários em cada curso
-- [ ] Avaliações e quizzes registram nota, tentativa e status de aprovação
+- [ ] Progresso salvo e retom?vel a qualquer momento
+- [ ] Admin visualiza progresso de todos os funcion?rios em cada curso
+- [ ] Avalia??es e quizzes registram nota, tentativa e status de aprova??o
 
 ---
 
@@ -1334,6 +1370,8 @@ Os itens abaixo **não fazem parte** da plataforma em nenhuma fase planejada:
 | 2026-04-02 | 1.0 | PRD ampliado com jornada global do atleta entre escolas, carteirinha com QR para check-in/check-out opcional por escola, notificações para responsáveis e visão futura modular para gestão de clubes | Product Owner |
 | 2026-04-02 | 1.1 | PRD atualizado com aniversariantes do mês no dashboard da escola e mensagem automática de parabéns para o atleta no dia do aniversário | Product Owner |
 | 2026-04-02 | 1.2 | Módulo Cursos reposicionado no MVP com catálogo comercial, módulos, aulas, avaliações, quizzes e venda por assinatura ou individual | Product Owner |
+| 2026-04-04 | 1.3 | M?dulo Cursos evolu?do para portais independentes de SuperAdmin, criador e aluno; modelo comercial passa a prever cursos gratuitos, pagos, h?bridos e split entre plataforma, criador e escola, com v?deo por YouTube ou Panda Video | Product Owner |
+| 2026-04-04 | 1.4 | PRD reorganizado conceitualmente em tr?s sistemas independentes — Gest?o, Cursos e Competi??es — compartilhando apenas o Portal SuperAdmin e a identidade global por CPF | Product Owner |
 
 ---
 

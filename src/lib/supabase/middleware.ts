@@ -74,6 +74,16 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  if (user && request.nextUrl.pathname.startsWith('/professor')) {
+    const escolaId = request.cookies.get('ea-escola-id')?.value
+    const perfil = request.cookies.get('ea-perfil')?.value
+    if (!escolaId || perfil !== 'professor') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Module feature flag + permission matrix enforcement (Story 1.6)
   if (user && request.nextUrl.pathname.startsWith('/painel/')) {
     const escolaId = request.cookies.get('ea-escola-id')?.value

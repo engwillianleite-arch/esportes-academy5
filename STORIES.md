@@ -8,28 +8,65 @@
 
 ---
 
-## Legenda de épicos
+## Linhas de Produto
 
-| Epic | Tema |
-|------|------|
-| 1 | Fundação multi-tenant, auth e matriz de módulos |
-| 2 | Onboarding e configurações da escola (fora de módulos) |
-| 3 | Administrativo — atletas, responsáveis, planos e matrícula |
-| 4 | Administrativo — turmas (grupos) |
-| 5 | Administrativo — presenças e frequência |
-| 6 | Financeiro — cobranças e integração Asaas (runtime) |
-| 7 | Portal SuperAdmin — tenants e operações da plataforma |
-| 8 | Evolução de permissões e feature flags (DB-driven) |
-| 9 | Saúde — ficha médica, lesões e alertas operacionais |
-| 10 | App Esportes Academy — identidade global, acesso e contexto |
-| 11 | App Esportes Academy — jornadas por tipo de usuário |
-| 12 | Comunicação — notificações automáticas e comunicados |
-| 13 | Eventos — gestão, inscrições e check-in |
-| 14 | Competições — inscrições, resultados e ranking |
-| 15 | Expansão para clubes — módulos e operação multi-contexto |
-| 16 | Cursos — catálogo, conteúdo, avaliações e comercialização |
+A plataforma agora está organizada em **três sistemas independentes**, compartilhando apenas o **Portal SuperAdmin** e a base de identidade global por CPF:
+
+1. **Sistema de Gestão Esportes Academy** — operação da escola, app único, saúde, comunicação, eventos e expansão de clube.
+2. **Sistema de Cursos** — produto independente com portais próprios de criador e aluno, governado pelo SuperAdmin.
+3. **Sistema de Competições** — produto independente com portais próprios de organizador e clube, governado pelo SuperAdmin.
+
+> Regra de arquitetura: os portais de `Gestão`, `Cursos` e `Competições` não se confundem. O único portal em comum entre os sistemas é o **SuperAdmin**, que governa toda a plataforma.
 
 ---
+
+## Legenda de épicos
+
+| Epic | Tema | Sistema |
+|------|------|---------|
+| 1 | Fundação multi-tenant, auth e matriz de módulos | Gestão |
+| 2 | Onboarding e configurações da escola (fora de módulos) | Gestão |
+| 3 | Administrativo — atletas, responsáveis, planos e matrícula | Gestão |
+| 4 | Administrativo — turmas (grupos) | Gestão |
+| 5 | Administrativo — presenças e frequência | Gestão |
+| 6 | Financeiro — cobranças e integração Asaas (runtime) | Gestão |
+| 7 | Portal SuperAdmin — tenants e operações da plataforma | Comum |
+| 8 | Evolução de permissões e feature flags (DB-driven) | Gestão |
+| 9 | Saúde — ficha médica, lesões e alertas operacionais | Gestão |
+| 10 | App Esportes Academy — identidade global, acesso e contexto | Gestão |
+| 11 | App Esportes Academy — jornadas por tipo de usuário | Gestão |
+| 12 | Comunicação — notificações automáticas e comunicados | Gestão |
+| 13 | Eventos — gestão, inscrições e check-in | Gestão |
+| 14 | Competições — módulo legado interno de gestão | Competições |
+| 15 | Expansão para clubes — módulos e operação multi-contexto | Gestão |
+| 16 | Cursos — fundação, conteúdo, avaliações e comercialização | Cursos |
+| 17 | Cursos — portais independentes e experiência de aprendizagem | Cursos |
+| 18 | Competições — portais independentes, comercialização e jornada | Competições |
+
+---
+
+## Blocos por Sistema
+
+### Comum da Plataforma
+- Epic `7` — Portal SuperAdmin
+
+### Sistema de Gestão Esportes Academy
+- Epics `1–6`, `8–13` e `15`
+- Portal principal da escola e app único `Esportes Academy`
+
+### Sistema de Cursos
+- Epics `16–17`
+- Portais independentes de `criador` e `aluno`
+
+### Sistema de Competições
+- Epics `14` e `18`
+- Portais independentes de `organizador` e `clube`
+
+---
+
+## Sistema de Gestão Esportes Academy
+
+### Base da Plataforma de Gestão
 
 ## Epic 1 — Fundação multi-tenant e acesso
 
@@ -45,7 +82,7 @@
 
 ---
 
-## Epic 2 — Onboarding e configurações da escola
+### Epic 2 — Onboarding e configurações da escola
 
 | ID | Story | Status | Notas |
 |----|--------|--------|--------|
@@ -56,7 +93,7 @@
 
 ---
 
-## Epic 3 — Administrativo: atletas, planos e matrícula
+### Epic 3 — Administrativo: atletas, planos e matrícula
 
 | ID | Story | Status | Notas |
 |----|--------|--------|--------|
@@ -95,7 +132,7 @@
 
 ---
 
-## Epic 4 — Turmas (grupos)
+### Epic 4 — Turmas (grupos)
 
 *(PRD §7.01 Gestão de Turmas; protótipo `Escola-grupos.html` na memória do squad.)*
 
@@ -143,7 +180,7 @@
 
 ---
 
-## Epic 5 — Presenças e frequência
+### Epic 5 — Presenças e frequência
 
 *(PRD §7.01; janela de 48h; limiar configurável na escola.)*
 
@@ -178,7 +215,7 @@
 
 ---
 
-## Epic 6 — Financeiro (cobranças)
+### Epic 6 — Financeiro (cobranças)
 
 *(Depende de matrículas estáveis — Epic 3.4.)*
 
@@ -192,7 +229,9 @@
 
 ---
 
-## Epic 7 — Portal SuperAdmin
+## Comum da Plataforma
+
+### Epic 7 — Portal SuperAdmin
 
 | ID | Story | Status | Doc |
 |----|--------|--------|-----|
@@ -205,7 +244,7 @@
 
 ---
 
-## Epic 8 — Permissões e módulos avançados
+### Epic 8 — Permissões e módulos avançados
 
 | ID | Story | Status | Doc |
 |----|--------|--------|-----|
@@ -216,7 +255,7 @@
 
 ---
 
-## Epic 9 — Saúde
+### Epic 9 — Saúde
 
 *(PRD §7.03; sensível a LGPD e políticas de acesso por perfil.)*
 
@@ -228,7 +267,7 @@
 
 ---
 
-## Epic 10 — App Esportes Academy: identidade, acesso e contexto
+### Epic 10 — App Esportes Academy: identidade, acesso e contexto
 
 *(Nova diretriz de produto: app único para responsáveis, professores e demais perfis elegíveis. Acesso definido por `usuario + escola + tipo_usuario`, com CPF obrigatório e único por usuário.)*
 
@@ -240,14 +279,14 @@
 
 ---
 
-## Epic 11 — App Esportes Academy: jornadas por tipo de usuário
+### Epic 11 — App Esportes Academy: jornadas por tipo de usuário
 
 *(Substitui a separação anterior entre App Pais e App Professor. O mesmo app adapta navegação, permissões e conteúdo conforme o contexto ativo do usuário.)*
 
 | ID | Story | Status | Doc |
 |----|--------|--------|-----|
 | 11.1 | Jornada do responsável no app único | done | [`stories/11.1-app-unico-jornada-responsavel.md`](./stories/11.1-app-unico-jornada-responsavel.md) |
-| 11.2 | Jornada do professor no app único | todo | [`stories/11.2-app-unico-jornada-professor.md`](./stories/11.2-app-unico-jornada-professor.md) |
+| 11.2 | Jornada do professor no app único | done | [`stories/11.2-app-unico-jornada-professor.md`](./stories/11.2-app-unico-jornada-professor.md) |
 | 11.3 | Navegação adaptativa por tipo de usuário no app único | todo | [`stories/11.3-app-unico-navegacao-adaptativa.md`](./stories/11.3-app-unico-navegacao-adaptativa.md) |
 | 11.4 | Linha do tempo global da jornada do atleta no app | done | [`stories/11.4-app-unico-jornada-global-atleta.md`](./stories/11.4-app-unico-jornada-global-atleta.md) |
 | 11.5 | Carteirinha digital e impressão do atleta com QR Code | done | [`stories/11.5-app-unico-carteirinha-qr.md`](./stories/11.5-app-unico-carteirinha-qr.md) |
@@ -255,7 +294,7 @@
 
 ---
 
-## Epic 12 — Comunicação
+### Epic 12 — Comunicação
 
 *(PRD §7.04; canais por plano e idempotência de envios.)*
 
@@ -268,7 +307,7 @@
 
 ---
 
-## Epic 13 — Eventos
+### Epic 13 — Eventos
 
 *(PRD §7.05; eventos da escola com publicação e confirmação.)*
 
@@ -279,7 +318,9 @@
 
 ---
 
-## Epic 14 — Competições
+## Sistema de Competições
+
+### Epic 14 — Competições
 
 *(PRD §7.06; restrito ao plano Enterprise.)*
 
@@ -290,7 +331,7 @@
 
 ---
 
-## Epic 15 — Expansão para clubes
+### Epic 15 — Expansão para clubes
 
 *(Visão futura do PRD: a plataforma deve evoluir da gestão de escolas para operação de clubes, preservando a base modular e multi-tenant.)*
 
@@ -303,9 +344,11 @@
 
 ---
 
-## Epic 16 — Cursos
+## Sistema de Cursos
 
-*(PRD §7.09; agora incluído no MVP em recorte inicial de catálogo, estrutura pedagógica e comercialização.)*
+### Epic 16 — Cursos: fundação e operação
+
+*(PRD §7.09; base já entregue para catálogo, estrutura pedagógica, avaliações e comercialização do módulo.)*
 
 | ID | Story | Status | Doc |
 |----|--------|--------|-----|
@@ -316,13 +359,39 @@
 
 ---
 
+### Epic 17 — Cursos: portais independentes
+
+*(Nova diretriz de produto para Cursos: o módulo passa a ter três experiências independentes, porém conectadas pela mesma identidade global por CPF. Primeiro passo será prototipar as telas com dados mockados usando BMAD. O player de vídeo deve suportar YouTube e Panda Video.)*
+
+| ID | Story | Status | Doc |
+|----|--------|--------|-----|
+| 17.1 | Governança do módulo de cursos no portal SuperAdmin | todo | [`stories/17.1-cursos-superadmin-governanca-plataforma.md`](./stories/17.1-cursos-superadmin-governanca-plataforma.md) |
+| 17.2 | Portal do criador de conteúdo com dados mockados | todo | [`stories/17.2-cursos-portal-criador-conteudo-mockado.md`](./stories/17.2-cursos-portal-criador-conteudo-mockado.md) |
+| 17.3 | Portal do aluno com dados mockados | in_progress | [`stories/17.3-cursos-portal-aluno-mockado.md`](./stories/17.3-cursos-portal-aluno-mockado.md) |
+| 17.4 | Player e estratégia de vídeo com YouTube ou Panda Video | todo | [`stories/17.4-cursos-player-youtube-panda.md`](./stories/17.4-cursos-player-youtube-panda.md) |
+
+---
+
+### Epic 18 — Competicoes: portais independentes
+
+*(Nova diretriz de produto para Competições: o sistema passa a ter governança central do SuperAdmin e portais independentes para organizadores e clubes, com primeira fase em telas mockadas. O fluxo comercial deve suportar competições pagas ou gratuitas, cobrança por clube ou por atleta, repasse percentual para a plataforma e reflexo na jornada do atleta.)*
+
+| ID | Story | Status | Doc |
+|----|--------|--------|-----|
+| 18.1 | Governança do sistema de competições no portal SuperAdmin | in_progress | [`stories/18.1-competicoes-superadmin-governanca-plataforma.md`](./stories/18.1-competicoes-superadmin-governanca-plataforma.md) |
+| 18.2 | Portal do organizador de competições com dados mockados | in_progress | [`stories/18.2-competicoes-portal-organizador-mockado.md`](./stories/18.2-competicoes-portal-organizador-mockado.md) |
+| 18.3 | Portal do clube para inscrições e gestão competitiva com dados mockados | in_progress | [`stories/18.3-competicoes-portal-clube-mockado.md`](./stories/18.3-competicoes-portal-clube-mockado.md) |
+| 18.4 | Inscrição, pagamento, blogs e reflexo na jornada do atleta | in_progress | [`stories/18.4-competicoes-inscricao-pagamento-blog-jornada.md`](./stories/18.4-competicoes-inscricao-pagamento-blog-jornada.md) |
+
+---
+
 ## Próximos passos sugeridos (ordem)
 
-1. **MVP concluído** — trilha final fechada com `11.1`, `9.3`, `16.1`, `16.2`, `16.3` e `16.4` implementadas.
-2. **Já concluído dentro do MVP** — `11.4`, `11.5`, `11.6`, `12.1`, `12.3` e `12.4`.
-3. **Pós-MVP** — iniciar Epic `11.2` (jornada do professor) e Epic `11.3` (navegação adaptativa).
-4. **Pós-MVP** — manter Epic `15` (expansão para clubes) fora da entrega inicial.
-5. **Pós-MVP** — expandir `11.4`, `9.3` e `16.*` para timeline avançada, visão clínica completa, trilhas e analytics avançados.
+1. **Sistema de Gestão** — seguir com `11.2`, `11.3`, `15.*` e evoluções avançadas do app único.
+2. **Sistema de Cursos** — consolidar Epics `16–17`, conectando os portais independentes ao runtime real.
+3. **Sistema de Competições** — executar `18.1` → `18.2` → `18.3` → `18.4`, mantendo `14.*` como domínio funcional legado do produto competitivo.
+4. **Portal comum** — o `SuperAdmin` segue como camada transversal de governança entre os três sistemas.
+5. **Arquitetura de produto** — preservar CPF único, identidade global e separação clara entre portais de Gestão, Cursos e Competições.
 
 ---
 
@@ -359,5 +428,10 @@
 | 2026-04-02 | Story 16.3 concluída: quizzes de aula, módulo e curso final com nota mínima, tentativas máximas, perguntas, alternativas e registro real de tentativas com aprovação |
 | 2026-04-02 | Story 16.4 concluída: assinaturas de catálogo, matrículas manuais e individuais, progresso por aula, painel de comercialização e consumo no app do responsável; MVP de cursos fechado |
 | 2026-04-02 | Módulo Cursos adicionado ao recorte do MVP: PRD atualizado para catálogo comercial com venda por assinatura ou individual e backlog expandido com Epic 16 e stories detalhadas |
+| 2026-04-04 | Backlog de Cursos reorganizado: Epic 16 passa a representar a fundação já entregue e novo Epic 17 detalha os portais independentes de SuperAdmin, criador de conteúdo e aluno, com primeira fase em telas mockadas e suporte planejado a YouTube ou Panda Video |
+| 2026-04-04 | Competicoes ganham trilha própria de produto: Epic 18 define governança SuperAdmin e portais independentes de organizador e clube, incluindo competições pagas ou gratuitas, split percentual da plataforma, inscrição por clube ou atleta, blogs e integração futura com a jornada do atleta |
+| 2026-04-04 | Backlog reorganizado por linhas de produto: Sistema de Gestão, Sistema de Cursos e Sistema de Competições passam a ficar separados no BMAD, mantendo apenas o Portal SuperAdmin como camada comum entre os sistemas |
+| 2026-04-04 | Epic 18.2 refinado com o novo fluxo mockado do organizador: dashboard executivo, criação de campeonato e configuração de categorias com número de times, grupos e fase eliminatória inspirados em plataformas competitivas modernas, preservando o layout da Esportes Academy |
+| 2026-04-04 | Story 11.2 concluída: jornada do professor no app único entregue com roteamento dedicado para `/professor`, shell próprio, dashboard, turmas e chamada reutilizando a operação existente por contexto ativo |
 
 

@@ -15,6 +15,7 @@ export type {
   Cobranca,
   PlataformaUsuario,
   AssinaturaPlataforma,
+  PlataformaConfiguracao,
   Curso,
   CursoModulo,
   CursoAula,

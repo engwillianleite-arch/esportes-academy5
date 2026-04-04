@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -63,6 +63,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plataforma_configuracoes: {
+        Row: {
+          alertas_falha_ativos: boolean
+          canal_escalonamento: string
+          cpf_global_obrigatorio: boolean
+          created_at: string
+          email_alertas_operacionais: boolean
+          eventos_por_lote: number
+          exigir_reset_senha_internos: boolean
+          exportacao_auditoria_frequencia: string
+          idioma_padrao: string
+          key: string
+          landing_publica_ativa: boolean
+          mensagem_aniversario_template: string
+          mfa_superadmin: boolean
+          nome_publico: string
+          notif_aniversario_padrao: boolean
+          notif_checkin_checkout: boolean
+          pais_padrao: string
+          politica_cookies_status: string
+          politica_cookies_versao: string
+          politica_privacidade_status: string
+          politica_privacidade_versao: string
+          provider_video_padrao: string
+          rate_limit_janela_segundos: number
+          retencao_logs_dias: number
+          retry_jobs_limite: number
+          sandbox_cursos_ativo: boolean
+          selecao_contexto_obrigatoria: boolean
+          sessao_curta_critica: boolean
+          slug_institucional: string
+          termos_status: string
+          termos_versao: string
+          timeout_jobs_segundos: number
+          updated_at: string
+        }
+        Insert: {
+          alertas_falha_ativos?: boolean
+          canal_escalonamento?: string
+          cpf_global_obrigatorio?: boolean
+          created_at?: string
+          email_alertas_operacionais?: boolean
+          eventos_por_lote?: number
+          exigir_reset_senha_internos?: boolean
+          exportacao_auditoria_frequencia?: string
+          idioma_padrao?: string
+          key?: string
+          landing_publica_ativa?: boolean
+          mensagem_aniversario_template?: string
+          mfa_superadmin?: boolean
+          nome_publico?: string
+          notif_aniversario_padrao?: boolean
+          notif_checkin_checkout?: boolean
+          pais_padrao?: string
+          politica_cookies_status?: string
+          politica_cookies_versao?: string
+          politica_privacidade_status?: string
+          politica_privacidade_versao?: string
+          provider_video_padrao?: string
+          rate_limit_janela_segundos?: number
+          retencao_logs_dias?: number
+          retry_jobs_limite?: number
+          sandbox_cursos_ativo?: boolean
+          selecao_contexto_obrigatoria?: boolean
+          sessao_curta_critica?: boolean
+          slug_institucional?: string
+          termos_status?: string
+          termos_versao?: string
+          timeout_jobs_segundos?: number
+          updated_at?: string
+        }
+        Update: {
+          alertas_falha_ativos?: boolean
+          canal_escalonamento?: string
+          cpf_global_obrigatorio?: boolean
+          created_at?: string
+          email_alertas_operacionais?: boolean
+          eventos_por_lote?: number
+          exigir_reset_senha_internos?: boolean
+          exportacao_auditoria_frequencia?: string
+          idioma_padrao?: string
+          key?: string
+          landing_publica_ativa?: boolean
+          mensagem_aniversario_template?: string
+          mfa_superadmin?: boolean
+          nome_publico?: string
+          notif_aniversario_padrao?: boolean
+          notif_checkin_checkout?: boolean
+          pais_padrao?: string
+          politica_cookies_status?: string
+          politica_cookies_versao?: string
+          politica_privacidade_status?: string
+          politica_privacidade_versao?: string
+          provider_video_padrao?: string
+          rate_limit_janela_segundos?: number
+          retencao_logs_dias?: number
+          retry_jobs_limite?: number
+          sandbox_cursos_ativo?: boolean
+          selecao_contexto_obrigatoria?: boolean
+          sessao_curta_critica?: boolean
+          slug_institucional?: string
+          termos_status?: string
+          termos_versao?: string
+          timeout_jobs_segundos?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       atleta_acessos: {
         Row: {
@@ -2320,7 +2428,7 @@ export const Constants = {
   },
 } as const
 
-// ─── Custom type aliases ──────────────────────────────────────────────────────
+// â”€â”€â”€ Custom type aliases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type Escola                         = Tables<'escolas'>
 export type EscolaUsuario                  = Tables<'escola_usuarios'>
 export type EscolaModulo                   = Tables<'escola_modulos'>
@@ -2329,6 +2437,7 @@ export type Matricula                      = Tables<'matriculas'>
 export type Cobranca                       = Tables<'cobrancas'>
 export type PlataformaUsuario              = Tables<'plataforma_usuarios'>
 export type AssinaturaPlataforma           = Tables<'assinaturas_plataforma'>
+export type PlataformaConfiguracao         = Tables<'plataforma_configuracoes'>
 export type Curso                          = Tables<'cursos'>
 export type CursoModulo                    = Tables<'curso_modulos'>
 export type CursoAula                      = Tables<'curso_aulas'>
@@ -2356,7 +2465,7 @@ export type AtletaResponsavelWithResponsavel = AtletaResponsavel & { responsavel
 export type UsuarioGlobal                  = Tables<'usuarios'>
 export type UsuarioEscolaTipo              = Tables<'usuario_escola_tipos'>
 
-// ─── Scalar type aliases ──────────────────────────────────────────────────────
+// â”€â”€â”€ Scalar type aliases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type PlanoTipo                 = 'starter' | 'pro' | 'premium' | 'enterprise'
 export type FrequenciaTipo            = 'mensal' | 'trimestral' | 'semestral' | 'anual'
 export type MetodoPagamento           = 'pix' | 'boleto' | 'cartao_credito'
@@ -2377,3 +2486,6 @@ export type TipoExameAtleta           = 'admissional' | 'periodico' | 'demission
 export type StatusNotificacaoOutbox   = 'pendente' | 'processando' | 'enviado' | 'erro' | 'cancelado'
 export type CanalNotificacao          = 'whatsapp' | 'email' | 'sms' | 'push'
 export type StatusEntregaNotificacao  = 'pendente' | 'entregue' | 'falhou' | 'lido'
+
+
+

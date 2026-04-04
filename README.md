@@ -1,32 +1,33 @@
-# Esportes Academy — Portal Web
+# Esportes Academy ? Portal Web
 
-Aplicação web multi-tenant da plataforma Esportes Academy, construída com Next.js + Supabase.
+Aplica??o web multi-tenant da plataforma Esportes Academy, constru?da com Next.js + Supabase.
 
-## Estrutura do repositório
+## Estrutura do reposit?rio
 
 ```text
 .
-├─ src/                     # App Next.js (rotas, componentes, libs)
-├─ public/                  # Assets estáticos
-├─ supabase/                # Migrations e artefatos de banco
-├─ stories/                 # Stories detalhadas (BMAD)
-├─ STORIES.md               # Backlog resumido e status oficial
-├─ prd Esportes Academy.md  # PRD do produto
-├─ agents/                  # Artefatos de agentes/squad
-├─ output/                  # Protótipos/saídas auxiliares
-├─ _memory/                 # Memória de trabalho do squad
-└─ _investigations/         # Investigações técnicas
+?? src/                     # App Next.js (rotas, componentes, libs)
+?? public/                  # Assets est?ticos
+?? supabase/                # Migrations e artefatos de banco
+?? stories/                 # Stories detalhadas (BMAD)
+?? docs/                    # Documenta??o executiva e arquitetura
+?? STORIES.md               # Backlog resumido e status oficial
+?? prd Esportes Academy.md  # PRD do produto
+?? agents/                  # Artefatos de agentes/squad
+?? output/                  # Prot?tipos/sa?das auxiliares
+?? _memory/                 # Mem?ria de trabalho do squad
+?? _investigations/         # Investiga??es t?cnicas
 ```
 
-## Pré-requisitos
+## Pr?-requisitos
 
 - Node.js 20+
 - npm 10+
 
-## Configuração
+## Configura??o
 
 1. Copie `.env.local.example` para `.env.local`
-2. Preencha as variáveis do Supabase e ambiente
+2. Preencha as vari?veis do Supabase e ambiente
 
 ## Comandos
 
@@ -37,34 +38,52 @@ npm run build
 npm run lint
 ```
 
-## Convenções de produto (BMAD)
+## Documentos-chave
 
-- Quadro único de status: `STORIES.md`
-- Especificações detalhadas: `stories/README.md` e arquivos `stories/*.md`
+- `STORIES.md`
+- `stories/README.md`
+- `prd Esportes Academy.md`
+- `docs/arquitetura-produto.md`
+
+## Conven??es de produto (BMAD)
+
+- Quadro ?nico de status: `STORIES.md`
+- Especifica??es detalhadas: `stories/README.md` e arquivos `stories/*.md`
 - PRD base: `prd Esportes Academy.md`
+- Arquitetura executiva dos sistemas: `docs/arquitetura-produto.md`
 
-## Fluxo recomendado de execução
+## Arquitetura de produto
 
-1. Abrir `STORIES.md` e marcar a próxima story como `in_progress`.
-2. Ler a especificação detalhada correspondente em `stories/*.md`.
-3. Implementar em ordem de dependência:
-   - Epic 7 (SuperAdmin): `7.1` → `7.2` → `7.3` → `7.4`
-   - Epic 8 (Permissões): `8.1` → `8.2` → `8.3` → `8.4`
-   - Epic 9+ (Módulos de negócio): Saúde, Comunicação, Eventos, Competições
-4. Validar localmente com `npm run build` (e `npm run lint` quando aplicável).
-5. Atualizar status no `STORIES.md` e no índice `stories/README.md` para `done`.
+A plataforma est? organizada em tr?s sistemas independentes:
+
+1. `Sistema de Gest?o Esportes Academy`
+2. `Sistema de Cursos`
+3. `Sistema de Competi??es`
+
+Regra estrutural:
+- o ?nico portal em comum entre os sistemas ? o `SuperAdmin`
+- a identidade global por `CPF` continua transversal
+
+## Fluxo recomendado de execu??o
+
+1. Abrir `STORIES.md` e localizar o sistema correto: `Gest?o`, `Cursos`, `Competi??es` ou `Comum da Plataforma`
+2. Marcar a pr?xima story como `in_progress`
+3. Ler a especifica??o detalhada correspondente em `stories/*.md`
+4. Implementar respeitando a separa??o entre portais de cada sistema
+5. Validar localmente com `npm run build` e, quando fizer sentido, `npm run lint`
+6. Atualizar status no `STORIES.md` e no ?ndice `stories/README.md`
 
 ## Bootstrap do primeiro SuperAdmin
 
-Após aplicar as migrations mais recentes, crie o primeiro usuário interno da plataforma:
+Ap?s aplicar as migrations mais recentes, crie o primeiro usu?rio interno da plataforma:
 
-1. Crie/convide o usuário no Supabase Auth.
+1. Crie ou convide o usu?rio no Supabase Auth
 2. Insira um registro em `plataforma_usuarios` com:
-   - `user_id` do usuário Auth
+   - `user_id` do usu?rio Auth
    - `perfil = 'super_admin'`
    - `ativo = true`
-3. Faça login com esse usuário e acesse `/superadmin/escolas`.
+3. Fa?a login com esse usu?rio e acesse `/superadmin/escolas`
 
-## Observação
+## Observa??o
 
-O projeto foi consolidado na raiz deste diretório (`esportes-academy-Desenvolvimento-do-site`).
+O projeto foi consolidado na raiz deste diret?rio (`esportes-academy-Desenvolvimento-do-site`).

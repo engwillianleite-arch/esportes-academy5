@@ -312,7 +312,12 @@ export default function CursosPageClient({ escolaId }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex items-center justify-between gap-3">`r`n        <h1 className="text-2xl font-semibold">Cursos · Catálogo, conteúdo e avaliação</h1>`r`n        <Link href="/painel/cursos/comercializacao" className="rounded-md border px-4 py-2 text-sm font-medium">`r`n          Comercialização e progresso`r`n        </Link>`r`n      </div>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">Cursos · Catálogo, conteúdo e avaliação</h1>
+        <Link href="/painel/cursos/comercializacao" className="rounded-md border px-4 py-2 text-sm font-medium">
+          Comercialização e progresso
+        </Link>
+      </div>
 
       {error && <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p>}
       {quizResultMsg && <p className="mb-4 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700">{quizResultMsg}</p>}
@@ -418,5 +423,4 @@ export default function CursosPageClient({ escolaId }: Props) {
     </div>
   )
 }
-
 

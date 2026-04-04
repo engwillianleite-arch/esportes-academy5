@@ -2,6 +2,8 @@
 
 Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e status).
 
+A organização das stories agora segue três linhas de produto independentes: `Gestão`, `Cursos` e `Competições`. O único portal comum entre elas é o `SuperAdmin`.
+
 ## Convenção de nomes
 
 `{epico}.{id}-{slug-curto}.md` — exemplo: `6.1-cobrancas-schema-rls.md`
@@ -21,7 +23,15 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 
 ## Índice (stories detalhadas)
 
-### Epic 1 — Fundação multi-tenant e acesso
+### Comum da Plataforma
+
+| Epic | Linha | Observação |
+|------|-------|------------|
+| 7 | Comum | Portal SuperAdmin compartilhado entre Gestão, Cursos e Competições |
+
+### Sistema de Gestão Esportes Academy
+
+#### Epic 1 — Fundação multi-tenant e acesso
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -33,7 +43,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 1.6 | [fundacao-middleware-modulo-perfil.md](./1.6-fundacao-middleware-modulo-perfil.md) | `done` |
 | 1.7 | [fundacao-contexto-escola-ativa-sessao.md](./1.7-fundacao-contexto-escola-ativa-sessao.md) | `done` |
 
-### Epic 2 — Onboarding e configurações da escola
+#### Epic 2 — Onboarding e configurações da escola
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -42,7 +52,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 2.3 | [onboarding-asaas-configuracao.md](./2.3-onboarding-asaas-configuracao.md) | `done` |
 | 2.4 | [onboarding-preferencias-notificacao.md](./2.4-onboarding-preferencias-notificacao.md) | `done` |
 
-### Epic 3 — Administrativo (base)
+#### Epic 3 — Administrativo (base)
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -53,7 +63,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 3.5 | [adm-lista-busca-atletas.md](./3.5-adm-lista-busca-atletas.md) | `done` |
 | 3.6 | [filtro-turma-lista-atletas.md](./3.6-filtro-turma-lista-atletas.md) | `done` |
 
-### Epic 4 — Turmas
+#### Epic 4 — Turmas
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -61,14 +71,14 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 4.2 | [turmas-crud-painel.md](./4.2-turmas-crud-painel.md) | `done` |
 | 4.3 | [turmas-vinculo-atleta.md](./4.3-turmas-vinculo-atleta.md) | `done` |
 
-### Epic 5 — Presenças e frequência
+#### Epic 5 — Presenças e frequência
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
 | 5.1 | [presencas-aulas-chamada.md](./5.1-presencas-aulas-chamada.md) | `done` |
 | 5.2 | [frequencia-historico-percentual.md](./5.2-frequencia-historico-percentual.md) | `done` |
 
-### Epic 6 — Financeiro
+#### Epic 6 — Financeiro
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -76,7 +86,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 6.2 | [cobrancas-ui-listagem.md](./6.2-cobrancas-ui-listagem.md) | `done` |
 | 6.3 | [webhook-asaas-status.md](./6.3-webhook-asaas-status.md) | `done` |
 
-### Epic 7 — SuperAdmin
+### Comum da Plataforma — Epic 7 SuperAdmin
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -85,7 +95,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 7.3 | [superadmin-usuarios-internos.md](./7.3-superadmin-usuarios-internos.md) | `done` |
 | 7.4 | [superadmin-faturamento-plataforma.md](./7.4-superadmin-faturamento-plataforma.md) | `done` |
 
-### Epic 8 — Permissões e feature flags
+#### Epic 8 — Permissões e feature flags
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -94,7 +104,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 8.3 | [feature-flags-expiracao-ui.md](./8.3-feature-flags-expiracao-ui.md) | `todo` |
 | 8.4 | [matriz-acesso-db-driven.md](./8.4-matriz-acesso-db-driven.md) | `todo` |
 
-### Epic 9 — Saúde
+#### Epic 9 — Saúde
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -102,7 +112,7 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 9.2 | [saude-lesoes-alertas.md](./9.2-saude-lesoes-alertas.md) | `todo` |
 | 9.3 | [saude-exames-linha-do-tempo.md](./9.3-saude-exames-linha-do-tempo.md) | `done` |
 
-### Epic 10 — App Esportes Academy: identidade, acesso e contexto
+#### Epic 10 — App Esportes Academy: identidade, acesso e contexto
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -110,18 +120,18 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 10.2 | [app-unico-vinculo-usuario-escola-tipo.md](./10.2-app-unico-vinculo-usuario-escola-tipo.md) | `done` |
 | 10.3 | [app-unico-login-contexto-perfil.md](./10.3-app-unico-login-contexto-perfil.md) | `done` |
 
-### Epic 11 — App Esportes Academy: jornadas por tipo de usuário
+#### Epic 11 — App Esportes Academy: jornadas por tipo de usuário
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
 | 11.1 | [app-unico-jornada-responsavel.md](./11.1-app-unico-jornada-responsavel.md) | `done` |
-| 11.2 | [app-unico-jornada-professor.md](./11.2-app-unico-jornada-professor.md) | `todo` |
+| 11.2 | [app-unico-jornada-professor.md](./11.2-app-unico-jornada-professor.md) | `done` |
 | 11.3 | [app-unico-navegacao-adaptativa.md](./11.3-app-unico-navegacao-adaptativa.md) | `todo` |
 | 11.4 | [app-unico-jornada-global-atleta.md](./11.4-app-unico-jornada-global-atleta.md) | `done` |
 | 11.5 | [app-unico-carteirinha-qr.md](./11.5-app-unico-carteirinha-qr.md) | `done` |
 | 11.6 | [app-unico-checkin-checkout-responsavel.md](./11.6-app-unico-checkin-checkout-responsavel.md) | `done` |
 
-### Epic 12 — Comunicação
+#### Epic 12 — Comunicação
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -130,21 +140,23 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 12.3 | [comunicacao-checkin-checkout.md](./12.3-comunicacao-checkin-checkout.md) | `done` |
 | 12.4 | [comunicacao-aniversariantes-parabens.md](./12.4-comunicacao-aniversariantes-parabens.md) | `done` |
 
-### Epic 13 — Eventos
+#### Epic 13 — Eventos
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
 | 13.1 | [eventos-crud-publicacao.md](./13.1-eventos-crud-publicacao.md) | `todo` |
 | 13.2 | [eventos-inscricoes-checkin.md](./13.2-eventos-inscricoes-checkin.md) | `todo` |
 
-### Epic 14 — Competições
+### Sistema de Competições
+
+#### Epic 14 — Competições
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
 | 14.1 | [competicoes-cadastro-inscricoes.md](./14.1-competicoes-cadastro-inscricoes.md) | `todo` |
 | 14.2 | [competicoes-resultados-ranking.md](./14.2-competicoes-resultados-ranking.md) | `todo` |
 
-### Epic 15 — Expansão para clubes
+#### Epic 15 — Expansão para clubes
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -153,7 +165,9 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 15.3 | [clube-logistica.md](./15.3-clube-logistica.md) | `todo` |
 | 15.4 | [clube-competicoes.md](./15.4-clube-competicoes.md) | `todo` |
 
-### Epic 16 — Cursos
+### Sistema de Cursos
+
+#### Epic 16 — Cursos: fundação e operação
 
 | ID | Arquivo | Status no backlog |
 |----|---------|-------------------|
@@ -162,19 +176,35 @@ Este diretório complementa o [`STORIES.md`](../STORIES.md) (backlog resumido e 
 | 16.3 | [cursos-quizzes-avaliacoes.md](./16.3-cursos-quizzes-avaliacoes.md) | `done` |
 | 16.4 | [cursos-matriculas-progresso-comercializacao.md](./16.4-cursos-matriculas-progresso-comercializacao.md) | `done` |
 
+#### Epic 17 — Cursos: portais independentes
+
+| ID | Arquivo | Status no backlog |
+|----|---------|-------------------|
+| 17.1 | [cursos-superadmin-governanca-plataforma.md](./17.1-cursos-superadmin-governanca-plataforma.md) | `in_progress` |
+| 17.2 | [cursos-portal-criador-conteudo-mockado.md](./17.2-cursos-portal-criador-conteudo-mockado.md) | `in_progress` |
+| 17.3 | [cursos-portal-aluno-mockado.md](./17.3-cursos-portal-aluno-mockado.md) | `in_progress` |
+| 17.4 | [cursos-player-youtube-panda.md](./17.4-cursos-player-youtube-panda.md) | `todo` |
+
+#### Epic 18 — Competicoes: portais independentes
+
+| ID | Arquivo | Status no backlog |
+|----|---------|-------------------|
+| 18.1 | [competicoes-superadmin-governanca-plataforma.md](./18.1-competicoes-superadmin-governanca-plataforma.md) | `in_progress` |
+| 18.2 | [competicoes-portal-organizador-mockado.md](./18.2-competicoes-portal-organizador-mockado.md) | `in_progress` |
+| 18.3 | [competicoes-portal-clube-mockado.md](./18.3-competicoes-portal-clube-mockado.md) | `in_progress` |
+| 18.4 | [competicoes-inscricao-pagamento-blog-jornada.md](./18.4-competicoes-inscricao-pagamento-blog-jornada.md) | `in_progress` |
+
 ## Observação
 
 `STORIES.md` continua sendo o quadro único de status.  
-Esta pasta agora possui stories detalhadas dos Epics **1–16**.
+Esta pasta agora possui stories detalhadas dos Epics **1–18**.
 
-### Trilha oficial final de fechamento do MVP
+### Organização atual por produto
 
-1. `11.1` — jornada do responsável no app único
-2. `9.3` — exames e atestados em versão básica
-3. `16.1` — catálogo de cursos e modelo comercial
-4. `16.2` — estrutura de cursos, módulos e aulas
-5. `16.3` — quizzes, avaliações e critérios de aprovação
-6. `16.4` — matrículas, assinatura, compra individual e progresso
+1. `Gestão` — Epics `1–6`, `8–13` e `15`
+2. `Cursos` — Epics `16–17`
+3. `Competições` — Epics `14` e `18`
+4. `Comum` — Epic `7` (SuperAdmin)
 
 ### Já concluído no recorte MVP
 
@@ -188,12 +218,12 @@ Esta pasta agora possui stories detalhadas dos Epics **1–16**.
 - `12.3` — notificações de check-in/check-out
 - `12.4` — aniversariantes do mês e parabéns automático
 
-### Fora do MVP inicial
+### Regra estrutural dos portais
 
-- Epic `15` — expansão para clubes
-- Evolução avançada de `11.4` (timeline completa)
-- Evolução avançada de `9.3` (linha do tempo clínica completa)
-- Evolução avançada de `16.*` (trilhas complexas, certificações avançadas e analytics)
+- `Gestão` tem seus próprios portais e jornadas
+- `Cursos` tem portais independentes de `criador` e `aluno`
+- `Competições` tem portais independentes de `organizador` e `clube`
+- `SuperAdmin` é o único portal compartilhado entre os sistemas
 
 
 
