@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { logout } from '@/lib/auth-actions'
 
@@ -33,10 +33,10 @@ const SAAS_NAV: NavEntry[] = [
   { type: 'section', label: 'Financeiro' },
   { type: 'link', id: 'cobrancas', label: 'Fluxo de Caixa', icon: '💳', href: '/superadmin/faturamento' },
   { type: 'link', id: 'planos', label: 'Planos & Licencas', icon: '🧾', href: '/superadmin/planos' },
-  { type: 'link', id: 'relatorios', label: 'Relatorios', icon: '📈', href: '#', stub: true },
+  { type: 'link', id: 'relatorios', label: 'Relatorios', icon: '📈', href: '/superadmin/relatorios' },
   { type: 'link', id: 'notasfiscais', label: 'Notas Fiscais', icon: '🧷', href: '#', stub: true },
   { type: 'section', label: 'Sistema' },
-  { type: 'link', id: 'notificacoes', label: 'Notificacoes', icon: '🔔', href: '#', stub: true },
+  { type: 'link', id: 'notificacoes', label: 'Notificacoes', icon: '🔔', href: '/superadmin/notificacoes' },
   { type: 'link', id: 'permissoes', label: 'Permissoes', icon: '🔐', href: '/superadmin/permissoes' },
   { type: 'link', id: 'auditoria', label: 'Auditoria', icon: '📋', href: '/superadmin/auditoria' },
   { type: 'link', id: 'configuracoes', label: 'Configuracoes', icon: '⚙️', href: '/superadmin/configuracoes' },
@@ -77,6 +77,8 @@ const SAAS_PAGE_TITLES: Record<string, string> = {
   '/superadmin/permissoes': 'Matriz de Permissoes',
   '/superadmin/auditoria': 'Auditoria de Permissoes',
   '/superadmin/planos': 'Planos & Licencas',
+  '/superadmin/relatorios': 'Relatorios & Analytics',
+  '/superadmin/notificacoes': 'Central de Notificacoes',
   '/superadmin/configuracoes': 'Configuracoes da Plataforma',
 }
 
@@ -141,7 +143,9 @@ interface SuperAdminShellProps {
 
 export function SuperAdminShell({ perfil, userName, children }: SuperAdminShellProps) {
   const [open, setOpen] = useState(false)
+  const [environmentOpen, setEnvironmentOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   const mode: SystemMode = pathname.startsWith('/superadmin/cursos')
     ? 'courses'
@@ -202,27 +206,6 @@ export function SuperAdminShell({ perfil, userName, children }: SuperAdminShellP
               <p className="text-[13.5px] font-bold leading-tight text-white">Esportes Academy</p>
               <p className="text-[9.5px] uppercase tracking-[0.6px] text-white/30">{theme.systemLabel}</p>
             </div>
-          </div>
-        </div>
-
-        <div className="mx-3 mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-2">
-          <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[1px] text-white/28">Ambiente</p>
-          <div className="grid gap-2">
-            {switchItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-xl px-3 py-2 text-[12px] font-semibold transition-colors"
-                style={{
-                  background: item.active ? `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` : 'transparent',
-                  color: item.active ? '#ffffff' : 'rgba(255,255,255,.65)',
-                  border: item.active ? 'none' : '1px solid rgba(255,255,255,.06)',
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
           </div>
         </div>
 
@@ -291,6 +274,79 @@ export function SuperAdminShell({ perfil, userName, children }: SuperAdminShellP
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto lg:flex-shrink-0">
+            <div className="relative" style={{ width: '100%' }}>
+              <button
+                type="button"
+                onClick={() => setEnvironmentOpen((value) => !value)}
+                className="flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left md:py-1.5"
+                style={{
+                  background: '#fff',
+                  borderColor: environmentOpen ? theme.primary : '#e2e8f0',
+                  boxShadow: environmentOpen ? `0 0 0 3px ${theme.badgeBg}` : 'none',
+                }}
+              >
+                <span
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-sm"
+                  style={{ background: theme.badgeBg, color: theme.badgeText }}
+                >
+                  {theme.brandIcon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#64748b' }}>
+                    Ambiente
+                  </p>
+                  <p className="truncate text-[13px] font-semibold" style={{ color: '#0f172a' }}>
+                    {switchItems.find((item) => item.active)?.label}
+                  </p>
+                </div>
+                <span className="text-xs" style={{ color: '#64748b' }}>{environmentOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {environmentOpen ? (
+                <div
+                  className="absolute right-0 top-[calc(100%+8px)] z-50 w-full overflow-hidden rounded-2xl border bg-white p-2 shadow-2xl"
+                  style={{ borderColor: '#e2e8f0' }}
+                >
+                  {switchItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setEnvironmentOpen(false)
+                        router.push(item.href)
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors"
+                      style={{
+                        background: item.active ? theme.badgeBg : 'transparent',
+                        color: item.active ? theme.badgeText : '#0f172a',
+                      }}
+                    >
+                      <span
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm"
+                        style={{
+                          background: item.active ? `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` : '#f8fafc',
+                          color: item.active ? '#fff' : '#475569',
+                        }}
+                      >
+                        {item.id === 'saas' ? '🛡️' : item.id === 'courses' ? '🎓' : '🏆'}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-semibold">{item.label}</p>
+                        <p className="text-[11px]" style={{ color: item.active ? theme.badgeText : '#64748b' }}>
+                          {item.id === 'saas' ? 'Gestão central da plataforma' : item.id === 'courses' ? 'Governança comercial e conteúdo' : 'Governança de eventos esportivos'}
+                        </p>
+                      </div>
+                      {item.active ? (
+                        <span className="rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ background: '#fff', color: theme.badgeText }}>
+                          Atual
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
             <div className="flex items-center gap-1.5 rounded-lg border px-3 py-2 md:py-1.5" style={{ background: theme.pageBg, borderColor: '#e2e8f0', width: '100%' }}>
               <span className="text-[13px] text-gray-400">🔎</span>
               <input placeholder={mode === 'courses' ? 'Buscar cursos...' : mode === 'competitions' ? 'Buscar competicoes...' : 'Buscar...'} className="w-full bg-transparent text-[13px] outline-none" style={{ color: '#0f172a', border: 'none' }} />

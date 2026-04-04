@@ -3,8 +3,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assertSuperAdminAccess } from '@/lib/superadmin-actions'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type RelatoriosKpis = {
   mrr: number
   totalEscolas: number
@@ -15,9 +13,17 @@ export type RelatoriosKpis = {
   retencaoPct: number
 }
 
-export type MonthlySeries = { mes: string; receita: number; despesa: number }
+export type MonthlySeries = {
+  mes: string
+  receita: number
+  despesa: number
+}
 
-export type PlanoDist = { plano: string; count: number; mrr: number }
+export type PlanoDist = {
+  plano: string
+  count: number
+  mrr: number
+}
 
 export type EscolaPerf = {
   id: string
@@ -29,19 +35,53 @@ export type EscolaPerf = {
   mensalidade: number
   status: string
   proximoVenc: string | null
+  createdAt: string | null
 }
 
-export type CohortRow = { mes: string; novas: number; acumulado: number; planos: string }
+export type CohortRow = {
+  mes: string
+  novas: number
+  acumulado: number
+  planos: string
+}
 
-export type RegionRow = { estado: string; count: number }
+export type RegionRow = {
+  estado: string
+  count: number
+}
 
-const PLANO_VALORES: Record<string, number> = {
+export type TicketSeriesRow = {
+  mes: string
+  ticket: number
+}
+
+export type ChurnSeriesRow = {
+  mes: string
+  total: number
+  inativas: number
+  percentual: number
+}
+
+export type StatusSeriesRow = {
+  status: string
+  count: number
+}
+
+const FALLBACK_PLAN_PRICE: Record<string, number> = {
   starter: 199,
+  basic: 199,
   pro: 399,
+  premium: 599,
   enterprise: 899,
 }
 
-// ─── Main loader ──────────────────────────────────────────────────────────────
+function monthKey(dateIso: string) {
+  return dateIso.slice(0, 7)
+}
+
+function summarizePlans(planos: string[]) {
+  return [...new Set(planos)].join(', ')
+}
 
 export async function carregarRelatorios(): Promise<{
   error: string | null
@@ -51,124 +91,185 @@ export async function carregarRelatorios(): Promise<{
   escolaPerf?: EscolaPerf[]
   cohort?: CohortRow[]
   regions?: RegionRow[]
+  ticketSeries?: TicketSeriesRow[]
+  churnSeries?: ChurnSeriesRow[]
+  statusSeries?: StatusSeriesRow[]
 }> {
   const auth = await assertSuperAdminAccess()
   if ('error' in auth) return { error: auth.error }
 
   const admin = createAdminClient()
+  const startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().slice(0, 10)
 
-  // ── Parallel fetch ────────────────────────────────────────────────────────
-  const [escolasRes, matriculasRes, fluxoRes] = await Promise.all([
+  const [escolasRes, matriculasRes, fluxoRes, assinaturasRes] = await Promise.all([
     admin
       .from('escolas')
-      .select('id, nome, estado, plano, ativo, deleted_at, created_at')
+      .select('id, nome, estado, plano, ativo, created_at')
       .is('deleted_at', null),
     admin
       .from('matriculas')
-      .select('id, escola_id, status')
+      .select('escola_id, status')
       .is('deleted_at', null)
       .eq('status', 'ativa'),
     admin
       .from('fluxo_caixa_plataforma')
-      .select('data_lancamento, tipo, valor, status')
+      .select('escola_id, data_lancamento, tipo, valor, status')
       .is('deleted_at', null)
-      .eq('status', 'realizado')
-      .gte('data_lancamento', new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().slice(0, 10)),
+      .gte('data_lancamento', startDate),
+    admin
+      .from('assinaturas_plataforma')
+      .select('escola_id, status, valor_mensal, proximo_vencimento')
+      .is('deleted_at', null),
   ])
 
-  const escolas  = escolasRes.data ?? []
-  const atletas  = matriculasRes.data ?? []
+  if (escolasRes.error || matriculasRes.error || fluxoRes.error || assinaturasRes.error) {
+    return { error: 'Erro ao carregar relatórios.' }
+  }
+
+  const escolas = escolasRes.data ?? []
+  const matriculas = matriculasRes.data ?? []
   const fluxoRows = fluxoRes.data ?? []
+  const assinaturas = assinaturasRes.data ?? []
 
-  // ── KPIs ──────────────────────────────────────────────────────────────────
-  const escolasAtivas = escolas.filter(e => e.ativo)
-  const mrr = escolasAtivas.reduce((s, e) => s + (PLANO_VALORES[e.plano ?? 'starter'] ?? 0), 0)
-  const ticket_medio = escolasAtivas.length > 0 ? mrr / escolasAtivas.length : 0
-  const escolasInadimplentes = 0 // placeholder — would need assinaturas table
-
-  const kpis: RelatoriosKpis = {
-    mrr,
-    totalEscolas: escolas.length,
-    totalAtletas: atletas.length,
-    escolasAtivas: escolasAtivas.length,
-    escolasInadimplentes,
-    ticket_medio,
-    retencaoPct: escolas.length > 0 ? Math.round((escolasAtivas.length / escolas.length) * 100) : 0,
+  const matriculasByEscola = new Map<string, number>()
+  for (const row of matriculas) {
+    if (!row.escola_id) continue
+    matriculasByEscola.set(row.escola_id, (matriculasByEscola.get(row.escola_id) ?? 0) + 1)
   }
 
-  // ── Monthly series (12 months) ────────────────────────────────────────────
-  const now   = new Date()
-  const months: string[] = []
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-  }
+  const assinaturaByEscola = new Map(assinaturas.map((row) => [row.escola_id, row]))
 
-  const monthly: MonthlySeries[] = months.map(mes => {
-    const rows = fluxoRows.filter(r => r.data_lancamento?.slice(0, 7) === mes)
+  const escolaPerf: EscolaPerf[] = escolas.map((escola) => {
+    const assinatura = assinaturaByEscola.get(escola.id)
+    const mensalidade = Number(assinatura?.valor_mensal ?? FALLBACK_PLAN_PRICE[escola.plano ?? 'starter'] ?? 0)
+
+    let status = escola.ativo ? 'ativa' : 'inativa'
+    if (escola.ativo && assinatura?.status) {
+      status = assinatura.status
+    } else if (escola.ativo && !assinatura) {
+      status = 'sem_assinatura'
+    }
+
     return {
-      mes,
-      receita: rows.filter(r => r.tipo === 'receita').reduce((s, r) => s + (r.valor ?? 0), 0),
-      despesa: rows.filter(r => r.tipo === 'despesa').reduce((s, r) => s + (r.valor ?? 0), 0),
+      id: escola.id,
+      nome: escola.nome,
+      plano: escola.plano ?? 'starter',
+      estado: escola.estado,
+      atletas: matriculasByEscola.get(escola.id) ?? 0,
+      capacidade: 0,
+      mensalidade,
+      status,
+      proximoVenc: assinatura?.proximo_vencimento ?? null,
+      createdAt: escola.created_at ?? null,
     }
   })
 
-  // ── Plan distribution ──────────────────────────────────────────────────────
-  const planMap: Record<string, { count: number; mrr: number }> = {}
-  for (const e of escolasAtivas) {
-    const p = e.plano ?? 'starter'
-    if (!planMap[p]) planMap[p] = { count: 0, mrr: 0 }
-    planMap[p].count++
-    planMap[p].mrr += PLANO_VALORES[p] ?? 0
-  }
-  const planoDist: PlanoDist[] = Object.entries(planMap).map(([plano, v]) => ({ plano, ...v }))
+  const escolasAtivas = escolaPerf.filter((row) => row.status !== 'inativa' && row.status !== 'cancelado')
+  const escolasPagantes = escolaPerf.filter((row) => row.status === 'adimplente')
+  const escolasInadimplentes = escolaPerf.filter((row) => row.status === 'inadimplente' || row.status === 'atraso')
 
-  // ── Escola performance ────────────────────────────────────────────────────
-  const atletasByEscola: Record<string, number> = {}
-  for (const a of atletas) {
-    if (a.escola_id) atletasByEscola[a.escola_id] = (atletasByEscola[a.escola_id] ?? 0) + 1
-  }
+  const mrr = escolasPagantes.reduce((sum, row) => sum + row.mensalidade, 0)
+  const ticketMedio = escolasPagantes.length ? mrr / escolasPagantes.length : 0
 
-  const escolaPerf: EscolaPerf[] = escolas.slice(0, 50).map(e => ({
-    id:           e.id,
-    nome:         e.nome,
-    plano:        e.plano ?? 'starter',
-    estado:       e.estado,
-    atletas:      atletasByEscola[e.id] ?? 0,
-    capacidade:   0,
-    mensalidade:  PLANO_VALORES[e.plano ?? 'starter'] ?? 0,
-    status:       e.ativo ? 'ativa' : 'inativa',
-    proximoVenc:  null,
-  }))
-
-  // ── Cohort (group escolas by month of creation) ────────────────────────────
-  const cohortMap: Record<string, string[]> = {}
-  for (const e of escolas) {
-    const mes = (e.created_at ?? '').slice(0, 7)
-    if (!mes) continue
-    if (!cohortMap[mes]) cohortMap[mes] = []
-    cohortMap[mes].push(e.plano ?? 'starter')
+  const kpis: RelatoriosKpis = {
+    mrr,
+    totalEscolas: escolaPerf.length,
+    totalAtletas: matriculas.length,
+    escolasAtivas: escolasAtivas.length,
+    escolasInadimplentes: escolasInadimplentes.length,
+    ticket_medio: ticketMedio,
+    retencaoPct: escolaPerf.length ? Math.round((escolasAtivas.length / escolaPerf.length) * 100) : 0,
   }
 
-  const sortedMeses = Object.keys(cohortMap).sort()
-  let acum = 0
-  const cohort: CohortRow[] = sortedMeses.slice(-12).map(mes => {
-    const planos = cohortMap[mes]
-    acum += planos.length
-    const planosStr = [...new Set(planos)].join(', ')
-    return { mes, novas: planos.length, acumulado: acum, planos: planosStr }
+  const now = new Date()
+  const months: string[] = []
+  for (let index = 11; index >= 0; index -= 1) {
+    const date = new Date(now.getFullYear(), now.getMonth() - index, 1)
+    months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`)
+  }
+
+  const monthly = months.map((mes) => {
+    const rows = fluxoRows.filter((row) => monthKey(row.data_lancamento) === mes && row.status === 'realizado')
+    return {
+      mes,
+      receita: rows.filter((row) => row.tipo === 'receita').reduce((sum, row) => sum + Number(row.valor ?? 0), 0),
+      despesa: rows.filter((row) => row.tipo === 'despesa').reduce((sum, row) => sum + Number(row.valor ?? 0), 0),
+    }
   })
 
-  // ── Regions ───────────────────────────────────────────────────────────────
-  const regionMap: Record<string, number> = {}
-  for (const e of escolasAtivas) {
-    const est = e.estado ?? 'N/D'
-    regionMap[est] = (regionMap[est] ?? 0) + 1
+  const ticketSeries: TicketSeriesRow[] = monthly.map((row) => ({
+    mes: row.mes,
+    ticket: escolasPagantes.length ? Math.round(row.receita / escolasPagantes.length) : 0,
+  }))
+
+  const planMap = new Map<string, { count: number; mrr: number }>()
+  for (const escola of escolasAtivas) {
+    const current = planMap.get(escola.plano) ?? { count: 0, mrr: 0 }
+    current.count += 1
+    current.mrr += escola.status === 'adimplente' ? escola.mensalidade : 0
+    planMap.set(escola.plano, current)
   }
-  const regions: RegionRow[] = Object.entries(regionMap)
+
+  const planoDist: PlanoDist[] = [...planMap.entries()].map(([plano, values]) => ({
+    plano,
+    count: values.count,
+    mrr: values.mrr,
+  }))
+
+  const cohortMonths = [...new Set(escolaPerf.map((row) => row.createdAt).filter(Boolean).map((row) => monthKey(row!)))].sort()
+  let acumulado = 0
+  const cohort: CohortRow[] = cohortMonths.map((mes) => {
+    const schools = escolaPerf.filter((row) => row.createdAt && monthKey(row.createdAt) === mes)
+    acumulado += schools.length
+    return {
+      mes,
+      novas: schools.length,
+      acumulado,
+      planos: summarizePlans(schools.map((row) => row.plano)),
+    }
+  })
+
+  const churnSeries: ChurnSeriesRow[] = cohortMonths.map((mes) => {
+    const schools = escolaPerf.filter((row) => row.createdAt && monthKey(row.createdAt) === mes)
+    const inativas = schools.filter((row) => row.status === 'inativa' || row.status === 'cancelado').length
+    return {
+      mes,
+      total: schools.length,
+      inativas,
+      percentual: schools.length ? Math.round((inativas / schools.length) * 100) : 0,
+    }
+  })
+
+  const regionMap = new Map<string, number>()
+  for (const escola of escolasAtivas) {
+    const key = escola.estado ?? 'N/D'
+    regionMap.set(key, (regionMap.get(key) ?? 0) + 1)
+  }
+
+  const regions: RegionRow[] = [...regionMap.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([estado, count]) => ({ estado, count }))
 
-  return { error: null, kpis, monthly, planoDist, escolaPerf, cohort, regions }
+  const statusMap = new Map<string, number>()
+  for (const escola of escolaPerf) {
+    statusMap.set(escola.status, (statusMap.get(escola.status) ?? 0) + 1)
+  }
+
+  const statusSeries: StatusSeriesRow[] = [...statusMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([status, count]) => ({ status, count }))
+
+  return {
+    error: null,
+    kpis,
+    monthly,
+    planoDist,
+    escolaPerf,
+    cohort,
+    regions,
+    ticketSeries,
+    churnSeries,
+    statusSeries,
+  }
 }
