@@ -211,7 +211,7 @@ export async function criarEscola(input: CriarEscolaInput): Promise<{ error: str
 
   const appUrl = getAppUrl()
   const invite = await admin.auth.admin.inviteUserByEmail(emailGerente, {
-    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
+    redirectTo: `${appUrl}/auth/callback?next=/primeiro-acesso`,
   })
 
   if (invite.error || !invite.data.user) {

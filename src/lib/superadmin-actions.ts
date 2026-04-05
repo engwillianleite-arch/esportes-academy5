@@ -306,7 +306,7 @@ export async function convidarUsuarioInternoPlataforma(
   const admin = createAdminClient()
   const appUrl = getAppUrl()
   const invite = await admin.auth.admin.inviteUserByEmail(cleanEmail, {
-    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
+    redirectTo: `${appUrl}/auth/callback?next=/primeiro-acesso`,
   })
 
   if (invite.error || !invite.data.user) {

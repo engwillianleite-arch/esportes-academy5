@@ -7,7 +7,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
 
-export default function ResetPasswordForm() {
+type ResetPasswordFormProps = {
+  successRedirectTo?: string
+  submitLabel?: string
+  helperText?: string
+  successMessage?: string
+}
+
+export default function ResetPasswordForm({
+  successRedirectTo = '/',
+  submitLabel = 'Salvar senha e continuar',
+  helperText = 'Depois de salvar sua senha, o sistema segue para o login e para a continuidade do acesso da sua escola.',
+  successMessage = 'Senha definida com sucesso. Estamos continuando seu acesso.',
+}: ResetPasswordFormProps) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
@@ -47,9 +59,9 @@ export default function ResetPasswordForm() {
       return
     }
 
-    setSuccess('Senha definida com sucesso. Estamos continuando seu acesso.')
+    setSuccess(successMessage)
     setIsPending(false)
-    router.replace('/')
+    router.replace(successRedirectTo)
     router.refresh()
   }
 
@@ -97,12 +109,10 @@ export default function ResetPasswordForm() {
         />
       </div>
 
-      <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        Depois de salvar sua senha, o sistema segue para o login e para a continuidade do acesso da sua escola.
-      </div>
+      <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">{helperText}</div>
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Salvando senha...' : 'Salvar senha e continuar'}
+        {isPending ? 'Salvando senha...' : submitLabel}
       </Button>
     </form>
   )
