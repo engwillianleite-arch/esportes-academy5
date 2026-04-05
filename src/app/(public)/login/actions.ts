@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { getAppUrl } from '@/lib/app-url'
 import { createClient } from '@/lib/supabase/server'
 
 export type AuthState = {
@@ -56,7 +57,7 @@ export async function resetPassword(
   }
 
   const supabase = await createClient()
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/reset-password`
+  const redirectTo = `${getAppUrl()}/auth/callback?next=/reset-password`
 
   // Don't reveal whether email exists — always return success (anti-enumeration)
   const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })

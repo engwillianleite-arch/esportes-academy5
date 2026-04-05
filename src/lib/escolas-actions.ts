@@ -1,6 +1,7 @@
 ﻿'use server'
 
 import { cleanCpf, validateCpf } from '@/lib/cpf'
+import { getAppUrl } from '@/lib/app-url'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assertSuperAdminAccess } from '@/lib/superadmin-actions'
 import type { PlanoTipo } from '@/types'
@@ -208,9 +209,9 @@ export async function criarEscola(input: CriarEscolaInput): Promise<{ error: str
     return { error: 'Erro ao criar escola.' }
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const appUrl = getAppUrl()
   const invite = await admin.auth.admin.inviteUserByEmail(emailGerente, {
-    redirectTo: `${appUrl}/`,
+    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
   })
 
   if (invite.error || !invite.data.user) {

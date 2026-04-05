@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getAppUrl } from '@/lib/app-url'
 import { PLAN_MODULES } from '@/lib/modulo-access'
 import type { ModuloSlug, PerfilPlataforma, PlanoTipo, StatusAssinaturaPlataforma } from '@/types'
 
@@ -303,9 +304,9 @@ export async function convidarUsuarioInternoPlataforma(
   if (!cleanEmail || !cleanEmail.includes('@')) return { error: 'E-mail inválido.' }
 
   const admin = createAdminClient()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const appUrl = getAppUrl()
   const invite = await admin.auth.admin.inviteUserByEmail(cleanEmail, {
-    redirectTo: `${appUrl}/superadmin`,
+    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
   })
 
   if (invite.error || !invite.data.user) {
