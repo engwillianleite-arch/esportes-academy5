@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useCallback, useEffect } from 'react'
 import {
@@ -10,7 +10,7 @@ import {
   type CriarEscolaInput,
 } from '@/lib/escolas-actions'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const PLANOS = ['starter', 'pro', 'premium', 'enterprise'] as const
 type Plano = (typeof PLANOS)[number]
@@ -30,11 +30,11 @@ const PLANO_COLOR: Record<Plano, string> = {
 }
 
 const ASSINATURA_LABEL: Record<string, string> = {
-  adimplente:  '● Em dia',
-  inadimplente:'● Inadimplente',
-  atraso:      '⚠ Em atraso',
-  suspenso:    '○ Suspenso',
-  cancelado:   '○ Cancelado',
+  adimplente:  'â— Em dia',
+  inadimplente:'â— Inadimplente',
+  atraso:      'âš  Em atraso',
+  suspenso:    'â—‹ Suspenso',
+  cancelado:   'â—‹ Cancelado',
 }
 
 const ASSINATURA_COLOR: Record<string, string> = {
@@ -48,16 +48,16 @@ const ASSINATURA_COLOR: Record<string, string> = {
 const ESTADOS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
 
 const fmtDate = (d: string | null | undefined) => {
-  if (!d) return '—'
+  if (!d) return 'â€”'
   const dt = new Date(d)
   return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('pt-BR')
 }
 
-// ─── Empty form state ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Empty form state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function emptyForm(): CriarEscolaInput & { capacidade_str: string; modalidades_str: string } {
   return {
-    nome: '', cnpj: '', email: '', telefone: '',
+    nome: '', cnpj: '', email: '', gerente_nome: '', gerente_cpf: '', telefone: '',
     cidade: '', estado: '', cep: '', bairro: '',
     logradouro: '', numero: '', complemento: '',
     plano: 'starter', ativo: true,
@@ -66,7 +66,7 @@ function emptyForm(): CriarEscolaInput & { capacidade_str: string; modalidades_s
   }
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type Form = ReturnType<typeof emptyForm>
 type KpiData = { total: number; ativas: number; trial: number; inativas: number }
@@ -77,7 +77,7 @@ interface Props {
   initialKpi: KpiData
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EscolasClient({ initialRows, initialTotal, initialKpi }: Props) {
   const [rows,  setRows]  = useState<EscolaRow[]>(initialRows)
@@ -123,7 +123,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
 
   useEffect(() => { reload() }, [reload])
 
-  // ── Drawer helpers ──────────────────────────────────────────────────────────
+  // â”€â”€ Drawer helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function openCreate() {
     setEditRow(null)
@@ -137,6 +137,8 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
       nome:           row.nome,
       cnpj:           row.cnpj ?? '',
       email:          row.email ?? '',
+      gerente_nome:   '',
+      gerente_cpf:    '',
       telefone:       row.telefone ?? '',
       cidade:         row.cidade ?? '',
       estado:         row.estado ?? '',
@@ -161,7 +163,9 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
   }
 
   async function handleSave() {
-    if (!form.nome.trim()) { setErro('Nome é obrigatório.'); return }
+    if (!form.nome.trim()) { setErro('Nome da escola e obrigatorio.'); return }
+    if (!editRow && !form.gerente_nome?.trim()) { setErro('Nome do gerente e obrigatorio.'); return }
+    if (!editRow && !(form.gerente_cpf ?? '').trim()) { setErro('CPF do gerente e obrigatorio.'); return }
     setErro(null); setMsg(null)
 
     const modalidades = form.modalidades_str
@@ -173,6 +177,8 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
     startTx(async () => {
       const input: CriarEscolaInput = {
         nome: form.nome, cnpj: form.cnpj, email: form.email,
+        gerente_nome: form.gerente_nome,
+        gerente_cpf: form.gerente_cpf,
         telefone: form.telefone, cidade: form.cidade, estado: form.estado,
         cep: form.cep, bairro: form.bairro, logradouro: form.logradouro,
         numero: form.numero, complemento: form.complemento,
@@ -185,13 +191,13 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
         : await criarEscola(input)
 
       if (r.error) { setErro(r.error); return }
-      setMsg(editRow ? 'Escola atualizada com sucesso.' : 'Escola criada com sucesso.')
+      setMsg(editRow ? 'Escola atualizada com sucesso.' : 'Escola criada com sucesso. O convite de acesso foi enviado para o e-mail da escola.')
       setDrawerOpen(false)
       reload()
     })
   }
 
-  // ── Toggle status ───────────────────────────────────────────────────────────
+  // â”€â”€ Toggle status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function askToggle(id: string, currentAtivo: boolean) {
     setConfirmId(id)
@@ -212,7 +218,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
     })
   }
 
-  // ── Busca CEP ───────────────────────────────────────────────────────────────
+  // â”€â”€ Busca CEP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function buscarCep() {
     const cep = form.cep?.replace(/\D/g, '')
     if (!cep || cep.length !== 8) return
@@ -230,28 +236,28 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
     } catch { /* silent */ }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
     <div className="mx-auto max-w-[1300px] space-y-5" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
-      {/* ── Feedback ── */}
+      {/* â”€â”€ Feedback â”€â”€ */}
       {erro && (
         <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <span>⚠</span> {erro}
-          <button className="ml-auto text-red-400 hover:text-red-600" onClick={() => setErro(null)}>✕</button>
+          <span>âš </span> {erro}
+          <button className="ml-auto text-red-400 hover:text-red-600" onClick={() => setErro(null)}>âœ•</button>
         </div>
       )}
       {msg && (
         <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          <span>✓</span> {msg}
-          <button className="ml-auto text-emerald-400 hover:text-emerald-600" onClick={() => setMsg(null)}>✕</button>
+          <span>âœ“</span> {msg}
+          <button className="ml-auto text-emerald-400 hover:text-emerald-600" onClick={() => setMsg(null)}>âœ•</button>
         </div>
       )}
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-bold text-[#0f172a]">Escolas</h1>
@@ -261,22 +267,22 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
           onClick={openCreate}
           className="flex items-center gap-2 rounded-xl bg-[#4f46e5] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338ca]"
         >
-          ＋ Nova Escola
+          ï¼‹ Nova Escola
         </button>
       </div>
 
-      {/* ── KPI Cards ── */}
+      {/* â”€â”€ KPI Cards â”€â”€ */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KpiCard icon="🏫" label="Total de Escolas" value={kpi.total} bg="#dbeafe" />
-        <KpiCard icon="✅" label="Ativas"            value={kpi.ativas}   bg="#d1fae5" />
-        <KpiCard icon="⏳" label="Em Trial"          value={kpi.trial}    bg="#fef3c7" />
-        <KpiCard icon="🔴" label="Inativas"          value={kpi.inativas} bg="#fee2e2" />
+        <KpiCard icon="ðŸ«" label="Total de Escolas" value={kpi.total} bg="#dbeafe" />
+        <KpiCard icon="âœ…" label="Ativas"            value={kpi.ativas}   bg="#d1fae5" />
+        <KpiCard icon="â³" label="Em Trial"          value={kpi.trial}    bg="#fef3c7" />
+        <KpiCard icon="ðŸ”´" label="Inativas"          value={kpi.inativas} bg="#fee2e2" />
       </div>
 
-      {/* ── Filters ── */}
+      {/* â”€â”€ Filters â”€â”€ */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#e2e8f0] bg-white px-5 py-4">
         <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2">
-          <span className="text-[#94a3b8]">🔍</span>
+          <span className="text-[#94a3b8]">ðŸ”</span>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Nome, CNPJ, e-mail, cidade..."
@@ -291,13 +297,13 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
         <select value={filterAtivo} onChange={e => setFilterAtivo(e.target.value)}
           className="h-10 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm text-[#0f172a]">
           <option value="todos">Todos os status</option>
-          <option value="ativo">Só ativas</option>
-          <option value="inativo">Só inativas</option>
+          <option value="ativo">SÃ³ ativas</option>
+          <option value="inativo">SÃ³ inativas</option>
         </select>
         {isPending && <span className="text-xs text-[#94a3b8]">Carregando...</span>}
       </div>
 
-      {/* ── Table ── */}
+      {/* â”€â”€ Table â”€â”€ */}
       <div className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white">
         {/* Table header */}
         <div className="flex items-center justify-between border-b border-[#f1f5f9] px-5 py-4">
@@ -307,7 +313,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
           </div>
           <button onClick={openCreate}
             className="rounded-xl border border-[#e2e8f0] px-4 py-2 text-xs font-semibold text-[#64748b] transition hover:bg-[#f8fafc]">
-            ＋ Nova Escola
+            ï¼‹ Nova Escola
           </button>
         </div>
 
@@ -320,16 +326,16 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                 <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Atletas</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Assinatura</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Próx. Venc.</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">PrÃ³x. Venc.</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Criada em</th>
-                <th className="px-4 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Ações</th>
+                <th className="px-4 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center text-sm text-[#94a3b8]">
-                    <div className="text-4xl mb-3">🔍</div>
+                    <div className="text-4xl mb-3">ðŸ”</div>
                     Nenhuma escola encontrada para os filtros aplicados.
                   </td>
                 </tr>
@@ -347,7 +353,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                       </div>
                       <div>
                         <p className="font-semibold text-[#0f172a]">{r.nome}</p>
-                        <p className="text-xs text-[#94a3b8]">{r.cidade ? `${r.cidade}${r.estado ? `, ${r.estado}` : ''}` : r.email ?? '—'}</p>
+                        <p className="text-xs text-[#94a3b8]">{r.cidade ? `${r.cidade}${r.estado ? `, ${r.estado}` : ''}` : r.email ?? 'â€”'}</p>
                       </div>
                     </div>
                   </td>
@@ -371,19 +377,19 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                   </td>
                   {/* Assinatura */}
                   <td className={`px-4 py-4 text-xs font-medium ${ASSINATURA_COLOR[r.assinatura_status ?? ''] ?? 'text-[#94a3b8]'}`}>
-                    {r.assinatura_status ? ASSINATURA_LABEL[r.assinatura_status] ?? r.assinatura_status : '—'}
+                    {r.assinatura_status ? ASSINATURA_LABEL[r.assinatura_status] ?? r.assinatura_status : 'â€”'}
                   </td>
-                  {/* Próx. vencimento */}
+                  {/* PrÃ³x. vencimento */}
                   <td className="px-4 py-4 text-xs text-[#64748b]">{fmtDate(r.proximo_vencimento)}</td>
                   {/* Criada em */}
                   <td className="px-4 py-4 text-xs text-[#64748b]">{fmtDate(r.created_at)}</td>
-                  {/* Ações */}
+                  {/* AÃ§Ãµes */}
                   <td className="px-4 py-4 text-right" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
-                      <ActionBtn title="Visualizar" onClick={() => { setViewRow(r); setViewTab('geral') }}>👁</ActionBtn>
-                      <ActionBtn title="Editar" onClick={() => openEdit(r)}>✏️</ActionBtn>
+                      <ActionBtn title="Visualizar" onClick={() => { setViewRow(r); setViewTab('geral') }}>ðŸ‘</ActionBtn>
+                      <ActionBtn title="Editar" onClick={() => openEdit(r)}>âœï¸</ActionBtn>
                       <ActionBtn title={r.ativo ? 'Inativar' : 'Ativar'} danger={r.ativo} success={!r.ativo} onClick={() => askToggle(r.id, r.ativo)}>
-                        {r.ativo ? '🔴' : '🟢'}
+                        {r.ativo ? 'ðŸ”´' : 'ðŸŸ¢'}
                       </ActionBtn>
                     </div>
                   </td>
@@ -394,7 +400,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
         </div>
       </div>
 
-      {/* ══ VIEW PANEL ══ */}
+      {/* â•â• VIEW PANEL â•â• */}
       {viewRow && (
         <>
           <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm" onClick={() => setViewRow(null)} />
@@ -407,12 +413,12 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[15px] font-bold text-[#0f172a]">{viewRow.nome}</p>
                 <p className="text-xs text-[#64748b]">
-                  {viewRow.cidade ? `${viewRow.cidade}${viewRow.estado ? `, ${viewRow.estado}` : ''}` : 'Sem localização'}
+                  {viewRow.cidade ? `${viewRow.cidade}${viewRow.estado ? `, ${viewRow.estado}` : ''}` : 'Sem localizaÃ§Ã£o'}
                 </p>
               </div>
               <button onClick={() => setViewRow(null)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e2e8f0] text-[#64748b] transition hover:border-red-300 hover:bg-red-50 hover:text-red-500">
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -450,28 +456,28 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                     </div>
                   </div>
 
-                  <InfoSection title="Identificação">
+                  <InfoSection title="IdentificaÃ§Ã£o">
                     <InfoGrid>
-                      <InfoItem label="CNPJ" value={viewRow.cnpj ?? '—'} />
+                      <InfoItem label="CNPJ" value={viewRow.cnpj ?? 'â€”'} />
                       <InfoItem label="Atletas" value={`${viewRow.total_atletas ?? 0}${viewRow.capacidade_padrao ? ` / ${viewRow.capacidade_padrao}` : ''}`} />
-                      <InfoItem label="Modalidades" value={(viewRow.modalidades ?? []).join(', ') || '—'} full />
+                      <InfoItem label="Modalidades" value={(viewRow.modalidades ?? []).join(', ') || 'â€”'} full />
                     </InfoGrid>
                   </InfoSection>
 
                   <InfoSection title="Contato">
                     <InfoGrid>
-                      <InfoItem label="E-mail" value={viewRow.email ?? '—'} full />
-                      <InfoItem label="Telefone" value={viewRow.telefone ?? '—'} />
+                      <InfoItem label="E-mail" value={viewRow.email ?? 'â€”'} full />
+                      <InfoItem label="Telefone" value={viewRow.telefone ?? 'â€”'} />
                     </InfoGrid>
                   </InfoSection>
 
-                  <InfoSection title="Endereço">
+                  <InfoSection title="EndereÃ§o">
                     <InfoGrid>
-                      <InfoItem label="CEP" value={viewRow.cep ?? '—'} />
-                      <InfoItem label="Bairro" value={viewRow.bairro ?? '—'} />
-                      <InfoItem label="Logradouro" value={[viewRow.logradouro, viewRow.numero, viewRow.complemento].filter(Boolean).join(', ') || '—'} full />
-                      <InfoItem label="Cidade" value={viewRow.cidade ?? '—'} />
-                      <InfoItem label="Estado" value={viewRow.estado ?? '—'} />
+                      <InfoItem label="CEP" value={viewRow.cep ?? 'â€”'} />
+                      <InfoItem label="Bairro" value={viewRow.bairro ?? 'â€”'} />
+                      <InfoItem label="Logradouro" value={[viewRow.logradouro, viewRow.numero, viewRow.complemento].filter(Boolean).join(', ') || 'â€”'} full />
+                      <InfoItem label="Cidade" value={viewRow.cidade ?? 'â€”'} />
+                      <InfoItem label="Estado" value={viewRow.estado ?? 'â€”'} />
                     </InfoGrid>
                   </InfoSection>
                 </div>
@@ -485,10 +491,10 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                       {viewRow.assinatura_status ? ASSINATURA_LABEL[viewRow.assinatura_status] ?? viewRow.assinatura_status : 'Sem assinatura registrada'}
                     </p>
                     {viewRow.proximo_vencimento && (
-                      <p className="mt-1 text-xs text-[#64748b]">Próx. vencimento: {fmtDate(viewRow.proximo_vencimento)}</p>
+                      <p className="mt-1 text-xs text-[#64748b]">PrÃ³x. vencimento: {fmtDate(viewRow.proximo_vencimento)}</p>
                     )}
                   </div>
-                  <p className="text-xs text-[#94a3b8]">Gerencie a assinatura na seção Fluxo de Caixa ou diretamente no Asaas.</p>
+                  <p className="text-xs text-[#94a3b8]">Gerencie a assinatura na seÃ§Ã£o Fluxo de Caixa ou diretamente no Asaas.</p>
                 </div>
               )}
             </div>
@@ -501,32 +507,32 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
               </button>
               <button onClick={() => { openEdit(viewRow) }}
                 className="rounded-xl border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] transition hover:bg-[#f8fafc]">
-                ✏️ Editar
+                âœï¸ Editar
               </button>
               <button onClick={() => askToggle(viewRow.id, viewRow.ativo)}
                 className={`ml-auto rounded-xl px-4 py-2 text-sm font-semibold text-white transition ${viewRow.ativo ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
-                {viewRow.ativo ? '🔴 Inativar' : '🟢 Ativar'}
+                {viewRow.ativo ? 'ðŸ”´ Inativar' : 'ðŸŸ¢ Ativar'}
               </button>
             </div>
           </div>
         </>
       )}
 
-      {/* ══ DRAWER criar/editar ══ */}
+      {/* â•â• DRAWER criar/editar â•â• */}
       {drawerOpen && (
         <>
           <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="fixed right-0 top-0 bottom-0 z-[210] flex w-full max-w-[560px] flex-col bg-white shadow-2xl">
             {/* Header */}
             <div className="flex flex-shrink-0 items-center gap-3 border-b border-[#e2e8f0] px-5 py-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#4f46e5]/10 text-xl">🏫</div>
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#4f46e5]/10 text-xl">ðŸ«</div>
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-bold text-[#0f172a]">{editRow ? `Editar: ${editRow.nome}` : 'Nova Escola'}</p>
                 <p className="text-xs text-[#64748b]">{editRow ? `ID: ${editRow.id}` : 'Preencha os dados da escola'}</p>
               </div>
               <button onClick={() => setDrawerOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e2e8f0] text-[#64748b] transition hover:border-red-300 hover:bg-red-50 hover:text-red-500">
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -536,8 +542,8 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                 <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">{erro}</div>
               )}
 
-              {/* Dados básicos */}
-              <FormSection icon="🏫" title="Dados da Escola">
+              {/* Dados bÃ¡sicos */}
+              <FormSection icon="ðŸ«" title="Dados da Escola">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <FLabel required>Nome da Escola</FLabel>
@@ -559,13 +565,13 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                     </select>
                   </div>
                   <div>
-                    <FLabel>Modalidades <span className="ml-1 font-normal text-[#94a3b8]">(separe por vírgula)</span></FLabel>
+                    <FLabel>Modalidades <span className="ml-1 font-normal text-[#94a3b8]">(separe por vÃ­rgula)</span></FLabel>
                     <input value={form.modalidades_str} onChange={e => f('modalidades_str', e.target.value)}
-                      placeholder="Futebol, Natação, Judô"
+                      placeholder="Futebol, NataÃ§Ã£o, JudÃ´"
                       className={FInput} />
                   </div>
                   <div>
-                    <FLabel>Capacidade Máx.</FLabel>
+                    <FLabel>Capacidade MÃ¡x.</FLabel>
                     <input type="number" value={form.capacidade_str} onChange={e => f('capacidade_str', e.target.value)}
                       placeholder="200"
                       className={FInput} />
@@ -573,8 +579,8 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                 </div>
               </FormSection>
 
-              {/* Identificação */}
-              <FormSection icon="📋" title="Identificação">
+              {/* IdentificaÃ§Ã£o */}
+              <FormSection icon="ðŸ“‹" title="IdentificaÃ§Ã£o">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <FLabel>CNPJ / CPF</FLabel>
@@ -586,7 +592,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
               </FormSection>
 
               {/* Contato */}
-              <FormSection icon="📞" title="Contato">
+              <FormSection icon="ðŸ“ž" title="Contato">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <FLabel required>E-mail</FLabel>
@@ -603,8 +609,35 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                 </div>
               </FormSection>
 
+              {!editRow && (
+                <FormSection icon="Ger" title="Gerente Inicial">
+                  <div className="rounded-2xl border border-[#dbeafe] bg-[#eff6ff] px-4 py-3 text-xs text-[#1d4ed8]">
+                    O e-mail da escola recebera o convite inicial. Essa pessoa entrara como gerente da unidade e podera finalizar as configuracoes no primeiro acesso.
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <FLabel required>Nome do gerente</FLabel>
+                      <input
+                        value={form.gerente_nome ?? ''}
+                        onChange={e => f('gerente_nome', e.target.value)}
+                        placeholder="Ex: Mariana Souza"
+                        className={FInput}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <FLabel required>CPF do gerente</FLabel>
+                      <input
+                        value={form.gerente_cpf ?? ''}
+                        onChange={e => f('gerente_cpf', e.target.value)}
+                        placeholder="000.000.000-00"
+                        className={FInput}
+                      />
+                    </div>
+                  </div>
+                </FormSection>
+              )}
               {/* Endereço */}
-              <FormSection icon="📍" title="Endereço">
+              <FormSection icon="ðŸ“" title="EndereÃ§o">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <FLabel>CEP</FLabel>
@@ -629,7 +662,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                       placeholder="Av. Paulista" className={FInput} />
                   </div>
                   <div>
-                    <FLabel>Número</FLabel>
+                    <FLabel>NÃºmero</FLabel>
                     <input value={form.numero ?? ''} onChange={e => f('numero', e.target.value)}
                       placeholder="1500" className={FInput} />
                   </div>
@@ -641,12 +674,12 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
                   <div>
                     <FLabel>Cidade</FLabel>
                     <input value={form.cidade ?? ''} onChange={e => f('cidade', e.target.value)}
-                      placeholder="São Paulo" className={FInput} />
+                      placeholder="SÃ£o Paulo" className={FInput} />
                   </div>
                   <div>
                     <FLabel>Estado</FLabel>
                     <select value={form.estado ?? ''} onChange={e => f('estado', e.target.value)} className={FInput}>
-                      <option value="">— Selecione —</option>
+                      <option value="">â€” Selecione â€”</option>
                       {ESTADOS.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
@@ -662,27 +695,27 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
               </button>
               <button onClick={handleSave} disabled={isPending}
                 className="flex-1 rounded-xl bg-[#4f46e5] py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338ca] disabled:opacity-60">
-                {isPending ? 'Salvando...' : editRow ? 'Salvar alterações' : 'Criar escola'}
+                {isPending ? 'Salvando...' : editRow ? 'Salvar alteraÃ§Ãµes' : 'Criar escola'}
               </button>
             </div>
           </div>
         </>
       )}
 
-      {/* ══ CONFIRM MODAL ══ */}
+      {/* â•â• CONFIRM MODAL â•â• */}
       {confirmId && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-5">
           <div className="w-full max-w-[420px] rounded-2xl bg-white p-7 shadow-2xl">
             <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-3xl ${confirmAtivo ? 'bg-emerald-100' : 'bg-red-100'}`}>
-              {confirmAtivo ? '🟢' : '🔴'}
+              {confirmAtivo ? 'ðŸŸ¢' : 'ðŸ”´'}
             </div>
             <p className="text-center text-[16px] font-bold text-[#0f172a]">
               {confirmAtivo ? 'Ativar escola?' : 'Inativar escola?'}
             </p>
             <p className="mt-2 text-center text-sm text-[#64748b]">
               {confirmAtivo
-                ? 'A escola terá acesso restaurado à plataforma.'
-                : 'Esta ação irá suspender o acesso da escola à plataforma. Você poderá reativá-la a qualquer momento.'}
+                ? 'A escola terÃ¡ acesso restaurado Ã  plataforma.'
+                : 'Esta aÃ§Ã£o irÃ¡ suspender o acesso da escola Ã  plataforma. VocÃª poderÃ¡ reativÃ¡-la a qualquer momento.'}
             </p>
             <div className="mt-5 flex gap-3">
               <button onClick={() => setConfirmId(null)}
@@ -701,7 +734,7 @@ export default function EscolasClient({ initialRows, initialTotal, initialKpi }:
   )
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FInput = 'w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2.5 text-sm text-[#0f172a] outline-none focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10'
 
@@ -743,7 +776,7 @@ function InfoItem({ label, value, full }: { label: string; value: string; full?:
   return (
     <div className={full ? 'col-span-2' : ''}>
       <p className="text-[11px] text-[#94a3b8]">{label}</p>
-      <p className="text-[13px] font-semibold text-[#0f172a]">{value || '—'}</p>
+      <p className="text-[13px] font-semibold text-[#0f172a]">{value || 'â€”'}</p>
     </div>
   )
 }
@@ -781,3 +814,7 @@ function ActionBtn({ title, onClick, danger, success, children }: {
     </button>
   )
 }
+
+
+
+
